@@ -8,4 +8,11 @@
 #include <string.h>
 #include <assert.h>
 
+#include "VBO.h"
+#include "EBO.h"
+#include "VAO.h"
+#include "Shaders.h"
+#include "Renderer.h"
+#include "Window.h"
+
 #endif // __UTIL_H__
