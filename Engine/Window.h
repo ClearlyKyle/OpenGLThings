@@ -9,6 +9,8 @@
 #include "SDL2/SDL.h"
 #include "glad/glad.h"
 
+#include "..\BasicTriangle.h"
+
 struct Window
 {
     SDL_Window *sdl_window;

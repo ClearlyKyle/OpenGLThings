@@ -64,13 +64,7 @@ static void Window_Destroy()
 
 void Window_Loop()
 {
-    // Vertices coordinates
-    GLfloat vertices[] =
-        {
-            -0.5f, -0.5f * (float)sqrt(3) / 3, 0.0f,  // Lower left corner
-            0.5f, -0.5f * (float)sqrt(3) / 3, 0.0f,   // Lower right corner
-            0.0f, 0.5f * (float)sqrt(3) * 2 / 3, 0.0f // Upper corner
-        };
+    BasicTriangle_Init();
 
     SDL_Event event;
     while (!window.quit)
@@ -86,8 +80,7 @@ void Window_Loop()
                 window.quit = true;
             }
         }
-
-        
+        BasicTriangle_Update();
 
         SDL_GL_SwapWindow(window.sdl_window);
 
