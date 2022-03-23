@@ -1,6 +1,6 @@
 #include "VBO.h"
 
-struct VBO VBO_Create(GLint type, bool dynamic)
+struct VBO VBO_Create(GLint type)
 {
     struct VBO vbo = {
         .type = type};
@@ -31,4 +31,5 @@ void VBO_Buffer(struct VBO vbo, GLsizeiptr size, void *data)
 {
     VBO_Bind(vbo);
     glBufferData(vbo.type, size, data, GL_STATIC_DRAW);
+    VBO_Unbind();
 }

@@ -11,7 +11,7 @@ struct VBO
     GLint type;
 };
 
-struct VBO VBO_Create(GLint type, bool dynamic);
+struct VBO VBO_Create(GLint type);
 void VBO_Destroy(struct VBO vbo);
 void VBO_Bind(struct VBO vbo);
 void VBO_Buffer(struct VBO vbo, GLsizeiptr size, void *data);
