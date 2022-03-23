@@ -37,19 +37,15 @@ static GLint _compile_shader(char *path, GLenum type)
 {
     FILE *f;
     fopen_s(&f, path, "rb");
-    // if (f == NULL)
-    //{
-    //     fprintf(stderr, "[Error] loading shader at : %s\n", path);
-    //     exit(1);
-    // }
-    assert__(f != NULL)
+    if (f == NULL)
     {
         fprintf(stderr, "[Error] loading shader at : %s\n", path);
-    };
+        exit(1);
+    }
 
     // Get length of file
     fseek(f, 0, SEEK_END);
-    const size_t len = ftell(f);
+    const long len = ftell(f);
     assert__(len > 0)
     {
         fprintf(stderr, "File length needs to be greater than 0!\n");
@@ -102,9 +98,12 @@ struct Shader Shader_Create(char *vertex_shader_path, char *fragment_shader_path
     glAttachShader(self.shader_id, self.fs_handle);
 
     // Bind vertex attributes
-    for (size_t i = 0; i < n; i++)
+    if (attributes != NULL)
     {
-        glBindAttribLocation(self.shader_id, attributes[i].index, attributes[i].name);
+        for (size_t i = 0; i < n; i++)
+        {
+            glBindAttribLocation(self.shader_id, attributes[i].index, attributes[i].name);
+        }
     }
 
     glLinkProgram(self.shader_id);
