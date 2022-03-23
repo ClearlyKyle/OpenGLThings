@@ -2,6 +2,8 @@
 
 #define BUFFER_SIZE 512
 
+#define assert__(x) for (; !(x); assert(x))
+
 void validate_shader(GLuint shader, const char *file)
 {
     char buffer[BUFFER_SIZE];
@@ -33,28 +35,41 @@ bool validate_program(GLuint program)
 static GLint _compile(char *path, GLenum type)
 {
     FILE *f;
-    char *text;
-    long len;
-
-    f = fopen(path, "rb");
-    if (f == NULL)
+    fopen_s(&f, path, "rb");
+    // if (f == NULL)
+    //{
+    //     fprintf(stderr, "[Error] loading shader at : %s\n", path);
+    //     exit(1);
+    // }
+    assert__(f != NULL)
     {
-        fprintf(stderr, "error loading shader at %s\n", path);
-        exit(1);
-    }
+        fprintf(stderr, "[Error] loading shader at : %s\n", path);
+    };
 
+    // Get length of file
     fseek(f, 0, SEEK_END);
-    len = ftell(f);
-    assert(len > 0);
+    const size_t len = ftell(f);
+    assert__(len > 0)
+    {
+        fprintf(stderr, "File length needs to be greater than 0!\n");
+    };
+
+    // Get text from file
     fseek(f, 0, SEEK_SET);
-    text = calloc(1, len);
-    assert(text != NULL);
-    fread(text, 1, len, f);
-    assert(strlen(text) > 0);
+    const char *file_text = calloc(1, len);
+    assert__(file_text != NULL)
+    {
+        fprintf(stderr, "Error loading text from file : %s\n", path);
+    };
+
+    fread(file_text, 1, len, f);
+    assert__(strlen(file_text) > 0);
+
+    // CLOSE file pointer
     fclose(f);
 
     GLuint handle = glCreateShader(type);
-    glShaderSource(handle, 1, (const GLchar *const *)&text, (const GLint *)&len);
+    glShaderSource(handle, 1, (const GLchar *const *)&file_text, (const GLint *)&len);
     glCompileShader(handle);
 
     GLint compiled;
@@ -66,7 +81,7 @@ static GLint _compile(char *path, GLenum type)
         _log_and_fail(handle, "compiling", path, glGetShaderInfoLog, glGetShaderiv);
     }
 
-    free(text);
+    free(file_text);
     return handle;
 }
 
@@ -76,6 +91,9 @@ struct Shader Shader_Create(char *vertex_shader_path, char *fragment_shader_path
     self.vs_handle = _compile(vertex_shader_path, GL_VERTEX_SHADER);
     self.fs_handle = _compile(fragment_shader_path, GL_FRAGMENT_SHADER);
     self.shader_id = glCreateProgram();
+
+    validate_shader(self.vs_handle, vertex_shader_path);
+    validate_shader(self.fs_handle, fragment_shader_path);
 
     // Link shader program
     glAttachShader(self.shader_id, self.vs_handle);
@@ -97,7 +115,13 @@ struct Shader Shader_Create(char *vertex_shader_path, char *fragment_shader_path
     {
         char buf[512];
         snprintf(buf, 512, "[%s, %s]", vertex_shader_path, fragment_shader_path);
-        _log_and_fail(self.shader_id, "linking", buf, glGetProgramInfoLog, glGetProgramiv);
+
+        GLint loglen;
+        glGetProgramiv(self.shader_id, GL_INFO_LOG_LENGTH, &loglen);
+
+        char *logtext = (char *)calloc(1, loglen);
+        glGetProgramInfoLog(self.shader_id, loglen, NULL, logtext);
+        fprintf(stderr, "Error %s shader at %s:\n%s", "linking", buf, logtext);
     }
 
     return self;
