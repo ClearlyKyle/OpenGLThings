@@ -15,7 +15,8 @@ struct Shader
     GLuint fs_handle;
 };
 
-void validate_shader(GLuint shader, const char *file);
-bool validate_program(GLuint program);
+struct Shader Shader_Create(char *vertex_shader_path, char *fragment_shader_path, size_t n, struct VertexAttr attributes[]);
+void Shader_Destroy(const struct Shader shader);
+void Shader_Bind(const struct Shader shader);
 
 #endif // __SHADERS_H__

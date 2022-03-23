@@ -4,34 +4,6 @@
 
 #define assert__(x) for (; !(x); assert(x))
 
-void validate_shader(GLuint shader, const char *file)
-{
-    char buffer[BUFFER_SIZE];
-    GLsizei length = 0;
-
-    glGetShaderInfoLog(shader, BUFFER_SIZE, &length, buffer);
-
-    if (length > 0)
-    {
-        fprintf(stderr, "Shader %d(%s) compile error: %s\n", shader, (file ? file : ""), buffer);
-    }
-}
-
-bool validate_program(GLuint program)
-{
-    GLchar buffer[BUFFER_SIZE];
-    GLsizei length = 0;
-
-    glGetProgramInfoLog(program, BUFFER_SIZE, &length, buffer);
-
-    if (length > 0)
-    {
-        fprintf(stderr, "Program %d link error: %s\n", program, buffer);
-        return false;
-    }
-
-    return true;
-}
 static GLint _compile(char *path, GLenum type)
 {
     FILE *f;
@@ -125,4 +97,16 @@ struct Shader Shader_Create(char *vertex_shader_path, char *fragment_shader_path
     }
 
     return self;
+}
+
+void Shader_Destroy(const struct Shader shader)
+{
+    glDeleteProgram(shader.shader_id);
+    glDeleteShader(shader.vs_handle);
+    glDeleteShader(shader.fs_handle);
+}
+
+void Shader_Bind(const struct Shader shader)
+{
+    glUseProgram(shader.shader_id);
 }
