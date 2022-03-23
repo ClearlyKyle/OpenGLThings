@@ -3,10 +3,12 @@
 // global window
 struct Window window;
 
-void Window_Init(int width, int height)
+void Window_Init(int width, int height, Windowfunction_ptr init, Windowfunction_ptr update)
 {
     window.window_width = width;
     window.window_heigh = height;
+    window.Init = init;
+    window.Update = update;
 
     // initialize sdl
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -62,9 +64,19 @@ static void Window_Destroy()
     SDL_Quit();
 }
 
+static void _Init()
+{
+    window.Init();
+}
+
+static void _Update()
+{
+    window.Update();
+}
+
 void Window_Loop()
 {
-    BasicTriangle_Init();
+    _Init();
 
     SDL_Event event;
     while (!window.quit)
@@ -80,7 +92,7 @@ void Window_Loop()
                 window.quit = true;
             }
         }
-        BasicTriangle_Update();
+        _Update();
 
         SDL_GL_SwapWindow(window.sdl_window);
 
