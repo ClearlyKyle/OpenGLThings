@@ -19,14 +19,14 @@ void EBO_Bind(struct EBO ebo)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo.ID);
 }
 
-static void EBO_Unbind()
+void EBO_Unbind()
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void EBO_Buffer(struct EBO vbo, GLsizeiptr size, void *data)
+void EBO_Buffer(struct EBO vbo, GLsizeiptr size, const GLvoid *data)
 {
     EBO_Bind(vbo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-    EBO_Unbind();
+    // EBO_Unbind();
 }
