@@ -22,7 +22,7 @@ void VBO_Bind(struct VBO vbo)
     glBindBuffer(vbo.type, vbo.ID);
 }
 
-static void VBO_Unbind()
+void VBO_Unbind()
 {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
