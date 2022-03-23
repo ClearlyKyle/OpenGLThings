@@ -9,7 +9,16 @@ find_package(glad CONFIG REQUIRED)
 
 set(EXE_NAME "MAIN")
 
-add_executable(${EXE_NAME} main.c Shaders.h Shaders.c Window.h Window.c)
+include_directories(
+        ${PROJECT_SOURCE_DIR}/Engine
+)
+
+file(GLOB ENGINE_SRC
+    "${PROJECT_SOURCE_DIR}/Engine/*.c"
+    "${PROJECT_SOURCE_DIR}/Engine/*.h"
+)
+
+add_executable(${EXE_NAME} main.c ${ENGINE_SRC})
 
 # SDL2::SDL2main needs to come first to compile with GCC 10.3.0
 target_link_libraries(${EXE_NAME} PRIVATE glad::glad)
