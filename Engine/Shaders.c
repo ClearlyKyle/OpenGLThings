@@ -139,3 +139,8 @@ void Shader_Bind(const struct Shader shader)
 {
     glUseProgram(shader.shader_id);
 }
+
+void Shader_Uniform_Float(struct Shader shader, const char *name, float f)
+{
+    glUniform1f(glGetUniformLocation(shader.shader_id, name), f);
+}
