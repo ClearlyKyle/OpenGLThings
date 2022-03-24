@@ -26,15 +26,12 @@ void VAO_Unbind()
 // type     - data type of each component in the array
 // stride   - byte offset between consecutive generic vertex attribute
 // offset   - offset of the first component of the first generic vertex attribute
-void VAO_Attr(struct VAO vao, struct VBO vbo, GLuint index, GLint size, GLenum type, GLsizei stride, size_t offset)
+void VAO_Attr(struct VAO vao, struct VBO vbo, GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid *offset)
 {
     VAO_Bind(vao);
     VBO_Bind(vbo);
 
-    // glVertexAttribIPointer(index, size, type, stride, (void *)offset);
-    // glVertexAttribPointer(index, size, type, GL_FALSE, stride, (void *)offset);
-
-    glVertexAttribPointer(index, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glVertexAttribPointer(index, size, type, GL_FALSE, stride, offset);
     glEnableVertexAttribArray(index);
 
     VAO_Unbind();
