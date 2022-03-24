@@ -12,6 +12,7 @@ set(EXE_NAME "MAIN")
 
 include_directories(
         ${PROJECT_SOURCE_DIR}/Engine
+        ${PROJECT_SOURCE_DIR}/Examples
 )
 
 file(GLOB ENGINE_SRC
@@ -19,7 +20,12 @@ file(GLOB ENGINE_SRC
     "${PROJECT_SOURCE_DIR}/Engine/*.h"
 )
 
-add_executable(${EXE_NAME} main.c BasicTriangle.h BasicTriangle.c ${ENGINE_SRC})
+file(GLOB EXAMPLES_SRC
+    "${PROJECT_SOURCE_DIR}/Examples/*.c"
+    "${PROJECT_SOURCE_DIR}/Examples/*.h"
+)
+
+add_executable(${EXE_NAME} main.c ${EXAMPLES_SRC} ${ENGINE_SRC})
 
 # SDL2::SDL2main needs to come first to compile with GCC 10.3.0
 target_link_libraries(${EXE_NAME} PRIVATE glad::glad)

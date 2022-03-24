@@ -14,6 +14,5 @@ struct VAO VAO_Create();
 void VAO_Destroy(struct VAO vao);
 void VAO_Bind(struct VAO vao);
 void VAO_Unbind();
-void VAO_Attr(struct VAO vao, struct VBO vbo, GLuint index, GLint size, GLenum type, GLsizei stride, size_t offset);
-
+void VAO_Attr(struct VAO vao, struct VBO vbo, GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid *offset);
 #endif // __VAO_H__
