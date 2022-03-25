@@ -12,6 +12,7 @@ set(EXE_NAME "MAIN")
 
 include_directories(
         ${PROJECT_SOURCE_DIR}/Engine
+        ${PROJECT_SOURCE_DIR}/Engine/libs
         ${PROJECT_SOURCE_DIR}/Examples
 )
 

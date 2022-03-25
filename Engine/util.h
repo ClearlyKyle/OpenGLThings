@@ -11,6 +11,7 @@
 #include "VBO.h"
 #include "EBO.h"
 #include "VAO.h"
+#include "Textures.h"
 #include "Shaders.h"
 #include "Renderer.h"
 #include "Window.h"
