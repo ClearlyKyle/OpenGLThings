@@ -33,7 +33,7 @@ static bool Validate_Program(GLuint program)
     return true;
 }
 
-static GLint _compile_shader(char *path, GLenum type)
+static GLint _compile_shader(const char *path, GLenum type)
 {
     FILE *f;
     fopen_s(&f, path, "rb");
@@ -83,7 +83,7 @@ static GLint _compile_shader(char *path, GLenum type)
     return handle;
 }
 
-struct Shader Shader_Create(char *vertex_shader_path, char *fragment_shader_path, size_t n, struct VertexAttribute attributes[])
+struct Shader Shader_Create(const char *vertex_shader_path, const char *fragment_shader_path, size_t n, struct VertexAttribute attributes[])
 {
     struct Shader self;
     self.vs_handle = _compile_shader(vertex_shader_path, GL_VERTEX_SHADER);
@@ -143,4 +143,16 @@ void Shader_Bind(const struct Shader shader)
 void Shader_Uniform_Float(struct Shader shader, const char *name, float f)
 {
     glUniform1f(glGetUniformLocation(shader.shader_id, name), f);
+}
+
+void Shader_Uniform_Mat4(struct Shader shader, const char *name, const mat4 matrix)
+{
+    glUniformMatrix4fv(glGetUniformLocation(shader.shader_id, name), 1, GL_FALSE, matrix[0]);
+}
+
+void Shader_Uniform_Texture2D(struct Shader shader, char *name, const struct Texture texture, GLuint n)
+{
+    glActiveTexture(GL_TEXTURE0 + n);
+    Texture_Bind(texture);
+    glUniform1i(glGetUniformLocation(shader.shader_id, (const GLchar *)name), n);
 }
