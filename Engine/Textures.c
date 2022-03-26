@@ -34,8 +34,8 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLenum slot
 
     // Assigns the image to the OpenGL Texture object
     glTexImage2D(texture_type, 0, GL_RGBA, image_width, image_height, 0, format, pixel_type, image_bytes);
+
     // Generates MipMaps
-    //glewExperimental = GL_TRUE;
     glGenerateMipmap(texture_type);
 
     // Deletes the image data as it is already in the OpenGL Texture object
