@@ -72,7 +72,7 @@ void Basic3D_Update()
 {
     Shader_Bind(basic3d.shader);
 
-    rotation += (float)window.frame_time * 100.0;
+    rotation += (float)(window.frame_time * 100.0);
 
     // Initializes matrices so they are not the null matrix
     mat4 model;
