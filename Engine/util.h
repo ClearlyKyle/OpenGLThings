@@ -8,11 +8,17 @@
 #include <string.h>
 #include <assert.h>
 
+#include "glad/glad.h"
+//#include "cglm/cglm.h"
+#include <cglm/cglm.h>
+#include <cglm/struct.h>
+#include <cglm/call.h>
+
+#include "Shaders.h"
 #include "VBO.h"
 #include "EBO.h"
 #include "VAO.h"
 #include "Textures.h"
-#include "Shaders.h"
 #include "Renderer.h"
 #include "Window.h"
 
