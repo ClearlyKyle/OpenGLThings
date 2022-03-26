@@ -1,0 +1,37 @@
+
+HEADER --------------------------------
+
+#include "util.h"
+
+#include "glad/glad.h"
+
+struct NAME
+{
+    struct Shader shader;
+    struct VAO vao;
+};
+
+void NAME_Init();
+void NAME_Update();
+
+
+C FILE --------------------------------
+
+#include "HEADER.h"
+
+static struct NAME bt;
+
+void NAME_Init()
+{
+
+}
+
+void NAME_Update()
+{
+
+}
+
+void NAME_OnExit()
+{
+    
+}
