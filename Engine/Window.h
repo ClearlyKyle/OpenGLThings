@@ -1,9 +1,9 @@
 #ifndef __WINDOW_H__
 #define __WINDOW_H__
 
-#include "util.h"
+#include "glad/glad.h"
 
-#include "SDL2/SDL.h"
+#include "Inputs.h"
 
 typedef void (*Windowfunction_ptr)();
 
@@ -20,6 +20,8 @@ struct Window
     Windowfunction_ptr OnExit;
 
     bool quit;
+
+    struct InputManager input;
 
     double frame_time, last_frame_time; // ms
 };

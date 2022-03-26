@@ -65,6 +65,8 @@ void Window_Init(int width, int height,
 
 static void Window_Destroy()
 {
+    InputManager_Destroy(window.input);
+
     SDL_DestroyWindow(window.sdl_window);
     window.sdl_window = NULL;
     SDL_Quit();
@@ -87,6 +89,10 @@ static void _OnExit()
 
 void Window_Loop()
 {
+    // Init Inputs
+    struct InputManager in = InputManager_Create();
+    window.input = in;
+
     _Init();
 
     SDL_Event event;
@@ -108,12 +114,23 @@ void Window_Loop()
             }
         }
         _Update();
+        Input_Update(&window.input);
+
+        if (Input_Key_Pressed(window.input, SDL_SCANCODE_W))
+        {
+            printf("W - is PRESSED\n");
+        }
+
+        if (Input_Mouse_Button_Pressed(window.input, MOUSE_BTN_LEFT))
+        {
+            printf("LEFT CLICK - is PRESSED\n");
+        }
 
         SDL_GL_SwapWindow(window.sdl_window);
 
         Uint64 end = SDL_GetPerformanceCounter();
         elapsed = (end - start) / (float)SDL_GetPerformanceFrequency();
-        printf("Elapsed time : %0.3fms\tFPS : %0.3f\n", elapsed * 1000.0, 1.0f / elapsed);
+        // printf("Elapsed time : %0.3fms\tFPS : %0.3f\n", elapsed * 1000.0, 1.0f / elapsed);
     }
 
     _OnExit();
