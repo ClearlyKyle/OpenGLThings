@@ -1,9 +1,7 @@
 #ifndef __VBO_H__
 #define __VBO_H__
 
-#include <stdbool.h>
-
-#include "glad/glad.h"
+#include "util.h"
 
 struct VBO
 {
