@@ -12,16 +12,22 @@ struct Window
     SDL_Window *sdl_window;
     SDL_GLContext sdl_gl_context;
 
-    int window_width;
-    int window_heigh;
+    unsigned int width;
+    unsigned int heigh;
 
     Windowfunction_ptr Init;
     Windowfunction_ptr Update;
+    Windowfunction_ptr OnExit;
 
     bool quit;
+
+    double frame_time, last_frame_time; // ms
 };
 
-void Window_Init(int width, int height, Windowfunction_ptr init, Windowfunction_ptr update);
+// global window
+extern struct Window window;
+
+void Window_Init(int width, int height, Windowfunction_ptr init, Windowfunction_ptr update, Windowfunction_ptr on_exit);
 void Window_Loop();
 
 #endif // __WINDOW_H__

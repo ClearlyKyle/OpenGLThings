@@ -1,14 +1,17 @@
 #include "Window.h"
 
-// global window
 struct Window window;
 
-void Window_Init(int width, int height, Windowfunction_ptr init, Windowfunction_ptr update)
+void Window_Init(int width, int height,
+                 Windowfunction_ptr init,
+                 Windowfunction_ptr update,
+                 Windowfunction_ptr on_exit)
 {
-    window.window_width = width;
-    window.window_heigh = height;
+    window.width = width;
+    window.heigh = height;
     window.Init = init;
     window.Update = update;
+    window.OnExit = on_exit;
 
     // initialize sdl
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -48,13 +51,16 @@ void Window_Init(int width, int height, Windowfunction_ptr init, Windowfunction_
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
+    // Enables the Depth Buffer
+    glEnable(GL_DEPTH_TEST);
+
     // Use v-sync: (0) - off, (1) - on
     SDL_GL_SetSwapInterval(0);
 
-    glViewport(0, 0, window.window_width, window.window_heigh);
+    glViewport(0, 0, window.width, window.heigh);
 
     // Set Clear Colour
-    glClearColor(0.18431f, 0.31765f, 0.71373f, 1.0f); // r g b a
+    glClearColor(0.07f, 0.13f, 0.17f, 1.0f); // r g b a
 }
 
 static void Window_Destroy()
@@ -74,14 +80,23 @@ static void _Update()
     window.Update();
 }
 
+static void _OnExit()
+{
+    window.OnExit();
+}
+
 void Window_Loop()
 {
     _Init();
 
     SDL_Event event;
+    float elapsed = 0.0f;
+
     while (!window.quit)
     {
         Uint64 start = SDL_GetPerformanceCounter();
+        window.last_frame_time = window.frame_time;
+        window.frame_time = elapsed;
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -97,9 +112,10 @@ void Window_Loop()
         SDL_GL_SwapWindow(window.sdl_window);
 
         Uint64 end = SDL_GetPerformanceCounter();
-        float elapsed = (end - start) / (float)SDL_GetPerformanceFrequency();
-        printf("Current FPS: %0.3f\n", 1.0f / elapsed);
+        elapsed = (end - start) / (float)SDL_GetPerformanceFrequency();
+        printf("Elapsed time : %0.3fms\tFPS : %0.3f\n", elapsed * 1000.0, 1.0f / elapsed);
     }
 
+    _OnExit();
     Window_Destroy();
 }
