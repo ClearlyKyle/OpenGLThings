@@ -16,6 +16,8 @@ struct InputManager
 
     int mouse_x;
     int mouse_y;
+    float lastX;
+    float lastY;
 };
 
 enum MOUSE_BUTTONS

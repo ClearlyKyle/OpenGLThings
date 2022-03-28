@@ -1,4 +1,5 @@
 #include "Inputs.h"
+#include "Window.h"
 
 struct InputManager InputManager_Create()
 {
@@ -25,6 +26,13 @@ struct InputManager InputManager_Create()
 
 void Input_Update(struct InputManager *in)
 {
+    while (SDL_PollEvent(&window.event))
+    {
+        if (window.event.type == SDL_QUIT)
+        {
+            window.quit = true;
+        }
+    }
     const Uint8 *current_key_state = SDL_GetKeyboardState(NULL);
 
     (void)memcpy(in->previous_keyboard_state, in->keyboard_state, in->key_length);
@@ -37,16 +45,22 @@ void Input_Update(struct InputManager *in)
 
 bool Input_Key_Down(const struct InputManager in, const SDL_Scancode code)
 { // Being held down
+
+    // printf("Input_Key_Down \t%s\n", SDL_GetKeyName(SDL_SCANCODE_TO_KEYCODE(code)));
     return (in.keyboard_state[code] != 0);
 }
 
 bool Input_Key_Pressed(const struct InputManager in, const SDL_Scancode code)
 { // returning true of the key was not pressed in the previous keyboard state but is pressed in the current one
+
+    // printf("Input_Key_Pressed \t%s\n", SDL_GetKeyName(SDL_SCANCODE_TO_KEYCODE(code)));
     return (in.previous_keyboard_state[code] == 0 && in.keyboard_state[code] != 0);
 }
 
 bool Input_Key_Released(const struct InputManager in, const SDL_Scancode code)
 { // returning true of the key was pressed in the previous keyboard state but is not pressed in the current one
+
+    // printf("Input_Key_Released \t%s\n", SDL_GetKeyName(SDL_SCANCODE_TO_KEYCODE(code)));
     return (in.previous_keyboard_state[code] != 0 && in.keyboard_state[code] == 0);
 }
 
