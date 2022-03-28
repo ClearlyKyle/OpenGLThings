@@ -10,6 +10,9 @@ struct Camera
     vec3 orientation;
     vec3 up;
 
+    // Projection matrix
+    mat4 projection;
+
     // Prevents the camera from jumping around when first clicking left click
     bool firstClick;
 
@@ -22,8 +25,8 @@ struct Camera
     float sensitivity;
 };
 
-struct Camera Camera_Create(unsigned int width, unsigned int height, vec3 position);
-void Camera_Matrix(const struct Camera camera, float FOV_deg, float near_plane, float far_plane, const struct Shader shader, const char *uniform);
+struct Camera Camera_Create(unsigned int width, unsigned int height, vec3 position, float FOV_deg, float near_plane, float far_plane);
+void Camera_View_Projection_To_Shader(struct Camera camera, const struct Shader shader, const char *uniform);
 void Camera_Inputs(struct Camera *camera);
 
 #endif // __CAMERA_H__
