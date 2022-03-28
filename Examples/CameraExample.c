@@ -62,7 +62,7 @@ void CameraExample_Init()
     Texture_Uniform(shader, "tex0", 0);
 
     // Camera
-    struct Camera cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f});
+    struct Camera cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f}, 45.0f, 0.1f, 100.0f);
     cam_example.cam = cam;
 
     // EBO_Unbind();
@@ -76,7 +76,7 @@ void CameraExample_Update()
     Camera_Inputs(&cam_example.cam);
 
     // Updates and exports the camera matrix to the Vertex Shader
-    Camera_Matrix(cam_example.cam, 45.0f, 0.1f, 100.0f, cam_example.shader, "camMatrix");
+    Camera_View_Projection_To_Shader(cam_example.cam, cam_example.shader, "camMatrix");
 
     // Binds texture so that is appears in rendering
     Texture_Bind(cam_example.tex);
