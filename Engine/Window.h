@@ -11,6 +11,7 @@ struct Window
 {
     SDL_Window *sdl_window;
     SDL_GLContext sdl_gl_context;
+    SDL_Event event;
 
     unsigned int width;
     unsigned int heigh;

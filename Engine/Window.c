@@ -12,6 +12,7 @@ void Window_Init(int width, int height,
     window.Init = init;
     window.Update = update;
     window.OnExit = on_exit;
+    // window.sdl_event = event;
 
     // initialize sdl
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -95,8 +96,12 @@ void Window_Loop()
 
     _Init();
 
-    SDL_Event event;
     float elapsed = 0.0f;
+
+    // SDL_Init(SDL_INIT_EVENTS);
+    // SDL_SetHint(SDL_HINT_EVENT_LOGGING, "2");
+
+    bool first_click = true;
 
     while (!window.quit)
     {
@@ -106,25 +111,8 @@ void Window_Loop()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        while (SDL_PollEvent(&event))
-        {
-            if (event.type == SDL_QUIT)
-            {
-                window.quit = true;
-            }
-        }
-        _Update();
         Input_Update(&window.input);
-
-        if (Input_Key_Pressed(window.input, SDL_SCANCODE_W))
-        {
-            printf("W - is PRESSED\n");
-        }
-
-        if (Input_Mouse_Button_Pressed(window.input, MOUSE_BTN_LEFT))
-        {
-            printf("LEFT CLICK - is PRESSED\n");
-        }
+        _Update();
 
         SDL_GL_SwapWindow(window.sdl_window);
 
