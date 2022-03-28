@@ -20,6 +20,12 @@ struct Camera
     unsigned int width;
     unsigned int height;
 
+    int lastX;
+    int lastY;
+
+    float yaw;
+    float pitch;
+
     // Adjust the speed of the camera and it's sensitivity when looking around
     float speed;
     float sensitivity;

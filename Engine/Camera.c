@@ -20,6 +20,13 @@ struct Camera Camera_Create(unsigned int width, unsigned int height, vec3 positi
 	glm_perspective(glm_rad(FOV_deg), (float)cam.width / (float)cam.height, near_plane, far_plane, projection);
 	glm_mat4_copy(projection, cam.projection);
 
+	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction
+	// vector pointing to the right so we initially rotate a bit to the left.
+	cam.yaw = -90.0f;
+	cam.pitch = 0.0f;
+	cam.lastX = (int)(800.0f / 2.0f);
+	cam.lastY = (int)(800.0f / 2.0f);
+
 	return cam;
 }
 
@@ -113,18 +120,18 @@ void Camera_Inputs(struct Camera *camera)
 		const float xoffset = (float)rel_x * sensitivity;
 		const float yoffset = (float)-rel_y * sensitivity; // negative so up is up
 
-		window.input.yaw += xoffset;
-		window.input.pitch += yoffset;
+		camera->yaw += xoffset;
+		camera->pitch += yoffset;
 
-		if (window.input.pitch > 89.0f)
-			window.input.pitch = 89.0f;
-		if (window.input.pitch < -89.0f)
-			window.input.pitch = -89.0f;
+		if (camera->pitch > 89.0f)
+			camera->pitch = 89.0f;
+		if (camera->pitch < -89.0f)
+			camera->pitch = -89.0f;
 
 		vec3 direction;
-		direction[0] = (float)(cos(glm_rad(window.input.yaw)) * cos(glm_rad(window.input.pitch)));
-		direction[1] = (float)(sin(glm_rad(window.input.pitch)));
-		direction[2] = (float)(sin(glm_rad(window.input.yaw)) * cos(glm_rad(window.input.pitch)));
+		direction[0] = (float)(cos(glm_rad(camera->yaw)) * cos(glm_rad(camera->pitch)));
+		direction[1] = (float)(sin(glm_rad(camera->pitch)));
+		direction[2] = (float)(sin(glm_rad(camera->yaw)) * cos(glm_rad(camera->pitch)));
 		glm_vec3_norm(direction);
 
 		glm_vec3_copy(direction, camera->orientation);
