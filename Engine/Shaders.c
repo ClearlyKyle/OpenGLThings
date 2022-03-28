@@ -145,6 +145,16 @@ void Shader_Uniform_Float(struct Shader shader, const char *name, float f)
     glUniform1f(glGetUniformLocation(shader.shader_id, name), f);
 }
 
+void Shader_Uniform_Vec3(struct Shader shader, char *name, vec3 v)
+{
+    glUniform3f(glGetUniformLocation(shader.shader_id, name), v[0], v[1], v[2]);
+}
+
+void Shader_Uniform_Vec4(struct Shader shader, char *name, vec4 v)
+{
+    glUniform4f(glGetUniformLocation(shader.shader_id, name), v[0], v[1], v[2], v[3]);
+}
+
 void Shader_Uniform_Mat4(struct Shader shader, const char *name, const mat4 matrix)
 {
     glUniformMatrix4fv(glGetUniformLocation(shader.shader_id, name), 1, GL_FALSE, matrix[0]);
