@@ -1,0 +1,201 @@
+#include "10_SpecularMaps.h"
+
+static struct SpecularMaps spec_maps;
+
+void SpecularMaps_Init()
+{
+    // Vertices coordinates
+    GLfloat vertices[] =
+        {//     COORDINATES     /        COLORS        /    TexCoord    /       NORMALS     //
+         -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+         -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+         1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+         1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+
+    // Indices for vertices order
+    GLuint indices[] =
+        {
+            0, 1, 2,
+            0, 2, 3};
+
+    GLfloat lightVertices[] =
+        {//     COORDINATES     //
+         -0.1f, -0.1f, 0.1f,
+         -0.1f, -0.1f, -0.1f,
+         0.1f, -0.1f, -0.1f,
+         0.1f, -0.1f, 0.1f,
+         -0.1f, 0.1f, 0.1f,
+         -0.1f, 0.1f, -0.1f,
+         0.1f, 0.1f, -0.1f,
+         0.1f, 0.1f, 0.1f};
+
+    GLuint lightIndices[] =
+        {
+            0, 1, 2,
+            0, 2, 3,
+            0, 4, 7,
+            0, 7, 3,
+            3, 7, 6,
+            3, 6, 2,
+            2, 6, 5,
+            2, 5, 1,
+            1, 5, 4,
+            1, 4, 0,
+            4, 5, 6,
+            4, 6, 7};
+
+    spec_maps.numer_of_indicies[0] = sizeof(indices) / sizeof(GLuint);
+    spec_maps.numer_of_indicies[1] = sizeof(lightIndices) / sizeof(GLuint);
+
+    {
+        // Generates Shader object using shaders default.vert and default.frag
+        struct Shader shader = Shader_Create(
+            "../../shaders/10/default.vs",
+            "../../shaders/10/default.fs",
+            4,
+            (struct VertexAttribute[]){
+                {.index = 0, .name = "aPos"},
+                {.index = 1, .name = "aColor"},
+                {.index = 2, .name = "aTex"},
+                {.index = 3, .name = "aNormal"}});
+
+        spec_maps.shader[0] = shader;
+
+        // Generates Vertex Array Object and binds it
+        struct VAO vao = VAO_Create();
+        VAO_Bind(vao);
+        spec_maps.vao[0] = vao;
+
+        // Generates Vertex Buffer Object and links it to vertices
+        struct VBO vbo = VBO_Create(GL_ARRAY_BUFFER);
+        VBO_Buffer(vbo, sizeof(vertices), (const GLvoid *)vertices);
+
+        struct EBO ebo = EBO_Create();
+        EBO_Buffer(ebo, sizeof(indices), (void *)indices);
+
+        // Links VBO attributes such as coordinates and colors to VAO
+        VAO_Attr(vao, vbo, 0, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(0));
+        VAO_Attr(vao, vbo, 1, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(3 * sizeof(GLfloat)));
+        VAO_Attr(vao, vbo, 2, 2, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(6 * sizeof(GLfloat)));
+        VAO_Attr(vao, vbo, 3, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(8 * sizeof(GLfloat)));
+
+        // Unbind all to prevent accidentally modifying them
+        VAO_Unbind();
+        VBO_Unbind();
+        EBO_Unbind();
+    }
+    {
+        // Generates Shader object using shaders default.vert and default.frag
+        struct Shader shader = Shader_Create(
+            "../../shaders/10/light.vs",
+            "../../shaders/10/light.fs",
+            1,
+            (struct VertexAttribute[]){
+                {.index = 0, .name = "aPos"}});
+
+        spec_maps.shader[1] = shader;
+
+        // Generates Vertex Array Object and binds it
+        struct VAO vao = VAO_Create();
+        VAO_Bind(vao);
+        spec_maps.vao[1] = vao;
+
+        // Generates Vertex Buffer Object and links it to vertices
+        struct VBO vbo = VBO_Create(GL_ARRAY_BUFFER);
+        VBO_Buffer(vbo, sizeof(lightVertices), (const GLvoid *)lightVertices);
+
+        struct EBO ebo = EBO_Create();
+        EBO_Buffer(ebo, sizeof(lightIndices), (void *)lightIndices);
+
+        // Links VBO attributes such as coordinates and colors to VAO
+        VAO_Attr(vao, vbo, 0, 3, GL_FLOAT, 3 * sizeof(GLfloat), (const GLvoid *)(0));
+
+        // Unbind all to prevent accidentally modifying them
+        VAO_Unbind();
+        VBO_Unbind();
+        EBO_Unbind();
+    }
+
+    vec4 light_colour = {1.0f, 1.0f, 1.0f, 1.0f};
+    vec3 light_position = {0.5f, 0.5f, 0.5f};
+    mat4 light_model = GLM_MAT4_ZERO_INIT;
+    glm_translate_make(light_model, light_position);
+
+    vec3 pyramid_position = {0.0f, 0.0f, 0.0f};
+    mat4 pyramid_model = GLM_MAT4_ZERO_INIT;
+    glm_translate_make(pyramid_model, pyramid_position);
+
+    Shader_Bind(spec_maps.shader[0]);
+    Shader_Uniform_Mat4(spec_maps.shader[0], "model", pyramid_model);
+    Shader_Uniform_Vec4(spec_maps.shader[0], "lightColor", light_colour);
+    Shader_Uniform_Vec4(spec_maps.shader[0], "lightPos", light_position);
+
+    Shader_Bind(spec_maps.shader[1]);
+    Shader_Uniform_Mat4(spec_maps.shader[1], "model", light_model);
+    Shader_Uniform_Vec4(spec_maps.shader[1], "lightColor", light_colour);
+
+    // Shader_Bind(spec_maps.shader[0]);
+    //  Texture
+    const char *file_path1 = "../../Examples/Textures/planks.png";
+    struct Texture tex1 = Texture_Create(file_path1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    spec_maps.tex[0] = tex1;
+    Texture_Uniform(spec_maps.shader[0], "tex0", 0);
+
+    // const char *file_path2 = "../../Examples/Textures/planksSpec.png";
+    // struct Texture tex2 = Texture_Create(file_path2, GL_TEXTURE_2D, GL_TEXTURE1, GL_RED, GL_UNSIGNED_BYTE);
+    // spec_maps.tex[1] = tex2;
+    // Texture_Uniform(spec_maps.shader[0], "tex1", 1);
+
+    // Camera
+    struct Camera cam = Camera_Create(window.width, window.heigh, (vec3){-1.880f, 0.509f, -1.031f}, 45.0f, 0.1f, 100.0f);
+    spec_maps.cam = cam;
+}
+
+void SpecularMaps_Update()
+{
+    // Handles camera inputs
+    Camera_Inputs(&spec_maps.cam);
+
+    // Tells OpenGL which Shader Program we want to use
+    Shader_Bind(spec_maps.shader[0]);
+
+    // Exports the camera Position to the Fragment Shader for specular lighting
+    Shader_Uniform_Vec3(spec_maps.shader[0], "camPos", spec_maps.cam.position);
+
+    // Export the camMatrix to the Vertex Shader of the pyramid
+    Camera_View_Projection_To_Shader(spec_maps.cam, spec_maps.shader[0], "camMatrix");
+
+    // Binds texture so that is appears in rendering
+    Texture_Bind(spec_maps.tex[0]);
+    // Texture_Bind(spec_maps.tex[1]);
+
+    // Bind the VAO so OpenGL knows to use it
+    VAO_Bind(spec_maps.vao[0]);
+    // Draw primitives, number of indices, datatype of indices, index of indices
+    glDrawElements(GL_TRIANGLES, spec_maps.numer_of_indicies[0], GL_UNSIGNED_INT, 0);
+
+    // Tells OpenGL which Shader Program we want to use
+    Shader_Bind(spec_maps.shader[1]);
+
+    // Export the camMatrix to the Vertex Shader of the light cube
+    Camera_View_Projection_To_Shader(spec_maps.cam, spec_maps.shader[1], "camMatrix");
+
+    // Bind the VAO so OpenGL knows to use it
+    VAO_Bind(spec_maps.vao[1]);
+
+    // Draw primitives, number of indices, datatype of indices, index of indices
+    glDrawElements(GL_TRIANGLES, spec_maps.numer_of_indicies[1], GL_UNSIGNED_INT, 0);
+
+    //printf("Camera Position : {%0.3ff, %0.3ff, %0.3ff}\n", spec_maps.cam.position[0], spec_maps.cam.position[1], spec_maps.cam.position[2]);
+    //glm_vec3_print(spec_maps.cam.orientation, stdout);
+}
+
+void SpecularMaps_OnExit()
+{
+    VAO_Destroy(spec_maps.vao[0]);
+    VAO_Destroy(spec_maps.vao[1]);
+    Shader_Destroy(spec_maps.shader[0]);
+    Shader_Destroy(spec_maps.shader[1]);
+    Texture_Delete(spec_maps.tex[0]);
+    Texture_Delete(spec_maps.tex[1]);
+}
