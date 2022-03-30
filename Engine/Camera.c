@@ -16,7 +16,7 @@ struct Camera Camera_Create(unsigned int width, unsigned int height, vec3 positi
 	glm_vec3_copy(position, cam.position);
 
 	// Calculate Peojection matrix
-	mat4 projection = GLM_MAT4_ZERO_INIT;
+	mat4 projection = GLM_MAT4_IDENTITY_INIT;
 	glm_perspective(glm_rad(FOV_deg), (float)cam.width / (float)cam.height, near_plane, far_plane, projection);
 	glm_mat4_copy(projection, cam.projection);
 
