@@ -50,14 +50,13 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLenum slot
 // Move this to Shder file?
 void Texture_Uniform(const struct Shader shader, const char *uniform, GLuint unit)
 {
-    // Gets the location of the uniform
-    const GLuint texUni = glGetUniformLocation(shader.shader_id, uniform);
+    glActiveTexture(GL_TEXTURE0 + unit);
 
     // Shader needs to be activated before changing the value of a uniform
     Shader_Bind(shader);
 
     // Sets the value of the uniform
-    glUniform1i(texUni, unit);
+    glUniform1i(glGetUniformLocation(shader.shader_id, (const GLchar *)uniform), unit);
 }
 
 void Texture_Bind(const struct Texture t)
