@@ -21,6 +21,8 @@ void EBO_Bind(struct EBO ebo)
 
 void EBO_Unbind()
 {
+    // make sure you don't unbind the element array buffer before unbinding your VAO
+    // otherwise it doesn't have an EBO configured
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 

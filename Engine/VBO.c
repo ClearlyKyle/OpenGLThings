@@ -31,5 +31,5 @@ void VBO_Buffer(struct VBO vbo, GLsizeiptr size, const GLvoid *data)
 {
     VBO_Bind(vbo);
     glBufferData(vbo.type, size, data, GL_STATIC_DRAW);
-    VBO_Unbind();
+    //VBO_Unbind();
 }
