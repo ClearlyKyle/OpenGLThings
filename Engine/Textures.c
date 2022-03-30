@@ -3,8 +3,10 @@
 #define STB_IMAGE_IMPLEMENTATION // use of stb functions once and for all
 #include "stb/stb_image.h"
 
-struct Texture Texture_Create(const char *path, GLenum texture_type, GLenum slot, GLenum format, GLenum pixel_type)
+struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot, GLenum format, GLenum pixel_type)
 {
+    assert(slot < GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+
     struct Texture t;
     t.type = texture_type;
 
@@ -15,14 +17,16 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLenum slot
     stbi_set_flip_vertically_on_load(true);
 
     // Reads the image from a file and stores it in bytes
-    unsigned char *image_bytes = stbi_load(path, &image_width, &image_height, &image_bpp, STBI_rgb_alpha);
+    unsigned char *image_bytes = stbi_load(path, &image_width, &image_height, &image_bpp, 0);
+    assert(image_bytes != NULL);
 
     // Generates an OpenGL texture object
     glGenTextures(1, &t.ID);
 
     // Assigns the texture to a Texture Unit
-    glActiveTexture(slot);
-    glBindTexture(texture_type, t.ID);
+    glActiveTexture(GL_TEXTURE0 + slot);
+    t.slot = slot;                     // slot is used for "glActiveTexture(GL_TEXTURE0 + slot)"
+    glBindTexture(texture_type, t.ID); // ID is used for "glBindTexture(..., ID)"
 
     // Configures the type of algorithm that is used to make the image smaller or bigger
     glTexParameteri(texture_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -48,12 +52,13 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLenum slot
 }
 
 // Move this to Shder file?
-void Texture_Uniform(const struct Shader shader, const char *uniform, GLuint unit)
+void Texture_Uniform(const struct Shader shader, const struct Texture texture, const char *uniform, GLuint unit)
 {
-    glActiveTexture(GL_TEXTURE0 + unit);
-
     // Shader needs to be activated before changing the value of a uniform
     Shader_Bind(shader);
+
+    glActiveTexture(GL_TEXTURE0 + unit);
+    glBindTexture(texture.type, texture.ID);
 
     // Sets the value of the uniform
     glUniform1i(glGetUniformLocation(shader.shader_id, (const GLchar *)uniform), unit);
@@ -65,9 +70,7 @@ void Texture_Bind(const struct Texture t)
 }
 
 void Texture_Unbind()
-// void Texture_Unbind(const struct Texture t)
 {
-    // glBindTexture(t.type, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
