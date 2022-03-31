@@ -36,14 +36,11 @@ void main() {
   vec3 viewDirection = normalize(camPos - crntPos);
   vec3 reflectionDirection = reflect(-lightDirection, normal);
   float specAmount =
-      pow(max(dot(viewDirection, reflectionDirection), 0.0f), 8);
+      pow(max(dot(viewDirection, reflectionDirection), 0.0f), 128);
   float specular = specAmount * specularLight;
 
   // outputs final color
-  // FragColor = (texture(tex0, texCoord) * (diffuse + ambient) +
-  //             texture(tex1, texCoord).r * specular) *
-  //            lightColor;
-
-  FragColor =
-      texture(tex0, texCoord) * lightColor * (diffuse + ambient + specular);
+  FragColor = (texture(tex0, texCoord) * (diffuse + ambient) +
+               texture(tex1, texCoord).r * specular) *
+              lightColor;
 }
