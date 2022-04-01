@@ -4,7 +4,7 @@
 
 #define assert__(x) for (; !(x); assert(x))
 
-static void Validate_Shader(GLuint shader, const char *file)
+static void _Validate_Shader(GLuint shader, const char *file)
 {
     char buffer[BUFFER_SIZE];
     GLsizei length = 0;
@@ -17,23 +17,31 @@ static void Validate_Shader(GLuint shader, const char *file)
     }
 }
 
-static bool Validate_Program(GLuint program)
+static void _Validate_Program(struct Shader shader, const char *vertex_shader_path, const char *fragment_shader_path)
 {
-    GLchar buffer[BUFFER_SIZE];
-    GLsizei length = 0;
+    // Check link status
+    GLint linked = 0;
+    glGetProgramiv(shader.shader_id, GL_LINK_STATUS, &linked);
 
-    glGetProgramInfoLog(program, BUFFER_SIZE, &length, buffer);
-
-    if (length > 0)
+    if (linked == GL_FALSE)
     {
-        printf("Program %d link error: %s\n", program, buffer);
-        return false;
-    }
+        char buf[512];
+        // snprintf(buf, 512, "[%s, %s]", vertex_shader_path, fragment_shader_path);
 
-    return true;
+        GLint loglen;
+        glGetProgramiv(shader.shader_id, GL_INFO_LOG_LENGTH, &loglen);
+
+        char *logtext = (char *)calloc(1, loglen);
+        glGetProgramInfoLog(shader.shader_id, loglen, NULL, logtext);
+        fprintf(stderr, "[Shader Program Error] %s shader at %s:\n%s", "linking", buf, logtext);
+
+        Shader_Destroy(shader);
+
+        exit(1);
+    }
 }
 
-static GLint _compile_shader(const char *path, GLenum type)
+static GLint _Compile_Shader(const char *path, GLenum type)
 {
     FILE *f;
     fopen_s(&f, path, "rb");
@@ -75,57 +83,73 @@ static GLint _compile_shader(const char *path, GLenum type)
     // Check OpenGL logs if compilation failed
     if (compiled == 0)
     {
-        //_log_and_fail(handle, "compiling", path, glGetShaderInfoLog, glGetShaderiv);
         printf("Error with compiling!");
+        free(file_text);
+        exit(1);
     }
+
+    // Detch after successful linkg, and destroy as we dont need them anymore
+    glDetachShader(shader.shader_id, shader.fs_handle);
+    glDetachShader(shader.shader_id, shader.vs_handle);
+    glDeleteShader(shader.vs_handle);
+    glDeleteShader(shader.fs_handle);
 
     free(file_text);
     return handle;
 }
 
+static void _Get_Active_Uniforms(struct Shader shader)
+{
+    GLuint num_uniforms = 0;
+    glGetProgramiv(shader.shader_id, GL_ACTIVE_UNIFORMS, &num_uniforms);
+    GLuint max_char_len = 0;
+    glGetProgramiv(shader.shader_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_char_len);
+
+    if (num_uniforms > 0 && max_char_len > 0)
+    {
+        char *buffer = (char *)malloc(sizeof(char) * max_char_len);
+        for (GLuint i = 0; i < num_uniforms; i++)
+        {
+            GLsizei length, size;
+            GLenum type;
+            glGetActiveUniform(shader.shader_id, i, max_char_len, &length, &size, &type, buffer);
+
+            GLuint var_location = glGetUniformLocation(shader.shader_id, buffer);
+        }
+        free(buffer);
+    }
+}
+
 struct Shader Shader_Create(const char *vertex_shader_path, const char *fragment_shader_path, size_t n, struct VertexAttribute attributes[])
 {
-    struct Shader self;
-    self.vs_handle = _compile_shader(vertex_shader_path, GL_VERTEX_SHADER);
-    self.fs_handle = _compile_shader(fragment_shader_path, GL_FRAGMENT_SHADER);
-    self.shader_id = glCreateProgram();
+    struct Shader shader;
+    shader.vs_handle = _Compile_Shader(vertex_shader_path, GL_VERTEX_SHADER);
+    shader.fs_handle = _Compile_Shader(fragment_shader_path, GL_FRAGMENT_SHADER);
+    shader.shader_id = glCreateProgram();
 
-    Validate_Shader(self.vs_handle, vertex_shader_path);
-    Validate_Shader(self.fs_handle, fragment_shader_path);
+    _Validate_Shader(shader.vs_handle, vertex_shader_path);
+    _Validate_Shader(shader.fs_handle, fragment_shader_path);
 
     // Link shader program
-    glAttachShader(self.shader_id, self.vs_handle);
-    glAttachShader(self.shader_id, self.fs_handle);
+    glAttachShader(shader.shader_id, shader.vs_handle);
+    glAttachShader(shader.shader_id, shader.fs_handle);
 
     // Bind vertex attributes
     if (attributes != NULL)
     {
         for (size_t i = 0; i < n; i++)
         {
-            glBindAttribLocation(self.shader_id, attributes[i].index, attributes[i].name);
+            glBindAttribLocation(shader.shader_id, attributes[i].index, attributes[i].name);
         }
     }
 
-    glLinkProgram(self.shader_id);
+    glLinkProgram(shader.shader_id);
 
-    // Check link status
-    GLint linked;
-    glGetProgramiv(self.shader_id, GL_LINK_STATUS, &linked);
+    _Validate_Program(shader, vertex_shader_path, fragment_shader_path);
 
-    if (linked == 0)
-    {
-        char buf[512];
-        snprintf(buf, 512, "[%s, %s]", vertex_shader_path, fragment_shader_path);
+    //_Get_Active_Uniforms(shader);
 
-        GLint loglen;
-        glGetProgramiv(self.shader_id, GL_INFO_LOG_LENGTH, &loglen);
-
-        char *logtext = (char *)calloc(1, loglen);
-        glGetProgramInfoLog(self.shader_id, loglen, NULL, logtext);
-        fprintf(stderr, "Error %s shader at %s:\n%s", "linking", buf, logtext);
-    }
-
-    return self;
+    return shader;
 }
 
 void Shader_Destroy(const struct Shader shader)
