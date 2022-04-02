@@ -1,7 +1,7 @@
 #ifndef __MODELLOADER_H__
 #define __MODELLOADER_H__
 
-#include "util2.h"
+#include "util.h"
 
 #include "VAO.h"
 #include "EBO.h"
