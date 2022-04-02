@@ -2,6 +2,8 @@
 #define __CAMERA_H__
 
 #include "util.h"
+#include "Shaders.h"
+#include "Window.h"
 
 struct Camera
 {

@@ -1,8 +1,7 @@
 #ifndef __WINDOW_H__
 #define __WINDOW_H__
 
-#include "glad/glad.h"
-
+#include "util.h"
 #include "Inputs.h"
 
 typedef void (*Windowfunction_ptr)();

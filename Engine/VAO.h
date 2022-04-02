@@ -1,7 +1,7 @@
 #ifndef __VAO_H__
 #define __VAO_H__
 
-#include "glad/glad.h"
+#include "util.h"
 
 #include "VBO.h"
 

@@ -1,9 +1,7 @@
 #ifndef __INTPUTS_H__
 #define __INTPUTS_H__
 
-#include <stdbool.h>
-
-#include "SDL2/SDL.h"
+#include "util.h"
 
 struct InputManager
 {

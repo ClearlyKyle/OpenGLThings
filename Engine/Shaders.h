@@ -2,6 +2,7 @@
 #define __SHADERS_H__
 
 #include "util.h"
+#include "Textures.h"
 
 // VertexAttribute - are the (locations = 0) in the vs, for example:
 // layout (location = 0) in vec3 position;    "index = 0, name = position"

@@ -2,6 +2,7 @@
 #define __TEXTURES_H__
 
 #include "util.h"
+#include "Shaders.h"
 
 struct Texture
 {
