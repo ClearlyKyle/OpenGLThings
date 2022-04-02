@@ -1,9 +1,11 @@
 #include "VAO.h"
 
+// Create and Bind VAO
 struct VAO VAO_Create()
 {
     struct VAO vao;
     glGenVertexArrays(1, &vao.ID);
+    VAO_Bind(vao);
     return vao;
 }
 
