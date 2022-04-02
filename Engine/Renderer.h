@@ -10,11 +10,12 @@ enum Shader_Type
     SHADER_TYPE_COUNT
 };
 
-struct Renderer
-{
-    struct Shader shaders[SHADER_TYPE_COUNT + 1];
-    enum ShaderType current_shader;
-    struct Shader shader;
-};
+//struct Renderer
+//{
+//    struct Shader shaders[SHADER_TYPE_COUNT + 1];
+//    struct Shader s;
+
+//    enum ShaderType current_shader;
+//};
 
 #endif // __RENDERER_H__
