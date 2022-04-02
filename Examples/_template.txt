@@ -13,7 +13,7 @@ struct NAME
 
 void NAME_Init();
 void NAME_Update();
-
+void NAME_OnExit();
 
 C FILE --------------------------------
 
