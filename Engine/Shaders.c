@@ -88,12 +88,6 @@ static GLint _Compile_Shader(const char *path, GLenum type)
         exit(1);
     }
 
-    // Detch after successful linkg, and destroy as we dont need them anymore
-    glDetachShader(shader.shader_id, shader.fs_handle);
-    glDetachShader(shader.shader_id, shader.vs_handle);
-    glDeleteShader(shader.vs_handle);
-    glDeleteShader(shader.fs_handle);
-
     free(file_text);
     return handle;
 }
@@ -148,6 +142,12 @@ struct Shader Shader_Create(const char *vertex_shader_path, const char *fragment
     _Validate_Program(shader, vertex_shader_path, fragment_shader_path);
 
     //_Get_Active_Uniforms(shader);
+
+    // Detch after successful linkg, and destroy as we dont need them anymore
+    glDetachShader(shader.shader_id, shader.fs_handle);
+    glDetachShader(shader.shader_id, shader.vs_handle);
+    glDeleteShader(shader.vs_handle);
+    glDeleteShader(shader.fs_handle);
 
     return shader;
 }
