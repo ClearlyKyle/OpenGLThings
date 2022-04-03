@@ -31,5 +31,6 @@ void Shader_Uniform_Mat4(struct Shader shader, const char *name, const mat4 m);
 void Shader_Uniform_Vec3(struct Shader shader, char *name, vec3 v);
 void Shader_Uniform_Vec4(struct Shader shader, char *name, vec4 v);
 void Shader_Uniform_Texture2D(struct Shader shader, char *name, const struct Texture texture, GLuint n);
+void Texture_Uniform(struct Shader shader, const struct Texture texture, const char *uniform, GLuint unit);
 
 #endif // __SHADERS_H__

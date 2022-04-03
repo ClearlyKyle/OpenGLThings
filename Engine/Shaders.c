@@ -94,9 +94,9 @@ static GLint _Compile_Shader(const char *path, GLenum type)
 
 static void _Get_Active_Uniforms(struct Shader shader)
 {
-    GLuint num_uniforms = 0;
+    GLint num_uniforms = 0;
     glGetProgramiv(shader.shader_id, GL_ACTIVE_UNIFORMS, &num_uniforms);
-    GLuint max_char_len = 0;
+    GLint max_char_len = 0;
     glGetProgramiv(shader.shader_id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_char_len);
 
     if (num_uniforms > 0 && max_char_len > 0)
@@ -191,4 +191,17 @@ void Shader_Uniform_Texture2D(struct Shader shader, char *name, const struct Tex
     glActiveTexture(GL_TEXTURE0 + n);
     Texture_Bind(texture);
     glUniform1i(glGetUniformLocation(shader.shader_id, (const GLchar *)name), n);
+}
+
+// Move this to Shder file?
+void Texture_Uniform(struct Shader shader, const struct Texture texture, const char *uniform, GLuint unit)
+{
+    // Shader needs to be activated before changing the value of a uniform
+    Shader_Bind(shader);
+
+    glActiveTexture(GL_TEXTURE0 + unit);
+    glBindTexture(texture.type, texture.ID);
+
+    // Sets the value of the uniform
+    glUniform1i(glGetUniformLocation(shader.shader_id, (const GLchar *)uniform), unit);
 }

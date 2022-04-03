@@ -24,7 +24,7 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
     glGenTextures(1, &t.ID);
 
     // Assigns the texture to a Texture Unit
-    glActiveTexture(GL_TEXTURE0 + slot);
+    // glActiveTexture(GL_TEXTURE0 + slot);
     t.slot = slot;                     // slot is used for "glActiveTexture(GL_TEXTURE0 + slot)"
     glBindTexture(texture_type, t.ID); // ID is used for "glBindTexture(..., ID)"
 
@@ -40,28 +40,15 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
     glTexImage2D(texture_type, 0, GL_RGBA, image_width, image_height, 0, format, pixel_type, image_bytes);
 
     // Generates MipMaps
-    glGenerateMipmap(texture_type);
+    // glGenerateMipmap(texture_type);
 
     // Deletes the image data as it is already in the OpenGL Texture object
     stbi_image_free(image_bytes);
 
     // Unbinds the OpenGL Texture object so that it can't accidentally be modified
-    glBindTexture(texture_type, 0);
+    // glBindTexture(texture_type, 0);
 
     return t;
-}
-
-// Move this to Shder file?
-void Texture_Uniform(const struct Shader shader, const struct Texture texture, const char *uniform, GLuint unit)
-{
-    // Shader needs to be activated before changing the value of a uniform
-    Shader_Bind(shader);
-
-    glActiveTexture(GL_TEXTURE0 + unit);
-    glBindTexture(texture.type, texture.ID);
-
-    // Sets the value of the uniform
-    glUniform1i(glGetUniformLocation(shader.shader_id, (const GLchar *)uniform), unit);
 }
 
 void Texture_Bind(const struct Texture t)
