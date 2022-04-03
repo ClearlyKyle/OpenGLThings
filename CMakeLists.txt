@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.10)
 project(FCC_OpenGL_Tutorial)
 
-if(MSVC)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-endif()
+#if(MSVC)
+#    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+#endif()
 
 set(CMAKE_C_STANDARD 11)
 
