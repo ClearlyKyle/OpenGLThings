@@ -17,7 +17,7 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
     stbi_set_flip_vertically_on_load(true);
 
     // Reads the image from a file and stores it in bytes
-    unsigned char *image_bytes = stbi_load(path, &image_width, &image_height, &image_bpp, 0);
+    unsigned char *image_bytes = stbi_load(path, &image_width, &image_height, &image_bpp, STBI_rgb_alpha);
     assert(image_bytes != NULL);
 
     // Generates an OpenGL texture object
