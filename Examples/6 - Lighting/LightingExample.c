@@ -70,8 +70,8 @@ void LightingExample_Init()
     /* PYRAMID SAHDER ---------------------------------------------------------------------*/
     // Generates Shader object using shaders default.vert and default.frag
     struct Shader shader1 = Shader_Create(
-        "../../shaders/default.vs",
-        "../../shaders/default.fs",
+        "../../Examples/shaders/6/default.vs",
+        "../../Examples/shaders/6/default.fs",
         4,
         (struct VertexAttribute[]){
             {.index = 0, .name = "aPos"},
@@ -108,8 +108,8 @@ void LightingExample_Init()
     /* LIGHT SAHDER ---------------------------------------------------------------------*/
     // Shader for light cube
     struct Shader shader2 = Shader_Create(
-        "../../shaders/lights.vs",
-        "../../shaders/lights.fs",
+        "../../Examples/shaders/6/lights.vs",
+        "../../Examples/shaders/6/lights.fs",
         1,
         (struct VertexAttribute[]){
             {.index = 0, .name = "aPos"}});
@@ -157,7 +157,7 @@ void LightingExample_Init()
     Shader_Uniform_Vec3(lights.shader[0], "lightPos", light_position);
 
     // Texture
-    const char *file_path = "../../Examples/Textures/brick.png";
+    const char *file_path = "../../Examples/res/textures/brick.png";
     struct Texture tex = Texture_Create(file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     lights.tex = tex;
 

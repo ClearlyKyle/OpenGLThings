@@ -5,11 +5,11 @@ static struct ModelLoading model_loading;
 void ModelLoading_Init()
 {
     struct Model model = Model_Import(
-        "../../res/models/Dog House/Doghouse.obj",
-        //"../../res/models/Wooden Box/wooden crate.obj",
-        //"../../res/models/cube_normals.obj",
-        "../../shaders/12/default.vs",
-        "../../shaders/12/default.fs",
+        "../../Examples/res/models/Dog House/Doghouse.obj",
+        //"../../Examples/res/models/Wooden Box/wooden crate.obj",
+        //"../../Examples/res/models/cube_normals.obj",
+        "../../Examples/shaders/8/default.vs",
+        "../../Examples/shaders/8/default.fs",
         1,
         (struct VertexAttribute[]){{.index = 0, .name = "aPos"}, {.index = 1, .name = "aNormal"}, {.index = 2, .name = "aTex"}});
 

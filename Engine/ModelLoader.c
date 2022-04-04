@@ -209,7 +209,7 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
     Shader_Uniform_Mat4(shader, "model", model_transform);
 
     // TEXTURES
-    const char *texture_file_path = "../../res/models/Dog House/Doghouse_PBR_BaseColor.png";
+    const char *texture_file_path = "../../Examples/res/models/Dog House/Doghouse_PBR_BaseColor.png";
     struct Texture tex = Texture_Create(texture_file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     m.tex = tex;
 
