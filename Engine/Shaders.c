@@ -83,6 +83,7 @@ static GLint _Compile_Shader(const char *path, GLenum type)
     // Check OpenGL logs if compilation failed
     if (compiled == 0)
     {
+        // TODO : Get this error message
         printf("Error with compiling!");
         free(file_text);
         exit(1);
@@ -94,6 +95,12 @@ static GLint _Compile_Shader(const char *path, GLenum type)
 
 static void _Get_Active_Uniforms(struct Shader shader)
 {
+    // The index returned from these GLint functions gets passed to glEnableVertexAttribArray during rendering.
+    // GLint position_attrib_index = glGetAttribLocation(shader.shader_id, "position");
+    // GLint texcoord_attrib_index = glGetAttribLocation(shader.shader_id, "texcoord");
+    // GLint normal_attrib_index = glGetAttribLocation(shader.shader_id, "normal");
+    // GLint color_attrib_index = glGetAttribLocation(shader.shader_id, "color");
+
     GLint num_uniforms = 0;
     glGetProgramiv(shader.shader_id, GL_ACTIVE_UNIFORMS, &num_uniforms);
     GLint max_char_len = 0;
@@ -102,7 +109,7 @@ static void _Get_Active_Uniforms(struct Shader shader)
     if (num_uniforms > 0 && max_char_len > 0)
     {
         char *buffer = (char *)malloc(sizeof(char) * max_char_len);
-        for (GLuint i = 0; i < num_uniforms; i++)
+        for (GLint i = 0; i < num_uniforms; i++)
         {
             GLsizei length, size;
             GLenum type;
