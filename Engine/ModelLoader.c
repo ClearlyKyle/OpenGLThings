@@ -102,6 +102,10 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
     const GLsizeiptr normal_data_size = sizeof(GLfloat) * ((m.num_indicies) * 3);
     GLfloat *normal_data = (GLfloat *)malloc(normal_data_size);
 
+    // TEXTURES
+    const GLsizeiptr texture_data_size = sizeof(GLfloat) * ((m.num_indicies) * 2);
+    GLfloat *texture_data = (GLfloat *)malloc(texture_data_size);
+
     const GLsizeiptr index_data_size = sizeof(unsigned int) * (m.num_indicies);
     unsigned int *index_data = (unsigned int *)malloc(index_data_size);
 
@@ -114,10 +118,19 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
         const unsigned int vert_index2 = attrib.faces[3 * i + 1].v_idx;
         const unsigned int vert_index3 = attrib.faces[3 * i + 2].v_idx;
 
+        const unsigned int normal_index1 = attrib.faces[3 * i + 0].vn_idx;
+        const unsigned int normal_index2 = attrib.faces[3 * i + 1].vn_idx;
+        const unsigned int normal_index3 = attrib.faces[3 * i + 2].vn_idx;
+
+        const unsigned int texture_index1 = attrib.faces[3 * i + 0].vt_idx;
+        const unsigned int texture_index2 = attrib.faces[3 * i + 1].vt_idx;
+        const unsigned int texture_index3 = attrib.faces[3 * i + 2].vt_idx;
+
         index_data[3 * i + 0] = vert_index1;
         index_data[3 * i + 1] = vert_index2;
         index_data[3 * i + 2] = vert_index3;
 
+        // VERTICIES
         vertex_data[(i * 9) + 0] = attrib.vertices[vert_index1 * 3 + 0]; // V1
         vertex_data[(i * 9) + 1] = attrib.vertices[vert_index1 * 3 + 1];
         vertex_data[(i * 9) + 2] = attrib.vertices[vert_index1 * 3 + 2];
@@ -129,10 +142,6 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
         vertex_data[(i * 9) + 8] = attrib.vertices[vert_index3 * 3 + 2];
 
         // NORMALS
-        const unsigned int normal_index1 = attrib.faces[3 * i + 0].vn_idx;
-        const unsigned int normal_index2 = attrib.faces[3 * i + 1].vn_idx;
-        const unsigned int normal_index3 = attrib.faces[3 * i + 2].vn_idx;
-
         normal_data[(i * 9) + 0] = attrib.normals[normal_index1 * 3 + 0];
         normal_data[(i * 9) + 1] = attrib.normals[normal_index1 * 3 + 1];
         normal_data[(i * 9) + 2] = attrib.normals[normal_index1 * 3 + 2];
@@ -142,8 +151,17 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
         normal_data[(i * 9) + 6] = attrib.normals[normal_index3 * 3 + 0];
         normal_data[(i * 9) + 7] = attrib.normals[normal_index3 * 3 + 1];
         normal_data[(i * 9) + 8] = attrib.normals[normal_index3 * 3 + 2];
+
+        // TEXTURES
+        texture_data[(i * 6) + 0] = attrib.texcoords[texture_index1 * 2 + 0];
+        texture_data[(i * 6) + 1] = attrib.texcoords[texture_index1 * 2 + 1];
+        texture_data[(i * 6) + 2] = attrib.texcoords[texture_index2 * 2 + 0];
+        texture_data[(i * 6) + 3] = attrib.texcoords[texture_index2 * 2 + 1];
+        texture_data[(i * 6) + 4] = attrib.texcoords[texture_index3 * 2 + 0];
+        texture_data[(i * 6) + 5] = attrib.texcoords[texture_index3 * 2 + 1];
     }
 
+    printf("Loaded coordinates!\n");
     // for (size_t i = 0; i < attrib.num_vertices; i++)
     //{
     //     printf("vert  [%lld] {%f, %f, %f} {%f, %f, %f}\n", i, vertex_data[i * 6 + 0], vertex_data[i * 6 + 1], vertex_data[i * 6 + 2],
@@ -173,12 +191,15 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
     struct VBO vbo_normals = VBO_Create(GL_ARRAY_BUFFER);
     VBO_Buffer(vbo_normals, normal_data_size, (const GLvoid *)normal_data);
 
+    struct VBO vbo_textures = VBO_Create(GL_ARRAY_BUFFER);
+    VBO_Buffer(vbo_textures, texture_data_size, (const GLvoid *)texture_data);
+
     // struct EBO ebo = EBO_Create();
     // EBO_Buffer(ebo, index_data_size, (const GLvoid *)index_data);
 
     VAO_Attr(vao, vbo_verticies, 0, 3, GL_FLOAT, 3 * sizeof(GLfloat), (const GLvoid *)(0));
     VAO_Attr(vao, vbo_normals, 1, 3, GL_FLOAT, 3 * sizeof(GLfloat), (const GLvoid *)(0));
-    // VAO_Attr(vao, vbo_verticies, 1, 3, GL_FLOAT, 6 * sizeof(GLfloat), (const GLvoid *)(3 * sizeof(GLfloat)));
+    VAO_Attr(vao, vbo_textures, 2, 2, GL_FLOAT, 2 * sizeof(GLfloat), (const GLvoid *)(0));
 
     vec3 model_position = {0.0f, 0.0f, -2.0f};
     mat4 model_transform;
@@ -187,12 +208,24 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
     Shader_Bind(shader);
     Shader_Uniform_Mat4(shader, "model", model_transform);
 
-    m.shader = shader;
+    // TEXTURES
+    const char *texture_file_path = "../../res/models/Dog House/Doghouse_PBR_BaseColor.png";
+    struct Texture tex = Texture_Create(texture_file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    m.tex = tex;
 
+    Texture_Uniform(shader, tex, "tex0", 0);
+
+    m.shader = shader;
     VBO_Unbind();
     VAO_Unbind();
 
     fprintf(stderr, "Loading model complete : %s\n", file_path);
 
     return m;
+}
+
+void Model_Free(struct Model model)
+{
+    Shader_Destroy(model.shader);
+    VAO_Destroy(model.vao);
 }
