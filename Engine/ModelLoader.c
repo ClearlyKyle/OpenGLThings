@@ -69,65 +69,6 @@ static void _Print_TinyObj_Info(tinyobj_material_t *material, tinyobj_attrib_t *
     fprintf(stderr, "num_face_num_verts\t: %d (number of 'f' rows)\n", attrib->num_face_num_verts);
 }
 
-static void _Get_Vertex_Indicies(const tinyobj_attrib_t *attrib)
-{
-    // Check if mesh is triangulated
-    const unsigned int triangulated = (unsigned int)ceil((float)attrib->num_faces / (float)attrib->num_face_num_verts);
-    fprintf(stderr, "triangulated = %d\n", triangulated);
-
-    float *vert_indicies = NULL;
-    float *uv_coords = NULL;
-    float *normal_coords = NULL;
-
-    if (triangulated == 3)
-    {
-        // 3 face values
-        fprintf(stderr, "Using 3 face values setup...\n");
-        const unsigned int number_of_f_values = attrib->num_faces / 3;
-        const unsigned int number_of_triangles = number_of_f_values;
-
-        fprintf(stderr, "number_of_f_values  : %d\n", number_of_f_values);
-        fprintf(stderr, "number_of_triangles : %d\n", number_of_triangles);
-
-        vert_indicies = (float *)malloc(sizeof(float) * (number_of_triangles * 3) * 4); // 3 verts per triangle, each with 3 coordinates
-        if (!vert_indicies)
-        {
-            fprintf(stderr, "Error alocating memeory for 'vert_coords'\n");
-            exit(1);
-        }
-        // uv_coords = (float *)malloc(sizeof(float) * (number_of_triangles * 3) * 2);
-        // if (!uv_coords)
-        //{
-        //     fprintf(stderr, "Error alocating memeory for 'vert_coords'\n");
-        //     exit(1);
-        // }
-        // normal_coords = (float *)malloc(sizeof(float) * (number_of_triangles * 3) * 4);
-        // if (!normal_coords)
-        //{
-        //     fprintf(stderr, "Error alocating memeory for 'normal_coords'\n");
-        //     exit(1);
-        // }
-
-        for (size_t i = 0; i < number_of_f_values; i++)
-        {
-            const unsigned int f_vert_index1 = attrib->faces[3 * i + 0].v_idx;
-            const unsigned int f_vert_index2 = attrib->faces[3 * i + 1].v_idx;
-            const unsigned int f_vert_index3 = attrib->faces[3 * i + 2].v_idx;
-
-            // verts
-            vert_indicies[(i * 12) + 0] = attrib->vertices[f_vert_index1 * 3 + 0]; // X
-            vert_indicies[(i * 12) + 1] = attrib->vertices[f_vert_index1 * 3 + 1]; // Y
-            vert_indicies[(i * 12) + 2] = attrib->vertices[f_vert_index1 * 3 + 2]; // Z
-        }
-    }
-    else if (triangulated == 4)
-    {
-    }
-    else
-    {
-        fprintf(stderr, "[_Get_Vertex_Indicies] Some kind of triangulation error!\n");
-    }
-}
 struct Model Model_Import(const char *file_path, const char *vertex_shader_path, const char *fragment_shader_path, size_t number_of_attributes, struct VertexAttribute attributes[])
 {
     struct Model m;
@@ -151,9 +92,15 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
     _Print_TinyObj_Info(material, &attrib);
 
     m.num_indicies = attrib.num_face_num_verts * 3;
+    m.num_of_verticies = m.num_indicies;
 
-    const GLsizeiptr vertex_data_size = sizeof(GLfloat) * ((attrib.num_vertices + attrib.num_normals) * 3);
+    // VERTICIES
+    const GLsizeiptr vertex_data_size = sizeof(GLfloat) * ((m.num_indicies) * 3);
     GLfloat *vertex_data = (GLfloat *)malloc(vertex_data_size);
+
+    // NORMALS
+    const GLsizeiptr normal_data_size = sizeof(GLfloat) * ((m.num_indicies) * 3);
+    GLfloat *normal_data = (GLfloat *)malloc(normal_data_size);
 
     const GLsizeiptr index_data_size = sizeof(unsigned int) * (m.num_indicies);
     unsigned int *index_data = (unsigned int *)malloc(index_data_size);
@@ -161,53 +108,52 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
     for (unsigned int i = 0; i < attrib.num_face_num_verts; i++)
     {
         // f v1/vt1/vn1
+
+        // VERTICIES
         const unsigned int vert_index1 = attrib.faces[3 * i + 0].v_idx;
         const unsigned int vert_index2 = attrib.faces[3 * i + 1].v_idx;
         const unsigned int vert_index3 = attrib.faces[3 * i + 2].v_idx;
-
-        const unsigned int normal_index1 = attrib.faces[3 * i + 0].vn_idx;
-        const unsigned int normal_index2 = attrib.faces[3 * i + 1].vn_idx;
-        const unsigned int normal_index3 = attrib.faces[3 * i + 2].vn_idx;
 
         index_data[3 * i + 0] = vert_index1;
         index_data[3 * i + 1] = vert_index2;
         index_data[3 * i + 2] = vert_index3;
 
-        // first f value
-        vertex_data[(vert_index1 * 6) + 0] = attrib.vertices[vert_index1 * 3 + 0];
-        vertex_data[(vert_index1 * 6) + 1] = attrib.vertices[vert_index1 * 3 + 1];
-        vertex_data[(vert_index1 * 6) + 2] = attrib.vertices[vert_index1 * 3 + 2];
-        vertex_data[(vert_index1 * 6) + 3] = attrib.normals[normal_index1 * 3 + 0];
-        vertex_data[(vert_index1 * 6) + 4] = attrib.normals[normal_index1 * 3 + 1];
-        vertex_data[(vert_index1 * 6) + 5] = attrib.normals[normal_index1 * 3 + 2];
+        vertex_data[(i * 9) + 0] = attrib.vertices[vert_index1 * 3 + 0]; // V1
+        vertex_data[(i * 9) + 1] = attrib.vertices[vert_index1 * 3 + 1];
+        vertex_data[(i * 9) + 2] = attrib.vertices[vert_index1 * 3 + 2];
+        vertex_data[(i * 9) + 3] = attrib.vertices[vert_index2 * 3 + 0]; // V2
+        vertex_data[(i * 9) + 4] = attrib.vertices[vert_index2 * 3 + 1];
+        vertex_data[(i * 9) + 5] = attrib.vertices[vert_index2 * 3 + 2];
+        vertex_data[(i * 9) + 6] = attrib.vertices[vert_index3 * 3 + 0]; // V3
+        vertex_data[(i * 9) + 7] = attrib.vertices[vert_index3 * 3 + 1];
+        vertex_data[(i * 9) + 8] = attrib.vertices[vert_index3 * 3 + 2];
 
-        // second f value
-        vertex_data[(vert_index2 * 6) + 0] = attrib.vertices[vert_index2 * 3 + 0];
-        vertex_data[(vert_index2 * 6) + 1] = attrib.vertices[vert_index2 * 3 + 1];
-        vertex_data[(vert_index2 * 6) + 2] = attrib.vertices[vert_index2 * 3 + 2];
-        vertex_data[(vert_index2 * 6) + 3] = attrib.normals[normal_index2 * 3 + 0];
-        vertex_data[(vert_index2 * 6) + 4] = attrib.normals[normal_index2 * 3 + 1];
-        vertex_data[(vert_index2 * 6) + 5] = attrib.normals[normal_index2 * 3 + 2];
+        // NORMALS
+        const unsigned int normal_index1 = attrib.faces[3 * i + 0].vn_idx;
+        const unsigned int normal_index2 = attrib.faces[3 * i + 1].vn_idx;
+        const unsigned int normal_index3 = attrib.faces[3 * i + 2].vn_idx;
 
-        // third f value
-        vertex_data[(vert_index3 * 6) + 0] = attrib.vertices[vert_index3 * 3 + 0];
-        vertex_data[(vert_index3 * 6) + 1] = attrib.vertices[vert_index3 * 3 + 1];
-        vertex_data[(vert_index3 * 6) + 2] = attrib.vertices[vert_index3 * 3 + 2];
-        vertex_data[(vert_index3 * 6) + 3] = attrib.normals[normal_index3 * 3 + 0];
-        vertex_data[(vert_index3 * 6) + 4] = attrib.normals[normal_index3 * 3 + 1];
-        vertex_data[(vert_index3 * 6) + 5] = attrib.normals[normal_index3 * 3 + 2];
+        normal_data[(i * 9) + 0] = attrib.normals[normal_index1 * 3 + 0];
+        normal_data[(i * 9) + 1] = attrib.normals[normal_index1 * 3 + 1];
+        normal_data[(i * 9) + 2] = attrib.normals[normal_index1 * 3 + 2];
+        normal_data[(i * 9) + 3] = attrib.normals[normal_index2 * 3 + 0];
+        normal_data[(i * 9) + 4] = attrib.normals[normal_index2 * 3 + 1];
+        normal_data[(i * 9) + 5] = attrib.normals[normal_index2 * 3 + 2];
+        normal_data[(i * 9) + 6] = attrib.normals[normal_index3 * 3 + 0];
+        normal_data[(i * 9) + 7] = attrib.normals[normal_index3 * 3 + 1];
+        normal_data[(i * 9) + 8] = attrib.normals[normal_index3 * 3 + 2];
     }
 
-    for (size_t i = 0; i < attrib.num_vertices; i++)
-    {
-        printf("vert  [%lld] {%f, %f, %f} {%f, %f, %f}\n", i, vertex_data[i * 6 + 0], vertex_data[i * 6 + 1], vertex_data[i * 6 + 2],
-               vertex_data[i * 6 + 3], vertex_data[i * 6 + 4], vertex_data[i * 6 + 5]);
-    }
+    // for (size_t i = 0; i < attrib.num_vertices; i++)
+    //{
+    //     printf("vert  [%lld] {%f, %f, %f} {%f, %f, %f}\n", i, vertex_data[i * 6 + 0], vertex_data[i * 6 + 1], vertex_data[i * 6 + 2],
+    //            vertex_data[i * 6 + 3], vertex_data[i * 6 + 4], vertex_data[i * 6 + 5]);
+    // }
 
-    for (size_t i = 0; i < m.num_indicies; i += 1)
-    {
-        printf("index [%lld] {%d}\n", i, index_data[i]);
-    }
+    // for (size_t i = 0; i < m.num_indicies; i += 1)
+    //{
+    //     printf("index [%lld] {%d}\n", i, index_data[i]);
+    // }
 
     // Shader
     struct Shader shader = Shader_Create(
@@ -224,11 +170,15 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
     struct VBO vbo_verticies = VBO_Create(GL_ARRAY_BUFFER);
     VBO_Buffer(vbo_verticies, vertex_data_size, (const GLvoid *)vertex_data);
 
-    struct EBO ebo = EBO_Create();
-    EBO_Buffer(ebo, index_data_size, (const GLvoid *)index_data);
+    struct VBO vbo_normals = VBO_Create(GL_ARRAY_BUFFER);
+    VBO_Buffer(vbo_normals, normal_data_size, (const GLvoid *)normal_data);
 
-    VAO_Attr(vao, vbo_verticies, 0, 3, GL_FLOAT, 6 * sizeof(GLfloat), (const GLvoid *)(0));
-    //VAO_Attr(vao, vbo_verticies, 1, 3, GL_FLOAT, 6 * sizeof(GLfloat), (const GLvoid *)(3 * sizeof(GLfloat)));
+    // struct EBO ebo = EBO_Create();
+    // EBO_Buffer(ebo, index_data_size, (const GLvoid *)index_data);
+
+    VAO_Attr(vao, vbo_verticies, 0, 3, GL_FLOAT, 3 * sizeof(GLfloat), (const GLvoid *)(0));
+    VAO_Attr(vao, vbo_normals, 1, 3, GL_FLOAT, 3 * sizeof(GLfloat), (const GLvoid *)(0));
+    // VAO_Attr(vao, vbo_verticies, 1, 3, GL_FLOAT, 6 * sizeof(GLfloat), (const GLvoid *)(3 * sizeof(GLfloat)));
 
     vec3 model_position = {0.0f, 0.0f, -2.0f};
     mat4 model_transform;
