@@ -27,8 +27,8 @@ void CameraExample_Init()
 
     // Generates Shader object using shaders defualt.vert and default.frag
     struct Shader shader = Shader_Create(
-        "../../shaders/camera_example.vs",
-        "../../shaders/camera_example.fs",
+        "../../Examples/shaders/5/camera_example.vs",
+        "../../Examples/shaders/5/camera_example.fs",
         3,
         (struct VertexAttribute[]){
             {.index = 0, .name = "aPos"},
@@ -55,7 +55,7 @@ void CameraExample_Init()
     VAO_Attr(vao, vbo, 2, 2, GL_FLOAT, 8 * sizeof(GLfloat), (const GLvoid *)(6 * sizeof(GLfloat)));
 
     // Texture
-    const char *file_path = "../../Examples/Textures/brick.png";
+    const char *file_path = "../../Examples/res/textures/brick.png";
     struct Texture tex = Texture_Create(file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     cam_example.tex = tex;
 
