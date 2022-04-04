@@ -1,9 +1,7 @@
 #ifndef __BASICTRAINGLE_H__
 #define __BASICTRAINGLE_H__
 
-#include "util.h"
-
-#include "glad/glad.h"
+#include "Engine.h"
 
 struct BasicTriangle
 {

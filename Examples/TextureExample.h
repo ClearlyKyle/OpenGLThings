@@ -1,7 +1,7 @@
 #ifndef __TEXTUREEXAMPLE_H__
 #define __TEXTUREEXAMPLE_H__
 
-#include "util.h"
+#include "Engine.h"
 
 struct TextureExample
 {

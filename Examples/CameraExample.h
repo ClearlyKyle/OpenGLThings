@@ -1,9 +1,7 @@
 #ifndef __CAMERAEXAMPLE_H__
 #define __CAMERAEXAMPLE_H__
 
-#include "util.h"
-
-#include "glad/glad.h"
+#include "Engine.h"
 
 struct CameraExample
 {

@@ -1,9 +1,7 @@
 #ifndef __BASIC3D_H__
 #define __BASIC3D_H__
 
-#include "util.h"
-
-#include "glad/glad.h"
+#include "Engine.h"
 
 struct Basic3D
 {

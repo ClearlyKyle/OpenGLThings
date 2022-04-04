@@ -1,9 +1,7 @@
 #ifndef __LIGHTINGEXAMPLE_H__
 #define __LIGHTINGEXAMPLE_H__
 
-#include "util.h"
-
-#include "glad/glad.h"
+#include "Engine.h"
 
 struct LightingExample
 {

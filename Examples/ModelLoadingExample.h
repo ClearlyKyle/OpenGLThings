@@ -1,9 +1,7 @@
 #ifndef __MODELLOADINGEXAMPLE_H__
 #define __MODELLOADINGEXAMPLE_H__
 
-#include "util.h"
-
-#include "glad/glad.h"
+#include "Engine.h"
 
 struct ModelLoading
 {

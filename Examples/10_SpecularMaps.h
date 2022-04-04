@@ -1,9 +1,7 @@
 #ifndef __10_SPECULARMAPS_H__
 #define __10_SPECULARMAPS_H__
 
-#include "util.h"
-
-#include "glad/glad.h"
+#include "Engine.h"
 
 struct SpecularMaps
 {
