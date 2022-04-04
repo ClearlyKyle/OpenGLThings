@@ -26,8 +26,8 @@ void ShaderColour_Init()
 
     // Generates Shader object using shaders defualt.vert and default.frag
     struct Shader shader = Shader_Create(
-        "../../shaders/coloured_triangle.vs",
-        "../../shaders/coloured_triangle.fs",
+        "../../Examples/shaders/2/coloured_triangle.vs",
+        "../../Examples/shaders/2/coloured_triangle.fs",
         2, (struct VertexAttribute[]){{.index = 0, .name = "aPos"}, {.index = 1, .name = "aColor"}});
 
     sc.shader = shader;
@@ -53,6 +53,7 @@ void ShaderColour_Init()
     // VBO_Unbind();
     // EBO_Unbind();
 }
+
 static float increment = 0.00001f;
 
 void ShaderColour_Update()
@@ -65,4 +66,10 @@ void ShaderColour_Update()
     VAO_Bind(sc.vao);
 
     glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+}
+
+void ShaderColour_OnExit()
+{
+    VAO_Destroy(sc.vao);
+    Shader_Destroy(sc.shader);
 }

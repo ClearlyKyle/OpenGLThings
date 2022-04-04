@@ -11,5 +11,6 @@ struct ShaderColour
 
 void ShaderColour_Init();
 void ShaderColour_Update();
+void ShaderColour_OnExit();
 
 #endif // __SHADERCOLOUR_H__
