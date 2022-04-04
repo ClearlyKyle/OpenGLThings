@@ -4,6 +4,8 @@
 #include "util.h"
 #include "Inputs.h"
 
+// ALT + R (performace overlay with nvidia)
+
 typedef void (*Windowfunction_ptr)();
 
 struct Window
