@@ -54,6 +54,7 @@ void Window_Init(int width, int height,
 
     // Enables the Depth Buffer
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
     // Use v-sync: (0) - off, (1) - on
     SDL_GL_SetSwapInterval(0);
