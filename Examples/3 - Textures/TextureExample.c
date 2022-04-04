@@ -24,8 +24,8 @@ void TextureExample_Init()
 
     // Generates Shader object using shaders default.vert and default.frag
     struct Shader shader = Shader_Create(
-        "../../shaders/texture_example.vs",
-        "../../shaders/texture_example.fs",
+        "../../Examples/shaders/3/texture_example.vs",
+        "../../Examples/shaders/3/texture_example.fs",
         2, (struct VertexAttribute[]){{.index = 0, .name = "aPos"}, {.index = 1, .name = "aColor"}});
 
     texture_example.shader = shader;
@@ -49,7 +49,7 @@ void TextureExample_Init()
     VAO_Attr(vao, vbo, 2, 2, GL_FLOAT, 8 * sizeof(GLfloat), (const GLvoid *)(6 * sizeof(GLfloat)));
 
     // Texture
-    const char *file_path = "../../Examples/Textures/stone.png";
+    const char *file_path = "../../Examples/res/textures/stone.png";
     struct Texture tex = Texture_Create(file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     texture_example.tex = tex;
 
@@ -79,4 +79,11 @@ void TextureExample_Update()
 
     // Draw primitives, number of indices, datatype of indices, index of indices
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+void TextureExample_OnExit()
+{
+    VAO_Destroy(texture_example.vao);
+    Texture_Delete(texture_example.tex);
+    Shader_Destroy(texture_example.shader);
 }
