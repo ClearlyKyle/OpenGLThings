@@ -1,6 +1,8 @@
 #ifndef __VEC4_H__
 #define __VEC4_H__
 
+#include <math.h>
+
 typedef struct vec4
 {
     float x, y, z, w;
