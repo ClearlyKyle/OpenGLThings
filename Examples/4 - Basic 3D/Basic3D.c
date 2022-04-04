@@ -2,8 +2,6 @@
 
 static struct Basic3D basic3d;
 
-//#include "cglm/simd/sse2/mat4.h"
-
 void Basic3D_Init()
 {
     // Vertices coordinates
@@ -29,8 +27,8 @@ void Basic3D_Init()
 
     // Generates Shader object using shaders default.vert and default.frag
     struct Shader shader = Shader_Create(
-        "../../shaders/basic_3D.vs",
-        "../../shaders/basic_3D.fs",
+        "../../Examples/shaders/4/basic_3D.vs",
+        "../../Examples/shaders/4/basic_3D.fs",
         2, (struct VertexAttribute[]){{.index = 0, .name = "aPos"}, {.index = 1, .name = "aColor"}});
 
     basic3d.shader = shader;
@@ -54,7 +52,7 @@ void Basic3D_Init()
     VAO_Attr(vao, vbo, 2, 2, GL_FLOAT, 8 * sizeof(GLfloat), (const GLvoid *)(6 * sizeof(GLfloat)));
 
     // Texture
-    const char *file_path = "../../Examples/Textures/brick.png";
+    const char *file_path = "../../Examples/res/textures/brick.png";
     struct Texture tex = Texture_Create(file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     basic3d.tex = tex;
 
