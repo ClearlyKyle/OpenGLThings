@@ -50,8 +50,8 @@ void SpecularMaps_Init()
     {
         // Generates Shader object using shaders default.vert and default.frag
         struct Shader shader = Shader_Create(
-            "../../shaders/11/default.vs",
-            "../../shaders/11/default.fs",
+            "../../Examples/shaders/7/default.vs",
+            "../../Examples/shaders/7/default.fs",
             4,
             (struct VertexAttribute[]){
                 {.index = 0, .name = "aPos"},
@@ -87,8 +87,8 @@ void SpecularMaps_Init()
     {
         // Generates Shader object using shaders default.vert and default.frag
         struct Shader shader = Shader_Create(
-            "../../shaders/11/light.vs",
-            "../../shaders/11/light.fs",
+            "../../Examples/shaders/7/lights.vs",
+            "../../Examples/shaders/7/lights.fs",
             1,
             (struct VertexAttribute[]){
                 {.index = 0, .name = "aPos"}});
@@ -135,11 +135,11 @@ void SpecularMaps_Init()
     Shader_Uniform_Vec4(spec_maps.shader[1], "lightColor", light_colour);
 
     //  Texture
-    const char *file_path1 = "../../Examples/Textures/planks.png";
+    const char *file_path1 = "../../Examples/res/textures/planks.png";
     struct Texture tex1 = Texture_Create(file_path1, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
     spec_maps.tex[0] = tex1;
 
-    const char *file_path2 = "../../Examples/Textures/planksSpec.png";
+    const char *file_path2 = "../../Examples/res/textures/planksSpec.png";
     struct Texture tex2 = Texture_Create(file_path2, GL_TEXTURE_2D, 1, GL_RED, GL_UNSIGNED_BYTE);
     spec_maps.tex[1] = tex2;
 
@@ -148,6 +148,8 @@ void SpecularMaps_Init()
 
     // Camera
     struct Camera cam = Camera_Create(window.width, window.heigh, (vec3){-1.880f, 0.509f, -1.031f}, 45.0f, 0.1f, 100.0f);
+    Camera_Set_Orientation(&cam, (vec3){0.85f, -0.17f, 0.48f});
+
     spec_maps.cam = cam;
 }
 
@@ -191,8 +193,8 @@ void SpecularMaps_Update()
     // Draw primitives, number of indices, datatype of indices, index of indices
     glDrawElements(GL_TRIANGLES, spec_maps.numer_of_indicies[1], GL_UNSIGNED_INT, 0);
 
-    // printf("Camera Position : {%0.3ff, %0.3ff, %0.3ff}\n", spec_maps.cam.position[0], spec_maps.cam.position[1], spec_maps.cam.position[2]);
     // glm_vec3_print(spec_maps.cam.orientation, stdout);
+    // glm_vec3_print(spec_maps.cam.position, stdout);
 }
 
 void SpecularMaps_OnExit()

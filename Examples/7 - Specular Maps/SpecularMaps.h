@@ -1,5 +1,5 @@
-#ifndef __10_SPECULARMAPS_H__
-#define __10_SPECULARMAPS_H__
+#ifndef __SPECULARMAPS_H__
+#define __SPECULARMAPS_H__
 
 #include "Engine.h"
 
@@ -16,4 +16,5 @@ struct SpecularMaps
 void SpecularMaps_Init();
 void SpecularMaps_Update();
 void SpecularMaps_OnExit();
-#endif // __10_SPECULARMAPS_H__
+
+#endif // __SPECULARMAPS_H__
