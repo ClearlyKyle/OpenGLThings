@@ -30,6 +30,16 @@ struct Camera Camera_Create(unsigned int width, unsigned int height, vec3 positi
 	return cam;
 }
 
+void Camera_Set_Orientation(struct Camera *camera, vec3 new_orientation)
+{
+	glm_vec3_copy(new_orientation, camera->orientation);
+}
+
+void Camera_Set_Position(struct Camera *camera, vec3 new_position)
+{
+	glm_vec3_copy(new_position, camera->position);
+}
+
 void Camera_View_Projection_To_Shader(struct Camera camera, const struct Shader shader, const char *uniform)
 {
 	// Initializes matrices since otherwise they will be the null matrix
