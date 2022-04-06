@@ -505,6 +505,306 @@ struct Model Model_ASSIMP(const char *path, struct Shader shader)
     return m;
 }
 
+void Model_Load(const char *file_path)
+{
+    // struct Model m;
+
+    //// unistd.h
+    // if( access( file_path, F_OK ) == 0 ) {
+    //     // file exists
+    // } else {
+    //     // file doesn't exist
+    // }
+
+    const struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_Quality);
+
+    // If the import failed, report it
+    if (!scene)
+    {
+        fprintf(stderr, "[MODEL] Error with 'aiImportFile'\n%s\n", aiGetErrorString());
+        return;
+    }
+    // Now we can access the file's contents.
+    fprintf(stderr, "Sucessfil Import of scene : %s\n", file_path);
+
+    fprintf(stderr, "Sucessfil Mesh Made\n");
+}
+
+// int LoadGLTextures(const struct aiScene *scene)
+//{
+//     bool success;
+
+//    /* scan scene's materials for textures */
+//    for (unsigned int m = 0; m < scene->mNumMaterials; ++m)
+//    {
+//        int texIndex = 0;
+//        struct aiString path; // filename
+
+//        // aiReturn texFound = scene->mMaterials[m]->GetTexture(aiTextureType_DIFFUSE, texIndex, &path);
+//        aiReturn texFound = aiGetMaterialTexture(scene->mMaterials[m], aiTextureType_DIFFUSE, texIndex, &path, NULL, NULL, NULL, NULL, NULL, NULL);
+
+//        while (texFound == AI_SUCCESS)
+//        {
+//            // fill map with textures, OpenGL image ids set to 0
+//            textureIdMap[path.data] = 0;
+//            // more textures?
+//            texIndex++;
+//            // texFound = scene->mMaterials[m]->GetTexture(aiTextureType_DIFFUSE, texIndex, &path);
+//            aiReturn texFound = aiGetMaterialTexture(scene->mMaterials[m], aiTextureType_DIFFUSE, texIndex, &path, NULL, NULL, NULL, NULL, NULL, NULL);
+//        }
+//    }
+
+//    int numTextures = textureIdMap.size();
+
+//    /* create and fill array with DevIL texture ids */
+//    ILuint *imageIds = new ILuint[numTextures];
+//    ilGenImages(numTextures, imageIds);
+
+//    /* create and fill array with GL texture ids */
+//    GLuint *textureIds = new GLuint[numTextures];
+//    glGenTextures(numTextures, textureIds); /* Texture name generation */
+
+//    /* get iterator */
+//    std::map<std::string, GLuint>::iterator itr = textureIdMap.begin();
+//    int i = 0;
+//    for (; itr != textureIdMap.end(); ++i, ++itr)
+//    {
+//        // save IL image ID
+//        std::string filename = (*itr).first; // get filename
+//        (*itr).second = textureIds[i];       // save texture id for filename in map
+
+//        ilBindImage(imageIds[i]); /* Binding of DevIL image name */
+//        ilEnable(IL_ORIGIN_SET);
+//        ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+//        success = ilLoadImage((ILstring)filename.c_str());
+
+//        if (success)
+//        {
+//            /* Convert image to RGBA */
+//            ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+
+//            /* Create and load textures to OpenGL */
+//            glBindTexture(GL_TEXTURE_2D, textureIds[i]);
+//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ilGetInteger(IL_IMAGE_WIDTH),
+//                         ilGetInteger(IL_IMAGE_HEIGHT), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+//                         ilGetData());
+//        }
+//        else
+//            printf("Couldn't load Image: %s\n", filename.c_str());
+//    }
+//    /* Because we have already copied image data into texture data
+//    we can release memory used by image. */
+//    ilDeleteImages(numTextures, imageIds);
+
+//    // Cleanup
+//    delete[] imageIds;
+//    delete[] textureIds;
+
+//    // return success;
+//    return true;
+//}
+
+static void _aiColor4D_to_glm_vec4(struct aiColor4D col, vec4 glm_col)
+{
+    glm_col[0] = col.r;
+    glm_col[1] = col.g;
+    glm_col[2] = col.b;
+    glm_col[3] = col.a;
+}
+
+struct Mesh Load_Model_Data(const char *file_path)
+{
+    struct Mesh my_mesh;
+    struct Model model;
+    struct MaterialInfo material_info;
+    // GLuint buffer;
+
+    const struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_Quality);
+
+    // If the import failed, report it
+    if (!scene)
+    {
+        fprintf(stderr, "[MODEL] Error with 'aiImportFile'\n%s\n", aiGetErrorString());
+        exit(1);
+    }
+    // Now we can access the file's contents.
+    fprintf(stderr, "Sucessfil Import of scene : %s\n", file_path);
+
+    // For each mesh
+    my_mesh.num_models = scene->mNumMeshes;
+    my_mesh.models = (struct Model *)malloc(sizeof(struct Model) * scene->mNumMeshes);
+
+    for (unsigned int i = 0; i < scene->mNumMeshes; i++)
+    {
+        const struct aiMesh *mesh = scene->mMeshes[i];
+
+        // Convert Assimp faces format to array format
+        unsigned int *faceArray = (unsigned int *)malloc(sizeof(unsigned int) * mesh->mNumFaces * 3);
+        unsigned int faceIndex = 0;
+
+        for (unsigned int f = 0; f < mesh->mNumFaces; f++)
+        {
+            const struct aiFace *face = &mesh->mFaces[f];
+
+            memcpy(&faceArray[faceIndex], face->mIndices, 3 * sizeof(unsigned int));
+            faceIndex += 3;
+        }
+        model.num_indicies = scene->mMeshes[i]->mNumFaces;
+
+        // generate Vertex Array for mesh
+        struct VAO vao = VAO_Create(); // Bound
+        model.vao = vao;
+
+        // buffer for faces
+        struct EBO ebo_faces = EBO_Create(); // Bound
+        EBO_Buffer(ebo_faces, sizeof(unsigned int) * mesh->mNumFaces * 3, faceArray);
+
+        // buffer for vertex positions
+        if (mesh->mVertices != NULL)
+        {
+            struct VBO verticies = VBO_Create(GL_ARRAY_BUFFER);
+            VBO_Buffer(verticies, sizeof(float) * 3 * mesh->mNumVertices, (const GLvoid *)mesh->mVertices);
+            VAO_Attr(vao, verticies, 0, 3, GL_FLOAT, 3 * sizeof(float), (const GLvoid *)(0));
+        }
+
+        // buffer for vertex normals
+        if (mesh->mNormals != NULL)
+        {
+            struct VBO normals = VBO_Create(GL_ARRAY_BUFFER);
+            VBO_Buffer(normals, sizeof(float) * 3 * mesh->mNumVertices, (const GLvoid *)mesh->mNormals);
+            VAO_Attr(vao, normals, 1, 3, GL_FLOAT, 3 * sizeof(float), (const GLvoid *)(0));
+        }
+
+        // buffer for vertex colours
+        if (mesh->mColors[0] != NULL)
+        {
+            struct VBO colours = VBO_Create(GL_ARRAY_BUFFER);
+            VBO_Buffer(colours, sizeof(float) * 3 * mesh->mNumVertices, (const GLvoid *)mesh->mColors);
+            VAO_Attr(vao, colours, 3, 3, GL_FLOAT, 3 * sizeof(float), (const GLvoid *)(0));
+        }
+
+        // buffer for vertex texture coordinates
+        if (mesh->mTextureCoords[0] != NULL)
+        {
+            float *texCoords = (float *)malloc(sizeof(float) * 2 * mesh->mNumVertices);
+            for (unsigned int k = 0; k < mesh->mNumVertices; ++k)
+            {
+                texCoords[k * 2 + 0] = mesh->mTextureCoords[0][k].x;
+                texCoords[k * 2 + 1] = mesh->mTextureCoords[0][k].y;
+            }
+            struct VBO tex_coordinates = VBO_Create(GL_ARRAY_BUFFER);
+            VBO_Buffer(tex_coordinates, sizeof(float) * 2 * mesh->mNumVertices, (const GLvoid *)texCoords);
+            VAO_Attr(vao, tex_coordinates, 2, 2, GL_FLOAT, 2 * sizeof(float), (const GLvoid *)(0));
+        }
+
+        // unbind buffers
+        VAO_Unbind();
+        VBO_Unbind();
+        // EBO_Unbind();
+
+        // create material uniform buffer
+        struct aiMaterial *mtl = scene->mMaterials[mesh->mMaterialIndex];
+
+        // struct aiString texPath; // contains filename of texture
+        //  if (AI_SUCCESS == mtl->GetTexture(aiTextureType_DIFFUSE, 0, &texPath))
+        //{
+        //      // bind texture
+        //      unsigned int texId = textureIdMap[texPath.data];
+        //      aMesh.texIndex = texId;
+        //      aMat.texCount = 1;
+        //  }
+        //  else
+        //{
+        //      aMat.texCount = 0;
+        //  }
+
+        // AMBIENT
+        struct aiColor4D ambient = {0.2f, 0.2f, 0.2f, 1.0f};
+        if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ambient))
+        {
+            _aiColor4D_to_glm_vec4(ambient, material_info.ambient);
+        }
+
+        // DIFFUSE
+        struct aiColor4D diffuse = {0.8f, 0.8f, 0.8f, 1.0f};
+        if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse))
+        {
+            _aiColor4D_to_glm_vec4(diffuse, material_info.diffuse);
+        }
+
+        // SPECULAR
+        struct aiColor4D specular = {0.0f, 0.0f, 0.0f, 1.0f};
+        if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &specular))
+        {
+            _aiColor4D_to_glm_vec4(specular, material_info.specular);
+        }
+
+        // EMISSION
+        struct aiColor4D emission = {0.0f, 0.0f, 0.0f, 1.0f};
+        if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &emission))
+        {
+            _aiColor4D_to_glm_vec4(emission, material_info.emission);
+        }
+
+        float shininess = 0.0f;
+        unsigned int max;
+        if (AI_SUCCESS == aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &shininess, &max))
+        {
+            material_info.shininess = shininess;
+        }
+
+        struct VBO materials = VBO_Create(GL_UNIFORM_BUFFER);
+        VBO_Buffer(materials, sizeof(struct MaterialInfo), (const GLvoid *)&material_info);
+
+        // glGenBuffers(1, &(aMesh.uniformBlockIndex));
+        // glBindBuffer(GL_UNIFORM_BUFFER, aMesh.uniformBlockIndex);
+        // glBufferData(GL_UNIFORM_BUFFER, sizeof(aMat), (void *)(&aMat), GL_STATIC_DRAW);
+
+        // myMeshes.push_back(aMesh);
+        my_mesh.models[i] = model;
+    }
+
+    return my_mesh;
+}
+
+void Model_Render_Mesh(struct Mesh m, struct Camera cam, struct Shader shader)
+{
+    //// Get node transformation matrix
+    // aiMatrix4x4 m = nd->mTransformation;
+    //// OpenGL matrices are column major
+    // m.Transpose();
+
+    //// save model matrix and apply node transformation
+    // pushMatrix();
+
+    // float aux[16];
+    // memcpy(aux, &m, sizeof(float) * 16);
+    // multMatrix(modelMatrix, aux);
+    // setModelMatrix();
+
+    // draw all meshes assigned to this node
+    for (unsigned int i = 0; i < m.num_models; i++)
+    {
+        // bind material uniform
+        // glBindBufferRange(GL_UNIFORM_BUFFER, materialUniLoc, myMeshes[nd->mMeshes[n]].uniformBlockIndex, 0, sizeof(struct MyMaterial));
+        // bind texture
+        // glBindTexture(GL_TEXTURE_2D, myMeshes[nd->mMeshes[n]].texIndex);
+        // bind VAO
+        VAO_Bind(m.models[i].vao);
+        // draw
+        glDrawElements(GL_TRIANGLES, m.models[i].num_indicies * 3, GL_UNSIGNED_INT, 0);
+    }
+
+    // draw all children
+    // for (unsigned int n = 0; n < nd->mNumChildren; ++n)
+    //{
+    //    recursive_render(sc, nd->mChildren[n]);
+    //}
+    // popMatrix();
+}
+
 void Model_Draw(struct Model model, struct Camera cam)
 {
     Shader_Bind(model.shader);
