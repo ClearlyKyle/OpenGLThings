@@ -16,6 +16,7 @@ struct Window
 
     unsigned int width;
     unsigned int heigh;
+    float aspect_ratio;
 
     Windowfunction_ptr Init;
     Windowfunction_ptr Update;

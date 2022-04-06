@@ -12,6 +12,7 @@ void Window_Init(int width, int height,
     window.Init = init;
     window.Update = update;
     window.OnExit = on_exit;
+    window.aspect_ratio = (float)width / (float)height;
     // window.sdl_event = event;
 
     // initialize sdl
