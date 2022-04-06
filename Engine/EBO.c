@@ -5,6 +5,7 @@ struct EBO EBO_Create()
     struct EBO ebo = {0};
 
     glGenBuffers(1, &ebo.ID);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo.ID);
 
     return ebo;
 }
