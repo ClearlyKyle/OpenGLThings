@@ -8,7 +8,7 @@ struct DepthBuffer
     struct Shader shader;
     struct VAO vao;
     struct Camera cam;
-    struct Model model;
+    struct Mesh model;
 };
 
 void DepthBuffer_Init();
