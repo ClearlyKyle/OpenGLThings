@@ -40,22 +40,27 @@ void Camera_Set_Position(struct Camera *camera, vec3 new_position)
 	glm_vec3_copy(new_position, camera->position);
 }
 
-void Camera_View_Projection_To_Shader(struct Camera camera, const struct Shader shader, const char *uniform)
+void Camera_Get_View_Matrix(struct Camera camera, mat4 view_matrix)
 {
 	// Initializes matrices since otherwise they will be the null matrix
-	mat4 view = GLM_MAT4_ZERO_INIT;
+	// view_matrix = GLM_MAT4_ZERO;
 
 	// Makes camera look in the right direction from the right position
 	vec3 center;
 	glm_vec3_add(camera.position, camera.orientation, center);
 
-	glm_lookat(camera.position, center, camera.up, view);
+	glm_lookat(camera.position, center, camera.up, view_matrix);
+}
 
-	mat4 res;
-	glm_mat4_mul(camera.projection, view, res);
+void Camera_View_Projection_To_Shader(struct Camera camera, const struct Shader shader, const char *uniform)
+{
+	// Initializes matrices since otherwise they will be the null matrix
+	mat4 view = GLM_MAT4_ZERO_INIT;
+
+	Camera_Get_View_Matrix(camera, view);
 
 	// Exports the camera matrix to the Vertex Shader
-	Shader_Uniform_Mat4(shader, uniform, res);
+	Shader_Uniform_Mat4(shader, uniform, view);
 }
 
 void Camera_Inputs(struct Camera *camera)

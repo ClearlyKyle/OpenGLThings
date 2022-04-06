@@ -36,6 +36,7 @@ struct Camera
 struct Camera Camera_Create(unsigned int width, unsigned int height, vec3 position, float FOV_deg, float near_plane, float far_plane);
 void Camera_View_Projection_To_Shader(struct Camera camera, const struct Shader shader, const char *uniform);
 
+void Camera_Get_View_Matrix(struct Camera camera, mat4 view_matrix);
 void Camera_Set_Orientation(struct Camera *camera, vec3 new_orientation);
 void Camera_Set_Position(struct Camera *camera, vec3 new_position);
 
