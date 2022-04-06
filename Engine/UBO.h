@@ -10,9 +10,9 @@ struct UBO
     GLuint ID;
 };
 
-struct UBO UBO_Create(GLuint index);
+struct UBO UBO_Create(GLuint index, GLintptr offset, GLsizeiptr size);
 
-void UBO_Bind_Shader(struct UBO ubo, struct Shader shader, GLuint uniformBlockBinding, const char *uniformBlockName);
+void UBO_Link_Shader(struct Shader shader, GLuint uniformBlockBinding, const char *uniformBlockName);
 void UBO_Data(struct UBO ubo, GLintptr offset, GLsizeiptr size, const void *data);
 
 void UBO_Unbind();
