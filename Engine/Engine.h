@@ -3,6 +3,7 @@
 
 #include "VAO.h"
 #include "VBO.h"
+#include "UBO.h"
 #include "Shaders.h"
 #include "Textures.h"
 #include "ModelLoader.h"
