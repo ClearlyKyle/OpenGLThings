@@ -5,8 +5,6 @@
 
 struct DepthBuffer
 {
-    struct Shader shader;
-    struct VAO vao;
     struct Camera cam;
     struct Mesh model;
 };
