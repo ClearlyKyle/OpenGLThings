@@ -619,7 +619,7 @@ struct Mesh Load_Model_Data(const char *file_path)
     struct Mesh my_mesh;
     struct Model model;
     struct MaterialInfo material_info;
-    // GLuint buffer;
+    //  GLuint buffer;
 
     const struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_Quality);
 
@@ -635,6 +635,9 @@ struct Mesh Load_Model_Data(const char *file_path)
     // For each mesh
     my_mesh.num_models = scene->mNumMeshes;
     my_mesh.models = (struct Model *)malloc(sizeof(struct Model) * scene->mNumMeshes);
+
+    my_mesh.material_ubo_index = 0;
+    my_mesh.ubo_size = sizeof(struct MaterialInfo);
 
     for (unsigned int i = 0; i < scene->mNumMeshes; i++)
     {
@@ -702,7 +705,6 @@ struct Mesh Load_Model_Data(const char *file_path)
         // unbind buffers
         VAO_Unbind();
         VBO_Unbind();
-        // EBO_Unbind();
 
         // create material uniform buffer
         struct aiMaterial *mtl = scene->mMaterials[mesh->mMaterialIndex];
@@ -757,52 +759,46 @@ struct Mesh Load_Model_Data(const char *file_path)
 
         struct VBO materials = VBO_Create(GL_UNIFORM_BUFFER);
         VBO_Buffer(materials, sizeof(struct MaterialInfo), (const GLvoid *)&material_info);
+        model.material_vbo = materials;
 
-        // glGenBuffers(1, &(aMesh.uniformBlockIndex));
-        // glBindBuffer(GL_UNIFORM_BUFFER, aMesh.uniformBlockIndex);
-        // glBufferData(GL_UNIFORM_BUFFER, sizeof(aMat), (void *)(&aMat), GL_STATIC_DRAW);
+        // glGenBuffers(1, &(model.material_vbo.ID));
+        // glBindBuffer(GL_UNIFORM_BUFFER, model.material_vbo.ID);
+        // glBufferData(GL_UNIFORM_BUFFER, sizeof(struct MaterialInfo), (void *)(&material_info), GL_STATIC_DRAW);
 
         // myMeshes.push_back(aMesh);
+        model.material_info = material_info;
         my_mesh.models[i] = model;
     }
 
     return my_mesh;
 }
 
-void Model_Render_Mesh(struct Mesh m, struct Camera cam, struct Shader shader)
+void Model_Render_Mesh(struct Mesh m, struct Camera cam)
 {
-    //// Get node transformation matrix
-    // aiMatrix4x4 m = nd->mTransformation;
-    //// OpenGL matrices are column major
-    // m.Transpose();
+    Shader_Bind(m.shader);
 
-    //// save model matrix and apply node transformation
-    // pushMatrix();
+    Shader_Uniform_Vec3(m.shader, "camPos", cam.position);
+    Camera_View_Projection_To_Shader(cam, m.shader, "camMatrix");
 
-    // float aux[16];
-    // memcpy(aux, &m, sizeof(float) * 16);
-    // multMatrix(modelMatrix, aux);
-    // setModelMatrix();
+    vec3 model_position = {0.0f, 0.0f, -2.0f};
+    mat4 model_transform;
+    glm_translate_make(model_transform, model_position);
 
-    // draw all meshes assigned to this node
+    Shader_Uniform_Mat4(m.shader, "model", model_transform);
+
     for (unsigned int i = 0; i < m.num_models; i++)
     {
         // bind material uniform
-        // glBindBufferRange(GL_UNIFORM_BUFFER, materialUniLoc, myMeshes[nd->mMeshes[n]].uniformBlockIndex, 0, sizeof(struct MyMaterial));
-        // bind texture
-        // glBindTexture(GL_TEXTURE_2D, myMeshes[nd->mMeshes[n]].texIndex);
+        // glBindBufferRange(GL_UNIFORM_BUFFER, m.models[i].material_vbo.ID, m.material_ubo_index, 0, m.ubo_size);
+        UBO_Bind_Buffer_To_Index(m.models[i].material_vbo.ID, m.material_ubo_index, 0, m.ubo_size);
+        //  bind texture
+        //  glBindTexture(GL_TEXTURE_2D, myMeshes[nd->mMeshes[n]].texIndex);
+
         // bind VAO
         VAO_Bind(m.models[i].vao);
         // draw
         glDrawElements(GL_TRIANGLES, m.models[i].num_indicies * 3, GL_UNSIGNED_INT, 0);
     }
-
-    // draw all children
-    // for (unsigned int n = 0; n < nd->mNumChildren; ++n)
-    //{
-    //    recursive_render(sc, nd->mChildren[n]);
-    //}
-    // popMatrix();
 }
 
 void Model_Draw(struct Model model, struct Camera cam)
