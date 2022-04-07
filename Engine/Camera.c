@@ -55,12 +55,15 @@ void Camera_Get_View_Matrix(struct Camera camera, mat4 view_matrix)
 void Camera_View_Projection_To_Shader(struct Camera camera, const struct Shader shader, const char *uniform)
 {
 	// Initializes matrices since otherwise they will be the null matrix
-	mat4 view = GLM_MAT4_ZERO_INIT;
+	mat4 view_matrix;
 
-	Camera_Get_View_Matrix(camera, view);
+	Camera_Get_View_Matrix(camera, view_matrix);
+
+	mat4 projection_matrix;
+	glm_mat4_mul(camera.projection, view_matrix, projection_matrix);
 
 	// Exports the camera matrix to the Vertex Shader
-	Shader_Uniform_Mat4(shader, uniform, view);
+	Shader_Uniform_Mat4(shader, uniform, projection_matrix);
 }
 
 void Camera_Inputs(struct Camera *camera)
