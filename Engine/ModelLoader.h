@@ -45,6 +45,6 @@ void Model_Draw(struct Model model, struct Camera cam);
 void Model_Free(struct Model model);
 
 struct Mesh Load_Model_Data(const char *file_path);
-void Model_Render_Mesh(struct Mesh m, struct Camera cam, struct Shader shader);
+void Mesh_Free(struct Mesh mesh);
 
 #endif // __MODELLOADER_H__

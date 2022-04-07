@@ -847,3 +847,18 @@ void Model_Free(struct Model model)
     Shader_Destroy(model.shader);
     VAO_Destroy(model.vao);
 }
+
+void Mesh_Free(struct Mesh mesh)
+{
+    for (unsigned int i = 0; i < mesh.num_models; i++)
+    {
+        VAO_Destroy(mesh.models[i].vao);
+        // Shader_Destroy(mesh.models[i].shader);
+        Texture_Delete(mesh.models[i].tex);
+    }
+
+    Shader_Destroy(mesh.shader);
+
+    free(mesh.models);
+    mesh.models = NULL;
+}
