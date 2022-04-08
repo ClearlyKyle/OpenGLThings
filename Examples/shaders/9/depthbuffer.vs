@@ -1,31 +1,27 @@
 #version 330 core
 
-// Positions/Coordinates
+// FROM Attrib Arrays
 layout(location = 0) in vec3 aPos;
-// Normals (not necessarily normalized)
 layout(location = 1) in vec3 aNormal;
-// Texture Coordinates
 layout(location = 2) in vec2 aTex;
-// Colors
 layout(location = 3) in vec3 aColour;
 
-// Outputs the current position for the Fragment Shader
-out vec3 crntPos;
-out vec3 fColour;
-// Outputs the normal for the Fragment Shader
-// out vec3 Normal;
-// Outputs the color for the Fragment Shader
-// out vec3 color;
-// Outputs the texture coordinates to the Fragment Shader
-// out vec2 texCoord;
-
-// Imports the camera matrix
+// UNIFORMS
 uniform mat4 camMatrix;
-// Imports the transformation matrices
 uniform mat4 model;
-// uniform mat4 translation;
-// uniform mat4 rotation;
-// uniform mat4 scale;
+
+layout(std140) uniform Matrices {
+  vec4 ambient;
+  vec4 diffuse;
+  vec4 specular;
+  vec4 emission;
+  float shininess;
+};
+
+// OUTPUTS to Fragment Shader
+out vec4 fAmbient;
+out vec4 fDiffuse;
+out vec2 fTexCoords;
 
 void main() {
   // calculates current position
@@ -39,7 +35,10 @@ void main() {
   // Assigns the texture coordinates from the Vertex Data to "texCoord"
   // texCoord = mat2(0.0, -1.0, 1.0, 0.0) * aTex;
 
-  fColour = aColour;
+  // fColour = aColour;
 
-  // Outputs the positions/coordinates of all vertices
+  // OUTPUT to Fragment Shader
+  fAmbient = ambient;
+  fDiffuse = diffuse;
+  fTexCoords = aTex;
 }

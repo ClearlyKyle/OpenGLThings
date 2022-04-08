@@ -1,24 +1,16 @@
 #version 330 core
-
-// Outputs colors in RGBA
 out vec4 FragColor;
 
-// Imports the current position from the Vertex Shader
-//in vec3 crntPos;
-// Imports the normal from the Vertex Shader
-//in vec3 Normal;
-// Imports the color from the Vertex Shader
-in vec3 fColour;
-// Imports the texture coordinates from the Vertex Shader
-//in vec2 texCoord;
+// INPUTS from Vertex Shader
+in vec4 fAmbient;
+in vec4 fDiffuse;
+in vec2 fTexCoords;
 
-
+// TEXTURE DATA
+uniform sampler2D diffuseTex;
 
 void main() {
-  // outputs final color
-  // float depth = logisticDepth(gl_FragCoord.z);
-  // FragColor = direcLight() * (1.0f - depth) +
-  //            vec4(depth * vec3(0.85f, 0.85f, 0.90f), 1.0f);
-
-  FragColor = vec4(fColour, 1.0f);
+  //  FragColor = vec4(1.0, 1.0, 0.0, 1.0);
+  // FragColor = fDiffuse;
+  FragColor = texture(diffuseTex, fTexCoords);
 }
