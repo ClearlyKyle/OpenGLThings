@@ -2,6 +2,8 @@
 
 struct UBO UBO_Create(GLuint index, GLintptr offset, GLsizeiptr size)
 {
+    assert(index < GL_MAX_UNIFORM_BUFFER_BINDINGS);
+
     struct UBO ubo;
 
     glGenBuffers(1, &ubo.ID);
@@ -10,14 +12,21 @@ struct UBO UBO_Create(GLuint index, GLintptr offset, GLsizeiptr size)
     glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+    return ubo;
+}
+
+void UBO_Bind_Buffer_To_Index(GLuint ubo_ID, GLuint index, GLintptr offset, GLsizeiptr size)
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo_ID);
+
     // bind a buffer object to an indexed buffer target
-    // glBindBufferBase(GL_UNIFORM_BUFFER, index, ubo.ID);
+    // glBindBufferBase(GL_UNIFORM_BUFFER, index, ubo_ID);
     // or
     // GLintptr offset; // offset into this uniform, is all then start from 0
     // GLsizeiptr size; // size of data in uniform : 2 * sizeof(glm::mat4)
-    glBindBufferRange(GL_UNIFORM_BUFFER, index, ubo.ID, offset, size);
+    glBindBufferRange(GL_UNIFORM_BUFFER, index, ubo_ID, offset, size);
 
-    return ubo;
+    UBO_Unbind(); // Unbind
 }
 
 // Binds a shader to a UBO block

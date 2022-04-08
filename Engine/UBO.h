@@ -12,6 +12,7 @@ struct UBO
 
 struct UBO UBO_Create(GLuint index, GLintptr offset, GLsizeiptr size);
 
+void UBO_Bind_Buffer_To_Index(GLuint ubo_ID, GLuint index, GLintptr offset, GLsizeiptr size);
 void UBO_Link_Shader(struct Shader shader, GLuint uniformBlockBinding, const char *uniformBlockName);
 void UBO_Data(struct UBO ubo, GLintptr offset, GLsizeiptr size, const void *data);
 

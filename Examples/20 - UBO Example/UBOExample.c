@@ -146,6 +146,7 @@ void UBOExample_Init()
 
     // Create the UBO Buffer
     struct UBO ubo = UBO_Create(0, 0, 2 * sizeof(mat4));
+    UBO_Bind_Buffer_To_Index(ubo.ID, 0, 0, 2 * sizeof(mat4));
     uboexample.ubo = ubo;
 
     // store the projection matrix (we only do this once now)
