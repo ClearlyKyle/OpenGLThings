@@ -21,4 +21,12 @@
 // SDL2
 #include "SDL2/SDL.h"
 
+// MACROS
+#define assert__(x) for (; !(x); assert(x))
+#define assert_message(x, str)  \
+    for (; !(x); assert(x))     \
+    {                           \
+        fprintf(stderr, (str)); \
+    }
+
 #endif // __UTIL2_H__
