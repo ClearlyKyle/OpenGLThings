@@ -9,6 +9,11 @@
 #include "Shaders.h"
 #include "Camera.h"
 
+/* assimp include files. These three are usually needed. */
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 struct MaterialInfo
 {
     vec4 ambient;
@@ -42,6 +47,11 @@ struct Mesh
 
     GLuint material_ubo_index;
     GLsizeiptr ubo_size;
+
+    unsigned int tex_count;
+    struct Texture *textures;
+    struct aiString *texture_names;
+    char *tex_names[32]; // array of pointers
 };
 
 struct Model Model_Import(const char *file_path, const char *vertex_shader_path, const char *fragment_shader_path, size_t n, struct VertexAttribute attributes[]);
