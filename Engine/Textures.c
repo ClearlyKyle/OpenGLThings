@@ -18,7 +18,12 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
 
     // Reads the image from a file and stores it in bytes
     unsigned char *image_bytes = stbi_load(path, &image_width, &image_height, &image_bpp, STBI_rgb_alpha);
-    assert(image_bytes != NULL);
+    if (image_bytes == NULL)
+    {
+        fprintf(stderr, "[ERROR] (stbi_load) : %s\n", path);
+        exit(1);
+    }
+    // assert_message(image_bytes != NULL, ("Error with image path :  %s\n", path));F
 
     // Generates an OpenGL texture object
     glGenTextures(1, &t.ID);

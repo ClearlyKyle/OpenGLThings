@@ -2,38 +2,48 @@
 
 #define BUFFER_SIZE 512
 
-#define assert__(x) for (; !(x); assert(x))
-
-static void _Validate_Shader(GLuint shader, const char *file)
+static void _Validate_Shader(GLuint handle, const char *file)
 {
-    char buffer[BUFFER_SIZE];
-    GLsizei length = 0;
+    // Check link status
+    GLint compiled = 0;
+    glGetShaderiv(handle, GL_COMPILE_STATUS, &compiled);
 
-    glGetShaderInfoLog(shader, BUFFER_SIZE, &length, buffer);
-
-    if (length > 0)
+    if (compiled == GL_FALSE)
     {
-        printf("Shader %d(%s) compile error: %s\n", shader, (file ? file : ""), buffer);
+        // char buf[512];
+        //  snprintf(buf, 512, "[%s, %s]", vertex_shader_path, fragment_shader_path);
+
+        GLint loglen;
+        glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &loglen);
+
+        char *logtext = (char *)calloc(1, loglen);
+        glGetShaderInfoLog(handle, loglen, NULL, logtext);
+        glDeleteShader(handle);
+
+        fprintf(stderr, "[Shader %s error] %s\n%s\n", "COMPILE", file, logtext);
+
+        exit(1);
     }
 }
 
-static void _Validate_Program(struct Shader shader, const char *vertex_shader_path, const char *fragment_shader_path)
+static void _Validate_Program(struct Shader shader, GLenum status, const char *vertex_shader_path, const char *fragment_shader_path)
 {
     // Check link status
     GLint linked = 0;
-    glGetProgramiv(shader.shader_id, GL_LINK_STATUS, &linked);
+    glGetProgramiv(shader.shader_id, status, &linked);
 
     if (linked == GL_FALSE)
     {
         char buf[512];
-        // snprintf(buf, 512, "[%s, %s]", vertex_shader_path, fragment_shader_path);
+        snprintf(buf, 512, "(%s, %s)", vertex_shader_path, fragment_shader_path);
 
         GLint loglen;
         glGetProgramiv(shader.shader_id, GL_INFO_LOG_LENGTH, &loglen);
 
         char *logtext = (char *)calloc(1, loglen);
         glGetProgramInfoLog(shader.shader_id, loglen, NULL, logtext);
-        fprintf(stderr, "[Shader Program Error] %s shader at %s:\n%s", "linking", buf, logtext);
+
+        fprintf(stderr, "[Shader %s error] %s\n%s\n", "COMPILE", buf, logtext);
 
         Shader_Destroy(shader);
 
@@ -77,17 +87,7 @@ static GLint _Compile_Shader(const char *path, GLenum type)
     glShaderSource(handle, 1, (const GLchar *const *)&file_text, (const GLint *)&len);
     glCompileShader(handle);
 
-    GLint compiled;
-    glGetShaderiv(handle, GL_COMPILE_STATUS, &compiled);
-
-    // Check OpenGL logs if compilation failed
-    if (compiled == 0)
-    {
-        // TODO : Get this error message
-        printf("Error with compiling!");
-        free(file_text);
-        exit(1);
-    }
+    _Validate_Shader(handle, path);
 
     free(file_text);
     return handle;
@@ -128,7 +128,6 @@ struct Shader Shader_Create(const char *vertex_shader_path, const char *fragment
     shader.fs_handle = _Compile_Shader(fragment_shader_path, GL_FRAGMENT_SHADER);
     shader.shader_id = glCreateProgram();
 
-    _Validate_Shader(shader.vs_handle, vertex_shader_path);
     _Validate_Shader(shader.fs_handle, fragment_shader_path);
 
     // Link shader program
@@ -146,7 +145,7 @@ struct Shader Shader_Create(const char *vertex_shader_path, const char *fragment
 
     glLinkProgram(shader.shader_id);
 
-    _Validate_Program(shader, vertex_shader_path, fragment_shader_path);
+    _Validate_Program(shader, GL_LINK_STATUS, vertex_shader_path, fragment_shader_path);
 
     //_Get_Active_Uniforms(shader);
 
@@ -170,6 +169,9 @@ void Shader_Bind(const struct Shader shader)
 {
     glUseProgram(shader.shader_id);
 }
+
+// ------------------------------------------------------------------------------------------------
+// UNIFORMS
 
 void Shader_Uniform_Float(struct Shader shader, const char *name, float f)
 {
@@ -197,7 +199,12 @@ void Shader_Uniform_Texture2D(struct Shader shader, char *name, const struct Tex
 {
     glActiveTexture(GL_TEXTURE0 + n);
     Texture_Bind(texture);
-    glUniform1i(glGetUniformLocation(shader.shader_id, (const GLchar *)name), n);
+
+    const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
+    if (location < 0)
+        fprintf(stderr, "Shader_Uniform_Texture2D might have an error =D\n");
+    else
+        glUniform1i(location, n);
 }
 
 // Move this to Shder file?
