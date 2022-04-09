@@ -23,18 +23,16 @@
 
 // MACROS
 #if _MSC_VER
-#define _colour_RED "\33[31m"
-#define _colour_GREEN "\33[32m"
-#define _colour_YELLOW "\33[33m"
-#define _colour_WHITE "\33[1m"
-#define _colour_COLOUR_X "\33[m" // Resets the colour
+#define E_THINGY "\33"
 #else
-#define _colour_RED "\e[31m"
-#define _colour_GREEN "\e[32m"
-#define _colour_YELLOW "\e[33m"
-#define _colour_WHITE "\e[1m"
-#define _colour_COLOUR_X "\e[m" // Resets the colour
+#define E_THINGY "\e
 #endif
+
+#define _colour_RED E_THINGY "[31m"
+#define _colour_GREEN E_THINGY "[32m"
+#define _colour_YELLOW E_THINGY "[33m"
+#define _colour_WHITE E_THINGY "[1m"
+#define _colour_COLOUR_X E_THINGY "[m" // Resets the colour
 
 // Need to add '\n' to the end of the message you want to log
 #define __clean_errno() (errno == 0 ? "None" : strerror(errno))
