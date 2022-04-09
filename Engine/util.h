@@ -22,11 +22,43 @@
 #include "SDL2/SDL.h"
 
 // MACROS
-#define assert__(x) for (; !(x); assert(x))
-#define assert_message(x, str)  \
-    for (; !(x); assert(x))     \
-    {                           \
-        fprintf(stderr, (str)); \
+#if _MSC_VER
+#define _colour_RED "\33[31m"
+#define _colour_GREEN "\33[32m"
+#define _colour_YELLOW "\33[33m"
+#define _colour_WHITE "\33[1m"
+#define _colour_COLOUR_X "\33[m" // Resets the colour
+#else
+#define _colour_RED "\e[31m"
+#define _colour_GREEN "\e[32m"
+#define _colour_YELLOW "\e[33m"
+#define _colour_WHITE "\e[1m"
+#define _colour_COLOUR_X "\e[m" // Resets the colour
+#endif
+
+// Need to add '\n' to the end of the message you want to log
+#define __clean_errno() (errno == 0 ? "None" : strerror(errno))
+
+// TODO : Toggle messaging levels (error only, error + warn, all)
+#define log_error(M, ...) fprintf(stderr, _colour_RED "= ERROR =" _colour_COLOUR_X " (%s:%d: %s) " M, __FILE__, __LINE__, __clean_errno(), ##__VA_ARGS__)
+#define log_warn(M, ...) fprintf(stderr, _colour_YELLOW "= WARN ==" _colour_COLOUR_X " (%s:%d:%s: %s) " M, __FILE__, __LINE__, __func__, __clean_errno(), ##__VA_ARGS__)
+#define log_msg(M, ...) fprintf(stderr, _colour_WHITE "= LOG === " _colour_COLOUR_X M "\n", ##__VA_ARGS__)
+
+//#define log_error(M, ...) fprintf(stderr, RED "[ERROR]" COLOUR_X "(%s:%d: %s) " M, __FILE__, __LINE__, __clean_errno(), __VA_OPT__(, ) __VA_ARGS__)
+//#define log_warn(M, ...) fprintf(stderr, YELLOW "[WARN]" COLOUR_X " (%s:%d:%sЖ %s) " M, __FILE__, __LINE__, __func__, __clean_errno(), __VA_OPT__(, ) __VA_ARGS__)
+//#define log_msg(M, ...) fprintf(stderr, WHITE "[LOG]" COLOUR_X M "\n" __VA_OPT__(, ) __VA_ARGS__)
+
+#define assert_msg(A, M, ...)        \
+    if (!(A))                        \
+    {                                \
+        log_error(M, ##__VA_ARGS__); \
+        assert(A);                   \
+    }
+
+#define check_that(A, M, ...)        \
+    if (!(A))                        \
+    {                                \
+        log_error(M, ##__VA_ARGS__); \
     }
 
 #endif // __UTIL2_H__
