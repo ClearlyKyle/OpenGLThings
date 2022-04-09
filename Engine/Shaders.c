@@ -64,21 +64,15 @@ static GLint _Compile_Shader(const char *path, GLenum type)
     // Get length of file
     fseek(f, 0, SEEK_END);
     const long len = ftell(f);
-    assert__(len > 0)
-    {
-        fprintf(stderr, "File length needs to be greater than 0!\n");
-    };
+    check_that(len > 0, "File length needs to be greater than 0!\n");
 
     // Get text from file
     fseek(f, 0, SEEK_SET);
     char *file_text = calloc(1, len);
-    assert__(file_text != NULL)
-    {
-        fprintf(stderr, "Error loading text from file : %s\n", path);
-    };
+    check_that(file_text != NULL, "Error loading text from file : %s\n", path);
 
     fread(file_text, 1, len, f);
-    assert__(strlen(file_text) > 0);
+    check_that(strlen(file_text) > 0, "file_text len failed\n");
 
     // CLOSE file pointer
     fclose(f);
