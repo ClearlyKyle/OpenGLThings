@@ -579,17 +579,19 @@ void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh)
 
     mesh->textures = (struct Texture *)malloc(sizeof(struct Texture) * mesh->tex_count);
 
-    for (size_t i = 0; i <= mesh->tex_count; i++)
+    char base_file_path[] = "../../Examples/res/models/Dog House/";
+    for (size_t i = 0; i <= mesh->tex_count - 1; i++)
     {
         // TODO : Better pathing
-        char base_file_path[] = "../../Examples/res/models/Dog House/";
-        strcat(base_file_path, mesh->tex_names[i]);
+        char buff[256];
+        sprintf(buff, "%s%s", base_file_path, mesh->tex_names[i]);
+        // strcat(base_file_path, mesh->tex_names[i]);
 
-        struct Texture tex = Texture_Create(base_file_path, GL_TEXTURE_2D, (GLuint)i, GL_RGBA, GL_UNSIGNED_BYTE);
+        struct Texture tex = Texture_Create(buff, GL_TEXTURE_2D, (GLuint)i, GL_RGBA, GL_UNSIGNED_BYTE);
         // tex.type = AMBIENT;
         mesh->textures[i] = tex;
 
-        fprintf(stderr, "[bound %lld] %s\n", i, base_file_path);
+        fprintf(stderr, "[bound %lld] %s\n", i, buff);
     }
 
     // TODO : Cleanup
