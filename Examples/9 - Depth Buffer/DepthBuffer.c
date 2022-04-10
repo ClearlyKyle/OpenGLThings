@@ -14,18 +14,18 @@ void DepthBuffer_Init()
             {.index = 2, .name = "aTex"},
             {.index = 3, .name = "aColour"}});
 
-    // vec4 light_colour = {1.0f, 1.0f, 1.0f, 1.0f};
-    // vec3 light_position = {0.5f, 0.5f, 0.5f};
-    // mat4 light_model;
-    // glm_translate_make(light_model, light_position);
+    vec4 light_colour = {1.0f, 1.0f, 1.0f, 1.0f};
+    vec3 light_position = {0.5f, 0.5f, 0.5f};
+    mat4 light_model;
+    glm_translate_make(light_model, light_position);
 
-    // Shader_Bind(shader);
-    // Shader_Uniform_Vec4(shader, "lightColor", light_colour);
-    // Shader_Uniform_Vec3(shader, "lightPos", light_position);
+    Shader_Bind(shader);
+    Shader_Uniform_Vec4(shader, "lightColor", light_colour);
+    Shader_Uniform_Vec3(shader, "lightPos", light_position);
 
     // struct Mesh mesh = Load_Model_Data("../../Examples/res/models/Wooden Box/wooden crate.obj");
-    struct Mesh mesh = Load_Model_Data("../../Examples/res/models/Dog House/DogHouse.obj");
-    // struct Mesh mesh = Load_Model_Data("../../Examples/res/models/Low Poly Scene/Low-Poly_Models.obj");
+    //  struct Mesh mesh = Load_Model_Data("../../Examples/res/models/Dog House/DogHouse.obj");
+    struct Mesh mesh = Load_Model_Data("../../Examples/res/models/Low Poly Scene/Low-Poly_Models.obj");
     mesh.shader = shader;
     dbuffer.model = mesh;
 
