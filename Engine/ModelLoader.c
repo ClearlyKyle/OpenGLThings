@@ -1,5 +1,7 @@
 #include "ModelLoader.h"
 
+#include "assimp_material.h"
+
 // TINY OBJ
 #define TINYOBJ_LOADER_C_IMPLEMENTATION
 #include "tinyobj/tinyobj_loader_c.h"
@@ -530,28 +532,31 @@ static int Find_Texture_Index(const struct Mesh *mesh)
     return 0;
 }
 
-void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh)
+void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh, const char *base_folder_path)
 {
     /* scan scene's materials for textures */
 
     mesh->tex_count = 0;
     for (unsigned int i = 0; i < scene->mNumMaterials; i++)
     {
-        unsigned int tex_count = aiGetMaterialTextureCount(scene->mMaterials[i], aiTextureType_DIFFUSE);
+        // unsigned int tex_count = aiGetMaterialTextureCount(scene->mMaterials[i], aiTextureType_DIFFUSE);
 
-        if (tex_count == 0)
-            continue;
+        // if (tex_count == 0)
+        //     continue;
 
         struct aiString path; // filename
         // struct Texture tex;
 
+        // fprintf(stderr, "Searching for all texture files...\n");
         for (int texture_type = 0; texture_type <= aiTextureType_UNKNOWN; texture_type++)
         {
             int texIndex = 0;
             while (aiGetMaterialTexture(scene->mMaterials[i], texture_type, texIndex, &path, NULL, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
             {
                 texIndex++;
-                fprintf(stderr, "(i = %d) (type = %d) aiGetMaterialTexture [%d]: %s\n", i, texture_type, texIndex, path.data);
+
+                const char *texture_type_str = TextureTypeToString(texture_type);
+                fprintf(stderr, "(i = %d)(texIndex : %d)(type = %s) aiGetMaterialTexture [%d]: %s\n", i, texIndex, texture_type_str, texIndex, path.data);
 
                 // TODO : Search for texture function?
                 bool save_this_path = true;
@@ -579,12 +584,11 @@ void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh)
 
     mesh->textures = (struct Texture *)malloc(sizeof(struct Texture) * mesh->tex_count);
 
-    char base_file_path[] = "../../Examples/res/models/Dog House/";
     for (size_t i = 0; i <= mesh->tex_count - 1; i++)
     {
         // TODO : Better pathing
         char buff[256];
-        sprintf(buff, "%s%s", base_file_path, mesh->tex_names[i]);
+        sprintf(buff, "%s%s", base_folder_path, mesh->tex_names[i]);
         // strcat(base_file_path, mesh->tex_names[i]);
 
         struct Texture tex = Texture_Create(buff, GL_TEXTURE_2D, (GLuint)i, GL_RGBA, GL_UNSIGNED_BYTE);
@@ -606,11 +610,24 @@ static void _aiColor4D_to_glm_vec4(struct aiColor4D col, vec4 glm_col)
     glm_col[3] = col.a;
 }
 
+static void _Get_Path_To_File(const char *full_path, char *path_to_file, char sperator)
+{
+    char *last = strrchr(full_path, sperator);
+    const size_t full_path_len = strlen(full_path);
+
+    if (last != NULL)
+    {
+        const size_t parentLen = full_path_len - strlen(last + 1);
+        strncpy(path_to_file, full_path, parentLen);
+        path_to_file[parentLen] = '\0';
+    }
+}
+
 struct Mesh Load_Model_Data(const char *file_path)
 {
     struct Mesh my_mesh;
     struct Model model;
-    struct MaterialInfo material_info;
+
     //  GLuint buffer;
 
     const struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_Quality);
@@ -623,7 +640,10 @@ struct Mesh Load_Model_Data(const char *file_path)
     // Now we can access the file's contents.
     fprintf(stderr, "Sucessfil Import of scene : %s\n", file_path);
 
-    _Load_Textures(scene, &my_mesh);
+    char base_folder_path[256];
+    _Get_Path_To_File(file_path, base_folder_path, '/');
+    printf("base_folder_path : %s\n", base_folder_path);
+    _Load_Textures(scene, &my_mesh, base_folder_path);
 
     // For each mesh
     my_mesh.num_models = scene->mNumMeshes;
@@ -634,6 +654,8 @@ struct Mesh Load_Model_Data(const char *file_path)
 
     for (unsigned int i = 0; i < scene->mNumMeshes; i++)
     {
+        struct MaterialInfo material_info;
+
         const struct aiMesh *mesh = scene->mMeshes[i];
 
         // Convert Assimp faces format to array format
@@ -704,18 +726,19 @@ struct Mesh Load_Model_Data(const char *file_path)
         // create material uniform buffer
         struct aiMaterial *mtl = scene->mMaterials[mesh->mMaterialIndex];
 
+        // Look for textures
         // struct aiString texPath; // contains filename of texture
-        //  if (AI_SUCCESS == mtl->GetTexture(aiTextureType_DIFFUSE, 0, &texPath))
+        // enum aiReturn ret = aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &texPath, NULL, NULL, NULL, NULL, NULL, NULL);
+        // if (ret == AI_SUCCESS)
         //{
-        //      // bind texture
-        //      unsigned int texId = textureIdMap[texPath.data];
-        //      aMesh.texIndex = texId;
-        //      aMat.texCount = 1;
-        //  }
-        //  else
-        //{
-        //      aMat.texCount = 0;
-        //  }
+        //     for (size_t i = 0; i < my_mesh.tex_count; i++)
+        //     {
+        //         if (strcmp(my_mesh.tex_names[i], texPath.data) == 0)
+        //         {
+        //             model.tex = my_mesh.textures[i];
+        //         }
+        //     }
+        // }
 
         // AMBIENT
         struct aiColor4D ambient = {0.2f, 0.2f, 0.2f, 1.0f};
@@ -756,20 +779,6 @@ struct Mesh Load_Model_Data(const char *file_path)
         VBO_Buffer(materials, sizeof(struct MaterialInfo), (const GLvoid *)&material_info);
         model.material_vbo = materials;
 
-        // Look for textures
-        struct aiString texPath; // contains filename of texture
-        if (aiGetMaterialTexture(scene->mMaterials[i], aiTextureType_DIFFUSE, 0, &texPath, NULL, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
-        {
-            for (size_t i = 0; i < my_mesh.tex_count; i++)
-            {
-                if (strcmp(my_mesh.tex_names[i], texPath.data) == 0)
-                {
-                    model.tex = my_mesh.textures[i];
-                }
-            }
-        }
-
-        // myMeshes.push_back(aMesh);
         model.material_info = material_info;
         my_mesh.models[i] = model;
     }
@@ -784,11 +793,26 @@ void Model_Render_Mesh(struct Mesh m, struct Camera cam)
     Shader_Uniform_Vec3(m.shader, "camPos", cam.position);
     Camera_View_Projection_To_Shader(cam, m.shader, "camMatrix");
 
-    vec3 model_position = {0.0f, 0.0f, -2.0f};
-    mat4 model_transform;
-    glm_translate_make(model_transform, model_position);
+    // Default values
+    mat4 matrix = GLM_MAT4_IDENTITY_INIT;
+    vec3 translation = {0.0f, 0.0f, 0.0f};
+    versor rotation = {0.0f, 0.0f, 0.0f, 0.0f};
+    vec3 scale = {1.0f, 1.0f, 1.0f};
 
-    Shader_Uniform_Mat4(m.shader, "model", model_transform);
+    // Update trans, rot and scale
+    mat4 mat_trans = GLM_MAT4_ZERO_INIT;
+    mat4 mat_rot = GLM_MAT4_ZERO_INIT;
+    mat4 mat_scale = GLM_MAT4_ZERO_INIT;
+
+    glm_translate_make(mat_trans, translation);
+    glm_quat_mat4(rotation, mat_rot);
+    glm_scale_make(mat_scale, scale);
+
+    // Send to shader uniforms
+    Shader_Uniform_Mat4(m.shader, "translation", mat_trans);
+    Shader_Uniform_Mat4(m.shader, "rotation", mat_rot);
+    Shader_Uniform_Mat4(m.shader, "scale", mat_scale);
+    Shader_Uniform_Mat4(m.shader, "model", matrix);
 
     for (unsigned int i = 0; i < m.num_models; i++)
     {
@@ -796,7 +820,7 @@ void Model_Render_Mesh(struct Mesh m, struct Camera cam)
         UBO_Bind_Buffer_To_Index(m.models[i].material_vbo.ID, m.material_ubo_index, 0, m.ubo_size);
         //  bind texture
 
-        Shader_Uniform_Texture2D(m.shader, "diffuseTex", m.models[i].tex, 0);
+        // Shader_Uniform_Texture2D(m.shader, "diffuseTex", m.models[i].tex, 0);
 
         // bind VAO
         VAO_Bind(m.models[i].vao);
