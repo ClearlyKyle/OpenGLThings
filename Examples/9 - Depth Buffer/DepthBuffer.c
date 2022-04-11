@@ -56,9 +56,7 @@ void DepthBuffer_Update()
 
 void DepthBuffer_OnExit()
 {
-    glm_vec3_print(dbuffer.cam.position, stdout);
-    glm_vec3_print(dbuffer.cam.orientation, stdout);
-    glm_vec3_print(dbuffer.cam.up, stdout);
+    Camera_Print_Values(dbuffer.cam);
 
     Mesh_Free(dbuffer.model);
 }
