@@ -45,7 +45,13 @@ void DepthBuffer_Update()
 {
     Camera_Inputs(&dbuffer.cam);
 
-    Model_Render_Mesh(dbuffer.model, dbuffer.cam);
+    Shader_Bind(dbuffer.model.shader);
+    Shader_Uniform_Vec3(dbuffer.model.shader, "camPos", dbuffer.cam.position);
+
+    Camera_View_Projection_To_Shader(dbuffer.cam, dbuffer.model.shader, "camMatrix");
+
+    // Model_Render_Mesh(dbuffer.model, dbuffer.cam);
+    recursive_render(dbuffer.model, dbuffer.model.scene, dbuffer.model.scene->mRootNode);
 }
 
 void DepthBuffer_OnExit()
