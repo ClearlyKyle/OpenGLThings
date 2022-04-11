@@ -32,12 +32,12 @@ void DepthBuffer_Init()
     // Camera
     struct Camera cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f}, 45.0f, 0.1f, 100.0f);
 
-    // Camera_Set_Orientation(&cam, (vec3){-0.06f, -0.35f, 0.93f});
-    // Camera_Set_Position(&cam, (vec3){
-    //                               5.32f,
-    //                               7.78f,
-    //                               -37.99f,
-    //                           });
+    glm_vec3_copy((vec3){-2.677339f, 1.266167f, -10.688577f}, cam.position);
+    glm_vec3_copy((vec3){0.683066f, -0.107999f, -0.722327f}, cam.orientation);
+    // glm_vec3_copy((vec3){0.000000f, 1.000000f, 0.000000f}, cam.up);
+    cam.pitch = -6.199975f;
+    cam.yaw = -46.600174f;
+
     dbuffer.cam = cam;
 }
 
