@@ -41,5 +41,6 @@ void Camera_Set_Orientation(struct Camera *camera, vec3 new_orientation);
 void Camera_Set_Position(struct Camera *camera, vec3 new_position);
 
 void Camera_Inputs(struct Camera *camera);
+void Camera_Print_Values(struct Camera camera);
 
 #endif // __CAMERA_H__

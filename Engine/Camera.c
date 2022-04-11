@@ -112,11 +112,11 @@ void Camera_Inputs(struct Camera *camera)
 	}
 	if (Input_Key_Down(window.input, SDL_SCANCODE_LSHIFT))
 	{
-		camera->speed = 0.4f;
+		camera->speed = 0.02f;
 	}
 	else if (Input_Key_Released(window.input, SDL_SCANCODE_LSHIFT))
 	{
-		camera->speed = 0.1f;
+		camera->speed = 0.001f;
 	}
 
 	// Handles mouse inputs
@@ -169,4 +169,15 @@ void Camera_Inputs(struct Camera *camera)
 		SDL_SetRelativeMouseMode(SDL_FALSE);
 		camera->firstClick = true;
 	}
+}
+
+void Camera_Print_Values(struct Camera camera)
+{
+	printf("[CAMERA] Information...\n");
+	printf("Position    \t: {%ff, %ff, %ff}\n", camera.position[0], camera.position[1], camera.position[2]);
+	printf("Orientation \t: {%ff, %ff, %ff}\n", camera.orientation[0], camera.orientation[1], camera.orientation[2]);
+	printf("Up          \t: {%ff, %ff, %ff}\n", camera.up[0], camera.up[1], camera.up[2]);
+
+	printf("Pitch \t: %ff\n", camera.pitch);
+	printf("Yawe  \t: %ff\n", camera.yaw);
 }
