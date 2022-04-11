@@ -189,6 +189,11 @@ void Shader_Uniform_Mat4(struct Shader shader, const char *name, const mat4 matr
     glUniformMatrix4fv(glGetUniformLocation(shader.shader_id, name), 1, GL_FALSE, matrix[0]);
 }
 
+void Shader_Uniform_Mat4_Floats(struct Shader shader, const char *name, const float *matrix)
+{
+    glUniformMatrix4fv(glGetUniformLocation(shader.shader_id, name), 1, GL_FALSE, matrix);
+}
+
 void Shader_Uniform_Texture2D(struct Shader shader, char *name, const struct Texture texture, GLuint n)
 {
     glActiveTexture(GL_TEXTURE0 + n);
