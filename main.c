@@ -10,6 +10,7 @@
 #include "SpecularMaps.h"        // Example 7 - Specular Maps with Various Lighting Types
 #include "ModelLoadingExample.h" // Example 8 - Loading A Model from OBJ File
 #include "DepthBuffer.h"         // Example 9 - Visualise Depth Buffer
+#include "StencilBuffer.h"       // Example 10 - Stencil Buffer
 #include "UBOExample.h"          // Example 20 - Drawing Triangles with use of UBO
 //#include "challanges.h"
 
@@ -42,10 +43,13 @@ int main(int argc, char *argv[])
     // Window_Init(800, 800, ModelLoading_Init, ModelLoading_Update, ModelLoading_OnExit);
 
     // Example 9 - Visualise Depth Buffer
-    // Window_Init(800, 800, DepthBuffer_Init, DepthBuffer_Update, DepthBuffer_OnExit);
+    Window_Init(800, 800, DepthBuffer_Init, DepthBuffer_Update, DepthBuffer_OnExit);
+
+    // Example 10 - Stencil Buffer
+    // Window_Init(800, 800, StencilBuffer_Init, StencilBuffer_Update, StencilBuffer_OnExit);
 
     // Example 20 - Drawing Triangles with use of UBO
-    Window_Init(800, 800, UBOExample_Init, UBOExample_Update, UBOExample_OnExit);
+    // Window_Init(800, 800, UBOExample_Init, UBOExample_Update, UBOExample_OnExit);
 
     // Testing things
     // Window_Init(800, 800, challanges_Init, challanges_Update, challanges_OnExit);
