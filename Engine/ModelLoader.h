@@ -40,6 +40,8 @@ struct Model
 
 struct Mesh
 {
+    struct aiScene *scene;
+
     struct Shader shader;
     struct Model *models;
 
@@ -62,6 +64,7 @@ struct Model Model_ASSIMP();
 void Model_Draw(struct Model model, struct Camera cam);
 void Model_Free(struct Model model);
 
+void recursive_render(struct Mesh m, const struct aiScene *sc, const struct aiNode *nd);
 struct Mesh Load_Model_Data(const char *file_path);
 void Model_Render_Mesh(struct Mesh m, struct Camera cam);
 void Mesh_Free(struct Mesh mesh);

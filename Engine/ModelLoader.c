@@ -630,7 +630,7 @@ struct Mesh Load_Model_Data(const char *file_path)
 
     //  GLuint buffer;
 
-    const struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_Quality);
+    struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_Quality);
     // If the import failed, report it
     if (!scene)
     {
@@ -639,6 +639,8 @@ struct Mesh Load_Model_Data(const char *file_path)
     }
     // Now we can access the file's contents.
     fprintf(stderr, "Sucessfil Import of scene : %s\n", file_path);
+
+    my_mesh.scene = scene;
 
     char base_folder_path[256];
     _Get_Path_To_File(file_path, base_folder_path, '/');
@@ -727,18 +729,18 @@ struct Mesh Load_Model_Data(const char *file_path)
         struct aiMaterial *mtl = scene->mMaterials[mesh->mMaterialIndex];
 
         // Look for textures
-        // struct aiString texPath; // contains filename of texture
-        // enum aiReturn ret = aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &texPath, NULL, NULL, NULL, NULL, NULL, NULL);
-        // if (ret == AI_SUCCESS)
-        //{
-        //     for (size_t i = 0; i < my_mesh.tex_count; i++)
-        //     {
-        //         if (strcmp(my_mesh.tex_names[i], texPath.data) == 0)
-        //         {
-        //             model.tex = my_mesh.textures[i];
-        //         }
-        //     }
-        // }
+        struct aiString texPath; // contains filename of texture
+        enum aiReturn ret = aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &texPath, NULL, NULL, NULL, NULL, NULL, NULL);
+        if (ret == AI_SUCCESS)
+        {
+            for (size_t i = 0; i < my_mesh.tex_count; i++)
+            {
+                if (strcmp(my_mesh.tex_names[i], texPath.data) == 0)
+                {
+                    model.tex = my_mesh.textures[i];
+                }
+            }
+        }
 
         // AMBIENT
         struct aiColor4D ambient = {0.2f, 0.2f, 0.2f, 1.0f};
@@ -783,6 +785,8 @@ struct Mesh Load_Model_Data(const char *file_path)
         my_mesh.models[i] = model;
     }
 
+    // recursive_render(my_mesh, scene, scene->mRootNode);
+
     return my_mesh;
 }
 
@@ -820,7 +824,7 @@ void Model_Render_Mesh(struct Mesh m, struct Camera cam)
         UBO_Bind_Buffer_To_Index(m.models[i].material_vbo.ID, m.material_ubo_index, 0, m.ubo_size);
         //  bind texture
 
-        // Shader_Uniform_Texture2D(m.shader, "diffuseTex", m.models[i].tex, 0);
+        Shader_Uniform_Texture2D(m.shader, "diffuseTex", m.models[i].tex, 0);
 
         // bind VAO
         VAO_Bind(m.models[i].vao);
@@ -864,6 +868,55 @@ void Model_Draw(struct Model model, struct Camera cam)
     // Draw call
     // glDrawArrays(GL_TRIANGLES, 0, model.num_indicies);
     glDrawElements(GL_TRIANGLES, model.num_indicies, GL_UNSIGNED_INT, 0);
+}
+
+void recursive_render(struct Mesh m, const struct aiScene *sc, const struct aiNode *nd)
+{
+    // Get node transformation matrix
+    // OpenGL matrices are column major
+    struct aiMatrix4x4 mTrans = nd->mTransformation;
+    float aux[16];
+    memcpy(aux, &mTrans, sizeof(float) * 16);
+
+    // Default values
+    mat4 matrix = GLM_MAT4_IDENTITY_INIT;
+    vec3 translation = {0.0f, 0.0f, 0.0f};
+    versor rotation = {0.0f, 0.0f, 0.0f, 0.0f};
+    vec3 scale = {1.0f, 1.0f, 1.0f};
+
+    // Update trans, rot and scale
+    mat4 mat_trans = GLM_MAT4_ZERO_INIT;
+    mat4 mat_rot = GLM_MAT4_ZERO_INIT;
+    mat4 mat_scale = GLM_MAT4_ZERO_INIT;
+
+    glm_translate_make(mat_trans, translation);
+    glm_quat_mat4(rotation, mat_rot);
+    glm_scale_make(mat_scale, scale);
+
+    // Send to shader uniforms
+    Shader_Uniform_MatFlaots(m.shader, "translation", aux);
+    Shader_Uniform_Mat4(m.shader, "rotation", mat_rot);
+    Shader_Uniform_Mat4(m.shader, "scale", mat_scale);
+    Shader_Uniform_Mat4(m.shader, "model", matrix);
+
+    // draw all meshes assigned to this node
+    for (unsigned int n = 0; n < nd->mNumMeshes; ++n)
+    {
+        // bind material uniform
+        glBindBufferRange(GL_UNIFORM_BUFFER, 0, m.models[nd->mMeshes[n]].material_vbo.ID, 0, sizeof(struct MaterialInfo));
+        // bind texture
+        glBindTexture(GL_TEXTURE_2D, m.models[nd->mMeshes[n]].tex.ID);
+        // bind VAO
+        glBindVertexArray(m.models[nd->mMeshes[n]].vao.ID);
+        // draw
+        glDrawElements(GL_TRIANGLES, m.models[nd->mMeshes[n]].num_indicies * 3, GL_UNSIGNED_INT, 0);
+    }
+
+    // draw all children
+    for (unsigned int n = 0; n < nd->mNumChildren; ++n)
+    {
+        recursive_render(m, sc, nd->mChildren[n]);
+    }
 }
 
 void Model_Free(struct Model model)
