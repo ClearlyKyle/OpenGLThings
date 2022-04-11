@@ -700,11 +700,21 @@ struct Mesh Load_Model_Data(const char *file_path)
         }
 
         // buffer for vertex colours
-        if (mesh->mColors[0] != NULL)
+        const size_t number_of_colours = sizeof(mesh->mColors) / sizeof(mesh->mColors[0]);
+        if (number_of_colours != 0)
         {
             struct VBO colours = VBO_Create(GL_ARRAY_BUFFER);
-            VBO_Buffer(colours, sizeof(float) * 3 * mesh->mNumVertices, (const GLvoid *)mesh->mColors);
-            VAO_Attr(vao, colours, 3, 3, GL_FLOAT, 3 * sizeof(float), (const GLvoid *)(0));
+            // VBO_Buffer(colours, sizeof(float) * 3 * mesh->mNumVertices, (const GLvoid *)mesh->mColors);
+
+            float *colourArray = (float *)malloc(sizeof(float) * mesh->mNumFaces * 4);
+            for (size_t c = 0, colour_index = 0; c < number_of_colours; c++, colour_index += 4)
+            {
+                struct aiColor4D *const *colour = &mesh->mColors[c];
+
+                memcpy(&colourArray[colour_index], colour, 4 * sizeof(float));
+            }
+            VBO_Buffer(colours, sizeof(float) * 4 * number_of_colours, (const GLvoid *)colourArray);
+            VAO_Attr(vao, colours, 3, 4, GL_FLOAT, 4 * sizeof(float), (const GLvoid *)(0));
         }
 
         // buffer for vertex texture coordinates
@@ -894,7 +904,7 @@ void recursive_render(struct Mesh m, const struct aiScene *sc, const struct aiNo
     glm_scale_make(mat_scale, scale);
 
     // Send to shader uniforms
-    Shader_Uniform_MatFlaots(m.shader, "translation", aux);
+    Shader_Uniform_Mat4_Floats(m.shader, "translation", aux);
     Shader_Uniform_Mat4(m.shader, "rotation", mat_rot);
     Shader_Uniform_Mat4(m.shader, "scale", mat_scale);
     Shader_Uniform_Mat4(m.shader, "model", matrix);
