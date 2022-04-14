@@ -8,6 +8,9 @@ struct StencilBuffer
     struct Camera cam;
     struct Mesh model;
     struct Mesh outline;
+
+    struct Shader model_shader;
+    struct Shader outline_shader;
 };
 
 void StencilBuffer_Init();
