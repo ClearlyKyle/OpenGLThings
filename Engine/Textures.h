@@ -5,7 +5,7 @@
 
 struct Texture
 {
-    // Texture uint and ID are not the same!
+    // Texture slot and ID are not the same!
     GLuint ID;
     GLuint slot;
     GLenum type;

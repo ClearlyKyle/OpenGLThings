@@ -29,7 +29,7 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
     glGenTextures(1, &t.ID);
 
     // Assigns the texture to a Texture Unit
-    // glActiveTexture(GL_TEXTURE0 + slot);
+    glActiveTexture(GL_TEXTURE0 + slot);
     t.slot = slot;                     // slot is used for "glActiveTexture(GL_TEXTURE0 + slot)"
     glBindTexture(texture_type, t.ID); // ID is used for "glBindTexture(..., ID)"
 
