@@ -27,8 +27,8 @@ void Basic3D_Init()
 
     // Generates Shader object using shaders default.vert and default.frag
     struct Shader shader = Shader_Create(
-        "../../Examples/shaders/4/basic_3D.vs",
-        "../../Examples/shaders/4/basic_3D.fs",
+        "../../Examples/4 - Basic 3D/basic_3D.vs",
+        "../../Examples/4 - Basic 3D/basic_3D.fs",
         2, (struct VertexAttribute[]){{.index = 0, .name = "aPos"}, {.index = 1, .name = "aColor"}});
 
     basic3d.shader = shader;

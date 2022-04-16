@@ -24,8 +24,8 @@ void TextureExample_Init()
 
     // Generates Shader object using shaders default.vert and default.frag
     struct Shader shader = Shader_Create(
-        "../../Examples/shaders/3/texture_example.vs",
-        "../../Examples/shaders/3/texture_example.fs",
+        "../../Examples/3 - Textures/texture_example.vs",
+        "../../Examples/3 - Textures/texture_example.fs",
         2, (struct VertexAttribute[]){{.index = 0, .name = "aPos"}, {.index = 1, .name = "aColor"}});
 
     texture_example.shader = shader;
