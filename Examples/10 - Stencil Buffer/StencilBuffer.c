@@ -33,12 +33,12 @@ void StencilBuffer_Init()
     Shader_Uniform_Vec4(shaderProgram, "lightColor", lightColor);
     Shader_Uniform_Vec3(shaderProgram, "lightPos", lightPos);
 
-    struct Mesh model = Load_Model_Data("../../Examples/res/models/crow/scene.gltf");
-    model.shader = shaderProgram;
+    struct Mesh model = Mesh_Load(shaderProgram, "../../Examples/res/models/crow/scene.gltf");
+    // model.shader = shaderProgram;
     sb.model = model;
 
-    struct Mesh outline = Load_Model_Data("../../Examples/res/models/crow-outline/scene.gltf");
-    outline.shader = outliningProgram;
+    struct Mesh outline = Mesh_Load(outliningProgram, "../../Examples/res/models/crow-outline/scene.gltf");
+    // outline.shader = outliningProgram;
     sb.outline = outline;
 
     sb.model_shader = shaderProgram;
@@ -81,7 +81,7 @@ void StencilBuffer_Update()
     Camera_View_Projection_To_Shader(sb.cam, sb.model.shader, "camMatrix");
 
     // Draw the normal model
-    recursive_render(sb.model, sb.model.scene, sb.model.scene->mRootNode);
+    Mesh_Draw(sb.model);
 
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // Make it so only the pixels without the value 1 pass the test
     glStencilMask(0x00);                 // Disable modifying of the stencil buffer
@@ -107,7 +107,7 @@ void StencilBuffer_Update()
 
     // Third method from the tutorial
     // sb.outline.shader = sb.outline_shader;
-    recursive_render(sb.outline, sb.outline.scene, sb.outline.scene->mRootNode);
+    Mesh_Draw(sb.outline);
 
     // Reset and Clear
     glStencilMask(0xFF);               // Enable modifying of the stencil buffer

@@ -23,10 +23,9 @@ void DepthBuffer_Init()
     Shader_Uniform_Vec4(shader, "lightColor", light_colour);
     Shader_Uniform_Vec3(shader, "lightPos", light_position);
 
-    // struct Mesh mesh = Load_Model_Data("../../Examples/res/models/Wooden Box/wooden crate.obj");
-    //  struct Mesh mesh = Load_Model_Data("../../Examples/res/models/Dog House/DogHouse.obj");
-    struct Mesh mesh = Load_Model_Data("../../Examples/res/models/Low Poly Scene/Low-Poly_Models.obj");
-    mesh.shader = shader;
+    // struct Mesh mesh = Mesh_load(shader, "../../Examples/res/models/Wooden Box/wooden crate.obj");
+    // struct Mesh mesh = Mesh_load(shader, "../../Examples/res/models/Dog House/DogHouse.obj");
+    struct Mesh mesh = Mesh_Load(shader, "../../Examples/res/models/Low Poly Scene/Low-Poly_Models.obj");
     dbuffer.model = mesh;
 
     // Camera
@@ -50,8 +49,7 @@ void DepthBuffer_Update()
 
     Camera_View_Projection_To_Shader(dbuffer.cam, dbuffer.model.shader, "camMatrix");
 
-    // Model_Render_Mesh(dbuffer.model, dbuffer.cam);
-    recursive_render(dbuffer.model, dbuffer.model.scene, dbuffer.model.scene->mRootNode);
+    Mesh_Draw(dbuffer.model);
 }
 
 void DepthBuffer_OnExit()
