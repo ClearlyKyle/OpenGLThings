@@ -21,6 +21,21 @@ void Window_Init(int width, int height,
         fprintf(stderr, "SDL cannot init with error: %s\n", SDL_GetError());
         exit(2);
     }
+
+    // SETTING ATTRIBUTES
+    //      SDL_GL_SetAttribute - needs to be used before "SDL_CreateWindow"
+
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1); // Set to 1 to require hardware acceleration, set to 0 to force software rendering
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4); // Request an OpenGL 4.5 context (should be core)
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24); // Depth buffer size in bits
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8); // Stencil buffer size in bits
+
     // create window
     window.sdl_window = SDL_CreateWindow("Opengl", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
     if (window.sdl_window == NULL)
@@ -41,21 +56,29 @@ void Window_Init(int width, int height,
         exit(2);
     }
 
-    // Request an OpenGL 4.5 context (should be core)
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    // Check OpenGL properties
+    printf("OpenGL loaded\n");
+    gladLoadGLLoader(SDL_GL_GetProcAddress);
+    printf("Vendor:   %s\n", glGetString(GL_VENDOR));
+    printf("Renderer: %s\n", glGetString(GL_RENDERER));
+    printf("Version:  %s\n", glGetString(GL_VERSION));
+    printf("\n");
 
-    // Set to 1 to require hardware acceleration, set to 0 to force software rendering
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+    GLint stencil_bits, depth_bits;
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL, GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE, &stencil_bits);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH, GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE, &depth_bits);
+    // SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &stencil_bits);
+    // SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &depth_bits);
 
-    // Request a depth buffer
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    printf("Stencil Buffer Size  : %d (bits)\n", stencil_bits);
+    printf("Depth Buffer Size    : %d (bits)\n", depth_bits);
+    printf("\n");
 
-    // Enables the Depth Buffer
-    glEnable(GL_DEPTH_TEST);
+    // ENABLE
+    glEnable(GL_DEPTH_TEST); // Enables the Depth Buffer
     glDepthFunc(GL_LESS);
+
+    glEnable(GL_STENCIL_TEST); // Enable stencil test
 
     // Use v-sync: (0) - off, (1) - on
     SDL_GL_SetSwapInterval(0);
@@ -111,7 +134,8 @@ void Window_Loop()
         window.last_frame_time = window.frame_time;
         window.frame_time = elapsed;
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         Input_Update(&window.input);
         _Update();
