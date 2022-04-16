@@ -56,17 +56,16 @@ struct Mesh
     char *tex_names[32]; // array of pointers
 };
 
+// "tinyobj_parse_obj" methods
 struct Model Model_Import(const char *file_path, const char *vertex_shader_path, const char *fragment_shader_path, size_t n, struct VertexAttribute attributes[]);
 struct Model Model_Import_Shader(const char *file_path, struct Shader ShaderColour);
-
-struct Model Model_ASSIMP();
 
 void Model_Draw(struct Model model, struct Camera cam);
 void Model_Free(struct Model model);
 
-void recursive_render(struct Mesh m, const struct aiScene *sc, const struct aiNode *nd);
-struct Mesh Load_Model_Data(const char *file_path);
-void Model_Render_Mesh(struct Mesh m, struct Camera cam);
+// "assimp" methods
+struct Mesh Mesh_Load(const struct Shader shader, const char *file_path);
+void Mesh_Draw(struct Mesh m);
 void Mesh_Free(struct Mesh mesh);
 
 #endif // __MODELLOADER_H__

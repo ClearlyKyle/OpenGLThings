@@ -386,152 +386,6 @@ struct Model Model_Import_Shader(const char *file_path, struct Shader shader)
     return m;
 }
 
-struct Model Model_ASSIMP(const char *path, struct Shader shader)
-{
-    struct Model m;
-
-    m.shader = shader;
-
-    // import model
-    const struct aiScene *scene = aiImportFile(path, aiProcessPreset_TargetRealtime_Quality);
-
-    if (scene->mNumMeshes <= 0)
-    {
-        fprintf(stderr, "scene->mNumMeshes <= 0\n%s\n", aiGetErrorString());
-        aiReleaseImport(scene);
-        exit(1);
-    }
-    fprintf(stderr, "Num of meshes : %d\n", scene->mNumMeshes);
-
-    struct aiMesh *mesh = scene->mMeshes[0]; // http://assimp.sourceforge.net/lib_html/structai_mesh.html
-
-    // allocate memory
-    float *farr = (float *)malloc(2 * mesh[0].mNumVertices * sizeof(float));
-    if (farr == 0)
-    {
-        fprintf(stderr, "farr == 0\n%s\n", aiGetErrorString());
-        aiReleaseImport(scene);
-        exit(1);
-    }
-    unsigned int *iarr = (unsigned int *)malloc(3 * mesh[0].mNumFaces * sizeof(unsigned int));
-    if (iarr == 0)
-    {
-        free(farr);
-        fprintf(stderr, "iarr == 0\n%s\n", aiGetErrorString());
-        aiReleaseImport(scene);
-        exit(1);
-    }
-
-    // copy tex coords from stupid 3d texcoord array
-    unsigned int farr_count = 0;
-    for (unsigned int i = 0; i < mesh[0].mNumVertices; i++)
-    {
-        farr[farr_count++] = mesh[0].mTextureCoords[0][i].x;
-        farr[farr_count++] = mesh[0].mTextureCoords[0][i].y;
-    }
-
-    // copy indices from stupid array format
-    unsigned int iarr_count = 0;
-    for (unsigned int i = 0; i < mesh[0].mNumFaces; i++)
-    {
-        iarr[iarr_count++] = mesh[0].mFaces[i].mIndices[0];
-        iarr[iarr_count++] = mesh[0].mFaces[i].mIndices[1];
-        iarr[iarr_count++] = mesh[0].mFaces[i].mIndices[2];
-    }
-
-    // upload data to a vao, this is my code, but you should already know this part
-    // globj_newModel(3);
-    // globj_pushVbo(3 * mesh[0].mNumVertices * sizeof(float), 3, (float *)mesh[0].mVertices);
-    // globj_pushVbo(2 * mesh[0].mNumVertices * sizeof(float), 2, farr);
-    // globj_pushVbo(3 * mesh[0].mNumVertices * sizeof(float), 3, (float *)mesh[0].mNormals);
-
-    GLsizei vertex_data_size = 3 * mesh->mNumVertices * sizeof(float);
-    GLsizei normal_data_size = 3 * mesh[0].mNumVertices * sizeof(float);
-    GLsizei texture_data_size = 2 * mesh[0].mNumVertices * sizeof(float);
-    GLsizei index_data_size = iarr_count * sizeof(unsigned int);
-
-    struct VAO vao = VAO_Create();
-    VAO_Bind(vao);
-    m.vao = vao;
-
-    unsigned int *faceArray = (unsigned int *)malloc(sizeof(unsigned int) * mesh->mNumFaces * 3);
-    unsigned int faceIndex = 0;
-
-    for (unsigned int t = 0; t < mesh->mNumFaces; ++t)
-    {
-        const struct aiFace *face = &mesh->mFaces[t];
-
-        memcpy(&faceArray[faceIndex], face->mIndices, 3 * sizeof(unsigned int));
-        faceIndex += 3;
-    }
-    m.num_indicies = scene->mMeshes[0]->mNumFaces * 3;
-
-    struct EBO ebo = EBO_Create();
-    EBO_Buffer(ebo, sizeof(unsigned int) * mesh->mNumFaces * 3, (const GLvoid *)faceArray);
-
-    struct VBO vbo_verticies = VBO_Create(GL_ARRAY_BUFFER);
-    VBO_Buffer(vbo_verticies, 3 * mesh->mNumVertices * sizeof(float), (const GLvoid *)mesh->mVertices);
-
-    VAO_Attr(vao, vbo_verticies, 0, 3, GL_FLOAT, 3 * sizeof(float), (const GLvoid *)(0));
-    // VAO_Attr(vao, vbo_normals, 1, 3, GL_FLOAT, 3 * sizeof(float), (const GLvoid *)(0));
-    // VAO_Attr(vao, vbo_textures, 2, 2, GL_FLOAT, 2 * sizeof(float), (const GLvoid *)(0));
-
-    // globj_pushIbo(iarr_count * sizeof(unsigned int), iarr);
-
-    vec3 model_position = {0.0f, 0.0f, -3.0f};
-    mat4 model_transform;
-    glm_translate_make(model_transform, model_position);
-
-    Shader_Bind(shader);
-    Shader_Uniform_Mat4(shader, "model", model_transform);
-
-    // free arrays
-    free(iarr);
-    free(farr);
-
-    VAO_Unbind();
-    VBO_Unbind();
-    EBO_Unbind();
-
-    // free scene
-    aiReleaseImport(scene);
-
-    fprintf(stderr, "Loading model complete : %s\n", path);
-
-    // finalizes model
-    return m;
-}
-
-void Model_Load(const char *file_path)
-{
-    // struct Model m;
-
-    //// unistd.h
-    // if( access( file_path, F_OK ) == 0 ) {
-    //     // file exists
-    // } else {
-    //     // file doesn't exist
-    // }
-
-    const struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_Quality);
-
-    // If the import failed, report it
-    if (!scene)
-    {
-        fprintf(stderr, "[MODEL] Error with 'aiImportFile'\n%s\n", aiGetErrorString());
-        return;
-    }
-    // Now we can access the file's contents.
-    fprintf(stderr, "Sucessfil Import of scene : %s\n", file_path);
-
-    fprintf(stderr, "Sucessfil Mesh Made\n");
-}
-
-static int Find_Texture_Index(const struct Mesh *mesh)
-{
-    return 0;
-}
-
 void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh, const char *base_folder_path)
 {
     /* scan scene's materials for textures */
@@ -568,6 +422,7 @@ void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh, const char *
                 }
                 if (save_this_path == true)
                 {
+                    // TODO : Create and bind texture here?
                     mesh->tex_names[mesh->tex_count] = (char *)malloc(sizeof(char) * (path.length));
                     strcpy(mesh->tex_names[mesh->tex_count], path.data);
                     mesh->tex_count += 1;
@@ -586,13 +441,11 @@ void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh, const char *
 
     for (size_t i = 0; i <= mesh->tex_count - 1; i++)
     {
-        // TODO : Better pathing
         char buff[256];
         sprintf(buff, "%s%s", base_folder_path, mesh->tex_names[i]);
         // strcat(base_file_path, mesh->tex_names[i]);
 
         struct Texture tex = Texture_Create(buff, GL_TEXTURE_2D, (GLuint)i, GL_RGBA, GL_UNSIGNED_BYTE);
-        // tex.type = AMBIENT;
         mesh->textures[i] = tex;
 
         fprintf(stderr, "[bound %lld] %s\n", i, buff);
@@ -623,22 +476,21 @@ static void _Get_Path_To_File(const char *full_path, char *path_to_file, char sp
     }
 }
 
-struct Mesh Load_Model_Data(const char *file_path)
+struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
 {
     struct Mesh my_mesh;
     struct Model model;
 
-    //  GLuint buffer;
+    my_mesh.shader = shader;
 
     struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_Quality);
-    // If the import failed, report it
-    if (!scene)
+    if (!scene) // If the import failed, report it
     {
         fprintf(stderr, "[MODEL] Error with 'aiImportFile'\n%s\n", aiGetErrorString());
         exit(1);
     }
     // Now we can access the file's contents.
-    fprintf(stderr, "Sucessfil Import of scene : %s\n", file_path);
+    fprintf(stderr, "[MODEL] Sucessfil Import of scene file : %s\n", file_path);
 
     my_mesh.scene = scene;
 
@@ -673,7 +525,7 @@ struct Mesh Load_Model_Data(const char *file_path)
         }
         model.num_indicies = scene->mMeshes[i]->mNumFaces;
 
-        fprintf(stderr, "mMaterialIndex : %d\n", mesh->mMaterialIndex);
+        // fprintf(stderr, "mMaterialIndex : %d\n", mesh->mMaterialIndex);
 
         // generate Vertex Array for mesh
         struct VAO vao = VAO_Create(); // Bound
@@ -718,7 +570,8 @@ struct Mesh Load_Model_Data(const char *file_path)
         }
 
         // buffer for vertex texture coordinates
-        if (mesh->mTextureCoords[0] != NULL)
+        const size_t number_of_tex_coords = sizeof(mesh->mTextureCoords) / sizeof(mesh->mTextureCoords[0]);
+        if (number_of_tex_coords != 0)
         {
             float *texCoords = (float *)malloc(sizeof(float) * 2 * mesh->mNumVertices);
             for (unsigned int k = 0; k < mesh->mNumVertices; ++k)
@@ -740,7 +593,7 @@ struct Mesh Load_Model_Data(const char *file_path)
 
         // Look for textures
         struct aiString texPath; // contains filename of texture
-        enum aiReturn ret = aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &texPath, NULL, NULL, NULL, NULL, NULL, NULL);
+        const enum aiReturn ret = aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &texPath, NULL, NULL, NULL, NULL, NULL, NULL);
         if (ret == AI_SUCCESS)
         {
             for (size_t i = 0; i < my_mesh.tex_count; i++)
@@ -748,6 +601,7 @@ struct Mesh Load_Model_Data(const char *file_path)
                 if (strcmp(my_mesh.tex_names[i], texPath.data) == 0)
                 {
                     model.tex = my_mesh.textures[i];
+                    break;
                 }
             }
         }
@@ -797,90 +651,11 @@ struct Mesh Load_Model_Data(const char *file_path)
 
     // recursive_render(my_mesh, scene, scene->mRootNode);
 
+    fprintf(stderr, "[MODEL] Mesh loading complete!\n");
     return my_mesh;
 }
 
-void Model_Render_Mesh(struct Mesh m, struct Camera cam)
-{
-    Shader_Bind(m.shader);
-
-    Shader_Uniform_Vec3(m.shader, "camPos", cam.position);
-    Camera_View_Projection_To_Shader(cam, m.shader, "camMatrix");
-
-    // Default values
-    mat4 matrix = GLM_MAT4_IDENTITY_INIT;
-    vec3 translation = {0.0f, 0.0f, 0.0f};
-    versor rotation = {0.0f, 0.0f, 0.0f, 0.0f};
-    vec3 scale = {1.0f, 1.0f, 1.0f};
-
-    // Update trans, rot and scale
-    mat4 mat_trans = GLM_MAT4_ZERO_INIT;
-    mat4 mat_rot = GLM_MAT4_ZERO_INIT;
-    mat4 mat_scale = GLM_MAT4_ZERO_INIT;
-
-    glm_translate_make(mat_trans, translation);
-    glm_quat_mat4(rotation, mat_rot);
-    glm_scale_make(mat_scale, scale);
-
-    // Send to shader uniforms
-    Shader_Uniform_Mat4(m.shader, "translation", mat_trans);
-    Shader_Uniform_Mat4(m.shader, "rotation", mat_rot);
-    Shader_Uniform_Mat4(m.shader, "scale", mat_scale);
-    Shader_Uniform_Mat4(m.shader, "model", matrix);
-
-    for (unsigned int i = 0; i < m.num_models; i++)
-    {
-        // bind material uniform
-        UBO_Bind_Buffer_To_Index(m.models[i].material_vbo.ID, m.material_ubo_index, 0, m.ubo_size);
-        //  bind texture
-
-        Shader_Uniform_Texture2D(m.shader, "diffuseTex", m.models[i].tex, 0);
-
-        // bind VAO
-        VAO_Bind(m.models[i].vao);
-        // draw
-        glDrawElements(GL_TRIANGLES, m.models[i].num_indicies * 3, GL_UNSIGNED_INT, 0);
-    }
-}
-
-void Model_Draw(struct Model model, struct Camera cam)
-{
-    Shader_Bind(model.shader);
-
-    // Default values
-    // mat4 matrix = GLM_MAT4_IDENTITY_INIT;
-    // vec3 translation = {0.0f, 0.0f, 0.0f};
-    // versor rotation = {1.0f, 0.0f, 0.0f, 0.0f};
-    // vec3 scale = {1.0f, 1.0f, 1.0f};
-
-    // Camera Matrix
-    Shader_Uniform_Vec3(model.shader, "camPos", cam.position);
-    Camera_View_Projection_To_Shader(cam, model.shader, "camMatrix");
-
-    // Update trans, rot and scale
-    // mat4 mat_trans = GLM_MAT4_ZERO_INIT;
-    // mat4 mat_rot = GLM_MAT4_ZERO_INIT;
-    // mat4 mat_scale = GLM_MAT4_ZERO_INIT;
-
-    // glm_translate_make(mat_trans, translation);
-    // glm_quat_mat4(rotation, mat_rot);
-    // glm_scale_make(mat_scale, scale);
-
-    // Send to shader uniforms
-    // Shader_Uniform_Mat4(model.shader, "translation", mat_trans);
-    // Shader_Uniform_Mat4(model.shader, "rotation", mat_rot);
-    // Shader_Uniform_Mat4(model.shader, "scale", mat_scale);
-    // Shader_Uniform_Mat4(model.shader, "model", matrix);
-
-    // glm_vec3_print(cam.position, stdout);
-
-    VAO_Bind(model.vao);
-    // Draw call
-    // glDrawArrays(GL_TRIANGLES, 0, model.num_indicies);
-    glDrawElements(GL_TRIANGLES, model.num_indicies, GL_UNSIGNED_INT, 0);
-}
-
-void recursive_render(struct Mesh m, const struct aiScene *sc, const struct aiNode *nd)
+static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, const struct aiNode *nd)
 {
     // Get node transformation matrix
     // OpenGL matrices are column major
@@ -891,7 +666,7 @@ void recursive_render(struct Mesh m, const struct aiScene *sc, const struct aiNo
     // Default values
     mat4 matrix = GLM_MAT4_IDENTITY_INIT;
     vec3 translation = {0.0f, 0.0f, 0.0f};
-    versor rotation = {0.0f, 0.0f, 0.0f, 0.0f};
+    versor rotation = {-0.7071068f, 0.0f, 0.0f, 0.7071068f};
     vec3 scale = {1.0f, 1.0f, 1.0f};
 
     // Update trans, rot and scale
@@ -910,23 +685,30 @@ void recursive_render(struct Mesh m, const struct aiScene *sc, const struct aiNo
     Shader_Uniform_Mat4(m.shader, "model", matrix);
 
     // draw all meshes assigned to this node
-    for (unsigned int n = 0; n < nd->mNumMeshes; ++n)
+    for (unsigned int n = 0; n < nd->mNumMeshes; n++)
     {
         // bind material uniform
-        glBindBufferRange(GL_UNIFORM_BUFFER, 0, m.models[nd->mMeshes[n]].material_vbo.ID, 0, sizeof(struct MaterialInfo));
-        // bind texture
-        glBindTexture(GL_TEXTURE_2D, m.models[nd->mMeshes[n]].tex.ID);
-        // bind VAO
-        glBindVertexArray(m.models[nd->mMeshes[n]].vao.ID);
-        // draw
+        UBO_Bind_Buffer_To_Index(m.models[nd->mMeshes[n]].material_vbo.ID, 0, 0, sizeof(struct MaterialInfo));
+        // glBindBufferRange(GL_UNIFORM_BUFFER, 0, m.models[nd->mMeshes[n]].material_vbo.ID, 0, sizeof(struct MaterialInfo));
+
+        Texture_Bind(m.models[nd->mMeshes[n]].tex);
+
+        VAO_Bind(m.models[nd->mMeshes[n]].vao);
+
         glDrawElements(GL_TRIANGLES, m.models[nd->mMeshes[n]].num_indicies * 3, GL_UNSIGNED_INT, 0);
     }
 
     // draw all children
-    for (unsigned int n = 0; n < nd->mNumChildren; ++n)
+    for (unsigned int n = 0; n < nd->mNumChildren; n++)
     {
-        recursive_render(m, sc, nd->mChildren[n]);
+        _Recursive_Mesh_Renderer(m, sc, nd->mChildren[n]);
     }
+}
+
+void Mesh_Draw(struct Mesh m)
+{
+    Shader_Bind(m.shader);
+    _Recursive_Mesh_Renderer(m, m.scene, m.scene->mRootNode);
 }
 
 void Model_Free(struct Model model)
@@ -937,6 +719,8 @@ void Model_Free(struct Model model)
 
 void Mesh_Free(struct Mesh mesh)
 {
+    aiReleaseImport(mesh.scene);
+
     for (unsigned int i = 0; i < mesh.num_models; i++)
     {
         VAO_Destroy(mesh.models[i].vao);
