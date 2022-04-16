@@ -15,16 +15,15 @@ uniform float outlining;
 void main()
 {
     // First Method
-    vec3 crntPos = vec3(model * translation * rotation * scale * outlining *
-                        vec4(aPos, 1.0f));
-    gl_Position = camMatrix * vec4(crntPos, 1.0);
+    // vec3 crntPos = vec3(model * translation * rotation * scale * outlining *
+    //                    vec4(aPos, 1.0f));
+    // gl_Position = camMatrix * vec4(crntPos, 1.0);
 
     // Second Method
     // vec3 crntPos = vec3(model * translation * rotation * scale * vec4(aPos + aNormal * outlining, 1.0f));
     // gl_Position = camMatrix * vec4(crntPos, 1.0);
 
     // Third Method
-    //    vec3 crntPos =
-    //        vec3(model * translation * rotation * scale * vec4(aPos, 1.0f));
-    //    gl_Position = camMatrix * vec4(crntPos, 1.0);
+    vec3 crntPos = vec3(model * translation * rotation * scale * vec4(aPos, 1.0f));
+    gl_Position = camMatrix * vec4(crntPos, 1.0);
 }

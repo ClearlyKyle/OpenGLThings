@@ -19,8 +19,9 @@ void StencilBuffer_Init()
     struct Shader outliningProgram = Shader_Create(
         "../../Examples/10 - Stencil Buffer/outlining.vs",
         "../../Examples/10 - Stencil Buffer/outlining.fs",
-        0,
-        NULL);
+        1,
+        (struct VertexAttribute[]){
+            {.index = 0, .name = "aPos"}});
 
     // Take care of all the light related things
     vec4 lightColor = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -54,14 +55,18 @@ void StencilBuffer_Init()
 
     sb.cam = cam;
 
-    glEnable(GL_DEPTH_TEST);                   // Enables the Depth Buffer
-    glEnable(GL_STENCIL_TEST);                 // Enables the Stencil Buffer
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); // Sets rules for outcomes of stecil tests
+    glEnable(GL_DEPTH_TEST);   // Enables the Depth Buffer
+    glEnable(GL_STENCIL_TEST); // Enables the Stencil Buffer
+    glStencilOp(
+        GL_KEEP,   // stencil action if stencil test fails
+        GL_KEEP,   // stencil action if stencil test passes but depth test fails
+        GL_REPLACE // stencil action if both pass (fragment shader will also run)
+    );
 }
 
 void StencilBuffer_Update()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClear(GL_STENCIL_BUFFER_BIT);
 
     Camera_Inputs(&sb.cam);
 
@@ -78,31 +83,31 @@ void StencilBuffer_Update()
     // Draw the normal model
     recursive_render(sb.model, sb.model.scene, sb.model.scene->mRootNode);
 
-    // Make it so only the pixels without the value 1 pass the test
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // Disable modifying of the stencil buffer
-    glStencilMask(0x00);                 // Disable the depth buffer
-    glDisable(GL_DEPTH_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // Make it so only the pixels without the value 1 pass the test
+    glStencilMask(0x00);                 // Disable modifying of the stencil buffer
+    glDisable(GL_DEPTH_TEST);            // Disable the depth buffer
 
     // ------------------------------------------------------------------------------------------------
     // OUTLINE SHADER BIND
-    Shader_Bind(sb.outline.shader);
+    Shader_Bind(sb.outline_shader);
     Shader_Uniform_Vec3(sb.outline.shader, "camPos", sb.cam.position);
 
     Camera_View_Projection_To_Shader(sb.cam, sb.outline.shader, "camMatrix");
 
     // First method from the tutorial
-    Shader_Uniform_Float(sb.outline.shader, "outlining", 1.08f);
-
-    sb.model.shader = sb.outline_shader; // TODO : Models should not hold their own shader?
-    recursive_render(sb.model, sb.model.scene, sb.model.scene->mRootNode);
-    sb.model.shader = sb.model_shader;
+    // Shader_Uniform_Float(sb.outline.shader, "outlining", 1.08f);
+    // Shader_Bind(sb.model_shader);
+    // sb.model.shader = sb.outline_shader;                                   // TODO : Models should not hold their own shader?
+    // recursive_render(sb.model, sb.model.scene, sb.model.scene->mRootNode); // DRAW MODEL
+    // sb.model.shader = sb.model_shader;
 
     // Second method from the tutorial
     // Shader_Uniform_Float(sb.outline.shader, "outlining", 0.08f);
     // recursive_render(sb.outline, sb.outline.scene, sb.outline.scene->mRootNode);
 
     // Third method from the tutorial
-    // recursive_render(sb.outline, sb.outline.scene, sb.outline.scene->mRootNode);
+    // sb.outline.shader = sb.outline_shader;
+    recursive_render(sb.outline, sb.outline.scene, sb.outline.scene->mRootNode);
 
     // Reset and Clear
     glStencilMask(0xFF);               // Enable modifying of the stencil buffer
