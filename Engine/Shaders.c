@@ -167,43 +167,52 @@ void Shader_Bind(const struct Shader shader)
 // ------------------------------------------------------------------------------------------------
 // UNIFORMS
 
+#define LOCATION_CHECK(LOCATION, NAME, FUNCTION)                                                                       \
+    if ((LOCATION) < 0)                                                                                                \
+        fprintf(stderr, _colour_RED "[UNIFORM ERROR] " _colour_COLOUR_X "Error locating uniform name : %s\n", (NAME)); \
+    else                                                                                                               \
+        (FUNCTION);
+
 void Shader_Uniform_Float(struct Shader shader, const char *name, float f)
 {
-    glUniform1f(glGetUniformLocation(shader.shader_id, name), f);
+    const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
+    LOCATION_CHECK(location, name, glUniform1f(location, f));
 }
 
 void Shader_Uniform_Vec3(struct Shader shader, char *name, vec3 v)
 {
-    glUniform3f(glGetUniformLocation(shader.shader_id, name), v[0], v[1], v[2]);
+    const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
+    LOCATION_CHECK(location, name, glUniform3f(location, v[0], v[1], v[2]));
 }
 
 void Shader_Uniform_Vec4(struct Shader shader, char *name, vec4 v)
 {
     // A vec3 is valid to pass to vec4 uniform, easy mistake, check for correct size
     // vec being used, similar for vec3 uniform
-    glUniform4f(glGetUniformLocation(shader.shader_id, name), v[0], v[1], v[2], v[3]);
+    const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
+    LOCATION_CHECK(location, name, glUniform4f(location, v[0], v[1], v[2], v[3]));
 }
 
 void Shader_Uniform_Mat4(struct Shader shader, const char *name, const mat4 matrix)
 {
-    glUniformMatrix4fv(glGetUniformLocation(shader.shader_id, name), 1, GL_FALSE, matrix[0]);
+    const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
+    LOCATION_CHECK(location, name, glUniformMatrix4fv(location, 1, GL_FALSE, matrix[0]));
 }
 
 void Shader_Uniform_Mat4_Floats(struct Shader shader, const char *name, const float *matrix)
 {
-    glUniformMatrix4fv(glGetUniformLocation(shader.shader_id, name), 1, GL_FALSE, matrix);
+    const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
+    LOCATION_CHECK(location, name, glUniformMatrix4fv(location, 1, GL_FALSE, matrix));
 }
 
-void Shader_Uniform_Texture2D(struct Shader shader, char *name, const struct Texture texture, GLuint n)
+void Shader_Uniform_Texture2D(struct Shader shader, char *name, const struct Texture texture)
 {
-    glActiveTexture(GL_TEXTURE0 + n);
+    Shader_Bind(shader);
     Texture_Bind(texture);
+    glActiveTexture(GL_TEXTURE0 + texture.slot);
 
     const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
-    if (location < 0)
-        fprintf(stderr, "Shader_Uniform_Texture2D might have an error =D\n");
-    else
-        glUniform1i(location, n);
+    LOCATION_CHECK(location, name, glUniform1i(location, texture.slot));
 }
 
 // Move this to Shder file?
@@ -215,6 +224,6 @@ void Texture_Uniform(struct Shader shader, const struct Texture texture, const c
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(texture.type, texture.ID);
 
-    // Sets the value of the uniform
-    glUniform1i(glGetUniformLocation(shader.shader_id, (const GLchar *)uniform), unit);
+    const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)uniform);
+    LOCATION_CHECK(location, uniform, glUniform1i(location, unit));
 }
