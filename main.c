@@ -47,7 +47,10 @@ int main(int argc, char *argv[])
     // Window_Init(800, 800, DepthBuffer_Init, DepthBuffer_Update, DepthBuffer_OnExit);
 
     // Example 10 - Stencil Buffer
-    Window_Init(800, 800, StencilBuffer_Init, StencilBuffer_Update, StencilBuffer_OnExit);
+    // Window_Init(800, 800, StencilBuffer_Init, StencilBuffer_Update, StencilBuffer_OnExit);
+
+    // Example 11 - Face Culling
+    Window_Init(800, 800, FaceCulling_Init, FaceCulling_Update, FaceCulling_OnExit);
 
     // Example 20 - Drawing Triangles with use of UBO
     // Window_Init(800, 800, UBOExample_Init, UBOExample_Update, UBOExample_OnExit);
