@@ -6,12 +6,12 @@ struct Camera Camera_Create(unsigned int width, unsigned int height, vec3 positi
     struct Camera cam =
         {
             .orientation = {0.0f, 0.0f, -1.0f},
-            .up = {0.0f, 1.0f, 0.0f},
-            .firstClick = true,
-            .speed = 0.001f,
+            .up          = {0.0f, 1.0f, 0.0f},
+            .firstClick  = true,
+            .speed       = 0.001f,
             .sensitivity = 100.0f,
-            .width = width,
-            .height = height};
+            .width       = width,
+            .height      = height};
 
     glm_vec3_copy(position, cam.position);
 
@@ -22,7 +22,7 @@ struct Camera Camera_Create(unsigned int width, unsigned int height, vec3 positi
 
     // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction
     // vector pointing to the right so we initially rotate a bit to the left.
-    cam.yaw = -90.0f;
+    cam.yaw   = -90.0f;
     cam.pitch = 0.0f;
     cam.lastX = (int)(800.0f / 2.0f);
     cam.lastY = (int)(800.0f / 2.0f);
@@ -137,8 +137,8 @@ void Camera_Inputs(struct Camera *camera)
         // printf("mouse relative pos : %d, %d\n", tmp_x, tmp_y);
 
         const float sensitivity = 0.1f;
-        const float xoffset = (float)rel_x * sensitivity;
-        const float yoffset = (float)-rel_y * sensitivity; // negative so up is up
+        const float xoffset     = (float)rel_x * sensitivity;
+        const float yoffset     = (float)-rel_y * sensitivity; // negative so up is up
 
         camera->yaw += xoffset;
         camera->pitch += yoffset;
@@ -181,5 +181,5 @@ void Camera_Print_Values(struct Camera camera)
     printf("Up          \t: {%ff, %ff, %ff}\n", camera.up[0], camera.up[1], camera.up[2]);
 
     printf("Pitch \t: %ff\n", camera.pitch);
-    printf("Yawe  \t: %ff\n", camera.yaw);
+    printf("Yaw   \t: %ff\n", camera.yaw);
 }
