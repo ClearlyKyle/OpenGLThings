@@ -17,7 +17,7 @@ void FaceCulling_Init()
 
     // Take care of all the light related things
     vec4 lightColor = {1.0f, 1.0f, 1.0f, 1.0f};
-    vec3 lightPos = {1.0f, 1.0f, 1.5f};
+    vec3 lightPos   = {1.0f, 1.0f, 1.5f};
     // mat4 lightModel;
     // glm_translate_make(lightModel, lightPos);
 
@@ -45,13 +45,13 @@ void FaceCulling_Init()
     glm_vec3_copy((vec3){0.114410f, 0.412679f, 0.933686f}, cam.position);
     glm_vec3_copy((vec3){-0.188730f, -0.345298f, -0.919321f}, cam.orientation);
     cam.pitch = -20.199989f;
-    cam.yaw = -101.601227f;
+    cam.yaw   = -101.601227f;
 
     fc.cam = cam;
 
     // Texture_Uniform(fc.model.shader, fc.model.textures[0], "diffuse0", fc.model.textures[0].slot);
 
-    Shader_Uniform_Texture2D(fc.model.shader, "diffuse0", fc.model.textures[0]);
+    Shader_Uniform_Texture2D(fc.model.shader, "diffuse0", fc.model.texInfo.textures[0]);
 }
 
 void FaceCulling_Update()
