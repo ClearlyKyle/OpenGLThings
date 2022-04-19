@@ -1,5 +1,15 @@
 #include "SpecularMaps.h"
 
+struct SpecularMaps
+{
+    struct Shader shader[2];
+    struct VAO vao[2];
+    struct Texture tex[2];
+    struct Camera cam;
+
+    GLsizei numer_of_indicies[2];
+};
+
 static struct SpecularMaps spec_maps;
 
 void SpecularMaps_Init()
@@ -50,8 +60,8 @@ void SpecularMaps_Init()
     {
         // Generates Shader object using shaders default.vert and default.frag
         struct Shader shader = Shader_Create(
-            "../../Examples/shaders/7/default.vs",
-            "../../Examples/shaders/7/default.fs",
+            "../../Examples/7 - Specular Maps/default.vs",
+            "../../Examples/7 - Specular Maps/default.fs",
             4,
             (struct VertexAttribute[]){
                 {.index = 0, .name = "aPos"},
@@ -87,8 +97,8 @@ void SpecularMaps_Init()
     {
         // Generates Shader object using shaders default.vert and default.frag
         struct Shader shader = Shader_Create(
-            "../../Examples/shaders/7/lights.vs",
-            "../../Examples/shaders/7/lights.fs",
+            "../../Examples/7 - Specular Maps/lights.vs",
+            "../../Examples/7 - Specular Maps/lights.fs",
             1,
             (struct VertexAttribute[]){
                 {.index = 0, .name = "aPos"}});
@@ -116,13 +126,13 @@ void SpecularMaps_Init()
         // EBO_Unbind();
     }
 
-    vec4 light_colour = {1.0f, 1.0f, 1.0f, 1.0f};
+    vec4 light_colour   = {1.0f, 1.0f, 1.0f, 1.0f};
     vec3 light_position = {0.5f, 0.5f, 0.5f};
-    mat4 light_model = GLM_MAT4_ZERO_INIT;
+    mat4 light_model    = GLM_MAT4_ZERO_INIT;
     glm_translate_make(light_model, light_position);
 
     vec3 pyramid_position = {0.0f, 0.0f, 0.0f};
-    mat4 pyramid_model = GLM_MAT4_ZERO_INIT;
+    mat4 pyramid_model    = GLM_MAT4_ZERO_INIT;
     glm_translate_make(pyramid_model, pyramid_position);
 
     Shader_Bind(spec_maps.shader[0]);
@@ -136,19 +146,24 @@ void SpecularMaps_Init()
 
     //  Texture
     const char *file_path1 = "../../Examples/res/textures/planks.png";
-    struct Texture tex1 = Texture_Create(file_path1, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
-    spec_maps.tex[0] = tex1;
+    struct Texture tex1    = Texture_Create(file_path1, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    spec_maps.tex[0]       = tex1;
 
     const char *file_path2 = "../../Examples/res/textures/planksSpec.png";
-    struct Texture tex2 = Texture_Create(file_path2, GL_TEXTURE_2D, 1, GL_RED, GL_UNSIGNED_BYTE);
-    spec_maps.tex[1] = tex2;
+    struct Texture tex2    = Texture_Create(file_path2, GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+    spec_maps.tex[1]       = tex2;
 
-    Texture_Uniform(spec_maps.shader[0], tex1, "tex0", 0);
-    Texture_Uniform(spec_maps.shader[0], tex2, "tex1", 1);
+    Shader_Uniform_Texture2D(spec_maps.shader[0], "tex0", tex1);
+    Shader_Uniform_Texture2D(spec_maps.shader[0], "tex1", tex2);
 
     // Camera
     struct Camera cam = Camera_Create(window.width, window.heigh, (vec3){-1.880f, 0.509f, -1.031f}, 45.0f, 0.1f, 100.0f);
     Camera_Set_Orientation(&cam, (vec3){0.85f, -0.17f, 0.48f});
+
+    // glm_vec3_copy((vec3){-39.353584f, 8.195490f, 30.373175f}, cam.position);
+    // glm_vec3_copy((vec3){0.810961f, -0.213032f, -0.544940f}, cam.orientation);
+    // cam.pitch = -12.300069f;
+    // cam.yaw   = -33.899826f;
 
     spec_maps.cam = cam;
 }
@@ -199,6 +214,8 @@ void SpecularMaps_Update()
 
 void SpecularMaps_OnExit()
 {
+    Camera_Print_Values(spec_maps.cam);
+
     VAO_Destroy(spec_maps.vao[0]);
     VAO_Destroy(spec_maps.vao[1]);
     Shader_Destroy(spec_maps.shader[0]);
