@@ -25,8 +25,8 @@ static void _Load_File(void *ctx, const char *filename, const int is_mtl, const 
         fseek(handler, 0, SEEK_END);
         string_size = ftell(handler);
         rewind(handler);
-        *buffer = (char *)malloc(sizeof(char) * (string_size + 1));
-        read_size = fread(*buffer, sizeof(char), (size_t)string_size, handler);
+        *buffer                = (char *)malloc(sizeof(char) * (string_size + 1));
+        read_size              = fread(*buffer, sizeof(char), (size_t)string_size, handler);
         (*buffer)[string_size] = '\0';
         if (string_size != read_size)
         {
@@ -75,7 +75,7 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
 {
     struct Model m;
 
-    tinyobj_shape_t *shape = NULL;
+    tinyobj_shape_t *shape       = NULL;
     tinyobj_material_t *material = NULL;
     tinyobj_attrib_t attrib;
 
@@ -93,23 +93,23 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
 
     _Print_TinyObj_Info(material, &attrib);
 
-    m.num_indicies = attrib.num_face_num_verts * 3;
+    m.num_indicies     = attrib.num_face_num_verts * 3;
     m.num_of_verticies = m.num_indicies;
 
     // VERTICIES
     const GLsizeiptr vertex_data_size = sizeof(GLfloat) * ((m.num_indicies) * 3);
-    GLfloat *vertex_data = (GLfloat *)malloc(vertex_data_size);
+    GLfloat *vertex_data              = (GLfloat *)malloc(vertex_data_size);
 
     // NORMALS
     const GLsizeiptr normal_data_size = sizeof(GLfloat) * ((m.num_indicies) * 3);
-    GLfloat *normal_data = (GLfloat *)malloc(normal_data_size);
+    GLfloat *normal_data              = (GLfloat *)malloc(normal_data_size);
 
     // TEXTURES
     const GLsizeiptr texture_data_size = sizeof(GLfloat) * ((m.num_indicies) * 2);
-    GLfloat *texture_data = (GLfloat *)malloc(texture_data_size);
+    GLfloat *texture_data              = (GLfloat *)malloc(texture_data_size);
 
     const GLsizeiptr index_data_size = sizeof(unsigned int) * (m.num_indicies);
-    unsigned int *index_data = (unsigned int *)malloc(index_data_size);
+    unsigned int *index_data         = (unsigned int *)malloc(index_data_size);
 
     for (unsigned int i = 0; i < attrib.num_face_num_verts; i++)
     {
@@ -212,10 +212,10 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
 
     // TEXTURES
     const char *texture_file_path = "../../Examples/res/models/Dog House/Doghouse_PBR_BaseColor.png";
-    struct Texture tex = Texture_Create(texture_file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    m.tex = tex;
+    struct Texture tex            = Texture_Create(texture_file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    m.tex                         = tex;
 
-    Texture_Uniform(shader, tex, "tex0", 0);
+    Shader_Uniform_Texture2D(shader, "tex0", tex);
 
     m.shader = shader;
     VBO_Unbind();
@@ -232,7 +232,7 @@ struct Model Model_Import_Shader(const char *file_path, struct Shader shader)
 
     fprintf(stderr, "Loading mode : %s\n", file_path);
 
-    tinyobj_shape_t *shape = NULL;
+    tinyobj_shape_t *shape       = NULL;
     tinyobj_material_t *material = NULL;
     tinyobj_attrib_t attrib;
 
@@ -262,23 +262,23 @@ struct Model Model_Import_Shader(const char *file_path, struct Shader shader)
 
     _Print_TinyObj_Info(material, &attrib);
 
-    m.num_indicies = attrib.num_face_num_verts * 3;
+    m.num_indicies     = attrib.num_face_num_verts * 3;
     m.num_of_verticies = m.num_indicies;
 
     // VERTICIES
     const GLsizeiptr vertex_data_size = sizeof(GLfloat) * ((m.num_indicies) * 3);
-    GLfloat *vertex_data = (GLfloat *)malloc(vertex_data_size);
+    GLfloat *vertex_data              = (GLfloat *)malloc(vertex_data_size);
 
     // NORMALS
     const GLsizeiptr normal_data_size = sizeof(GLfloat) * ((m.num_indicies) * 3);
-    GLfloat *normal_data = (GLfloat *)malloc(normal_data_size);
+    GLfloat *normal_data              = (GLfloat *)malloc(normal_data_size);
 
     // TEXTURES
     const GLsizeiptr texture_data_size = sizeof(GLfloat) * ((m.num_indicies) * 2);
-    GLfloat *texture_data = (GLfloat *)malloc(texture_data_size);
+    GLfloat *texture_data              = (GLfloat *)malloc(texture_data_size);
 
     const GLsizeiptr index_data_size = sizeof(unsigned int) * (m.num_indicies);
-    unsigned int *index_data = (unsigned int *)malloc(index_data_size);
+    unsigned int *index_data         = (unsigned int *)malloc(index_data_size);
 
     for (unsigned int i = 0; i < attrib.num_face_num_verts; i++)
     {
@@ -363,15 +363,15 @@ struct Model Model_Import_Shader(const char *file_path, struct Shader shader)
     Shader_Uniform_Mat4(shader, "model", model_transform);
 
     // TEXTURES
-    const char *texture_name = "Doghouse_PBR_BaseColor.png";
+    const char *texture_name   = "Doghouse_PBR_BaseColor.png";
     const char *base_file_path = "../../Examples/res/models/Dog House/";
     char texture_file_path[256];
     sprintf(texture_file_path, "%s%s", base_file_path, texture_name);
 
-    struct Texture tex = Texture_Create(texture_file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    m.tex = tex;
+    struct Texture tex = Texture_Create(texture_file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    m.tex              = tex;
 
-    Texture_Uniform(shader, tex, "tex0", 0);
+    Shader_Uniform_Texture2D(shader, "tex0", tex);
 
     m.shader = shader;
     VBO_Unbind();
@@ -389,12 +389,11 @@ struct Model Model_Import_Shader(const char *file_path, struct Shader shader)
 void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh, const char *base_folder_path)
 {
     /* scan scene's materials for textures */
+    struct TextureInfo texInfo = {0};
 
-    mesh->tex_count = 0;
+    texInfo.tex_count = 0;
     for (unsigned int i = 0; i < scene->mNumMaterials; i++)
     {
-        // unsigned int tex_count = aiGetMaterialTextureCount(scene->mMaterials[i], aiTextureType_DIFFUSE);
-
         // if (tex_count == 0)
         //     continue;
 
@@ -404,52 +403,81 @@ void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh, const char *
         // fprintf(stderr, "Searching for all texture files...\n");
         for (int texture_type = 0; texture_type <= aiTextureType_UNKNOWN; texture_type++)
         {
+            const unsigned int texture_type_count = aiGetMaterialTextureCount(scene->mMaterials[i], texture_type);
+            // printf("%d %s texture\n", texture_type_count, TextureTypeToString(texture_type));
+
             int texIndex = 0;
             while (aiGetMaterialTexture(scene->mMaterials[i], texture_type, texIndex, &path, NULL, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
             {
                 texIndex++;
 
-                const char *texture_type_str = TextureTypeToString(texture_type);
-                fprintf(stderr, "(i = %d)(texIndex : %d)(type = %s) aiGetMaterialTexture [%d]: %s\n", i, texIndex, texture_type_str, texIndex, path.data);
+                fprintf(stderr, "(i = %d)(texIndex : %d)(type = %d) aiGetMaterialTexture [%d]: %s\n", i, texIndex, texture_type, texIndex, path.data);
 
                 // TODO : Search for texture function?
                 bool save_this_path = true;
-                for (size_t i = 1; i <= mesh->tex_count; i++)
+                for (size_t i = 1; i <= texInfo.tex_count; i++)
                 {
                     // if strings are equal, the function returns 0
-                    if (strcmp(mesh->tex_names[mesh->tex_count - 1], path.data) == 0)
+                    if (strcmp(texInfo.texture_file_paths[texInfo.tex_count - 1], path.data) == 0)
                         save_this_path = false;
                 }
                 if (save_this_path == true)
                 {
                     // TODO : Create and bind texture here?
-                    mesh->tex_names[mesh->tex_count] = (char *)malloc(sizeof(char) * (path.length));
-                    strcpy(mesh->tex_names[mesh->tex_count], path.data);
-                    mesh->tex_count += 1;
+                    texInfo.texture_file_paths[texInfo.tex_count] = (char *)malloc(sizeof(char) * (path.length));
+                    strcpy(texInfo.texture_file_paths[texInfo.tex_count], path.data);
+                    texInfo.texture_type[texInfo.tex_count] = texture_type;
+
+                    texInfo.tex_count += 1;
                 }
             }
         }
     }
 
     fprintf(stderr, "Textures found...\n");
-    for (size_t i = 0; i < mesh->tex_count; i++)
+    for (size_t i = 0; i < texInfo.tex_count; i++)
     {
-        fprintf(stderr, "[%lld] %s\n", i, mesh->tex_names[i]);
+        fprintf(stderr, "[%lld] %s\n", i, texInfo.texture_file_paths[i]);
     }
 
-    mesh->textures = (struct Texture *)malloc(sizeof(struct Texture) * mesh->tex_count);
+    // size_t counter = 0;
+    // for (char *p = texInfo.texture_file_paths, *end = texInfo.texture_file_paths[texInfo.tex_count]; p != end; p++, counter++)
+    //{
+    //     fprintf(stderr, "[%lld] %s\n", counter, *p);
+    // }
 
-    for (size_t i = 0; i <= mesh->tex_count - 1; i++)
+    texInfo.textures = (struct Texture *)malloc(sizeof(struct Texture) * texInfo.tex_count);
+
+    for (size_t i = 0; i <= texInfo.tex_count - 1; i++)
     {
         char buff[256];
-        sprintf(buff, "%s%s", base_folder_path, mesh->tex_names[i]);
+        sprintf(buff, "%s%s", base_folder_path, texInfo.texture_file_paths[i]);
         // strcat(base_file_path, mesh->tex_names[i]);
 
-        struct Texture tex = Texture_Create(buff, GL_TEXTURE_2D, (GLuint)i, GL_RGBA, GL_UNSIGNED_BYTE);
-        mesh->textures[i] = tex;
+        const char *texture_type_str = TextureTypeToString(texInfo.texture_type[i]);
 
-        fprintf(stderr, "[bound %lld] %s\n", i, buff);
+        struct Texture tex  = Texture_Create(buff, GL_TEXTURE_2D, (GLuint)i, GL_RGBA, GL_UNSIGNED_BYTE);
+        texInfo.textures[i] = tex;
+
+        switch (texInfo.texture_type[i])
+        {
+        case aiTextureType_DIFFUSE:
+        {
+            Shader_Uniform_Texture2D(mesh->shader, "diffuse0", tex);
+            fprintf(stderr, "[slot - %lld](type: %s) %s\n", i, "diffuse0", buff);
+            break;
+        }
+        case aiTextureType_SPECULAR:
+            Shader_Uniform_Texture2D(mesh->shader, "specular0", tex);
+            fprintf(stderr, "[slot - %lld](type: %s) %s\n", i, "specular0", buff);
+            break;
+
+        default:
+            break;
+        }
     }
+
+    mesh->texInfo = texInfo;
 
     // TODO : Cleanup
     fprintf(stderr, "Textures Laoded\n");
@@ -465,7 +493,7 @@ static void _aiColor4D_to_glm_vec4(struct aiColor4D col, vec4 glm_col)
 
 static void _Get_Path_To_File(const char *full_path, char *path_to_file, char sperator)
 {
-    char *last = strrchr(full_path, sperator);
+    char *last                 = strrchr(full_path, sperator);
     const size_t full_path_len = strlen(full_path);
 
     if (last != NULL)
@@ -478,7 +506,11 @@ static void _Get_Path_To_File(const char *full_path, char *path_to_file, char sp
 
 struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
 {
-    struct Mesh my_mesh;
+    struct Mesh my_mesh = {
+        .matrix      = GLM_MAT4_IDENTITY_INIT,
+        .translation = {0.0f, 0.0f, 0.0f},
+        .rotation    = {0.0f, 0.0f, 0.0f, 0.0f},
+        .scale       = {1.0f, 1.0f, 1.0f}};
     struct Model model;
 
     my_mesh.shader = shader;
@@ -501,10 +533,10 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
 
     // For each mesh
     my_mesh.num_models = scene->mNumMeshes;
-    my_mesh.models = (struct Model *)malloc(sizeof(struct Model) * scene->mNumMeshes);
+    my_mesh.models     = (struct Model *)malloc(sizeof(struct Model) * scene->mNumMeshes);
 
     my_mesh.material_ubo_index = 0;
-    my_mesh.ubo_size = sizeof(struct MaterialInfo);
+    my_mesh.ubo_size           = sizeof(struct MaterialInfo);
 
     for (unsigned int i = 0; i < scene->mNumMeshes; i++)
     {
@@ -514,7 +546,7 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
 
         // Convert Assimp faces format to array format
         unsigned int *faceArray = (unsigned int *)malloc(sizeof(unsigned int) * mesh->mNumFaces * 3);
-        unsigned int faceIndex = 0;
+        unsigned int faceIndex  = 0;
 
         for (unsigned int f = 0; f < mesh->mNumFaces; f++)
         {
@@ -529,7 +561,7 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
 
         // generate Vertex Array for mesh
         struct VAO vao = VAO_Create(); // Bound
-        model.vao = vao;
+        model.vao      = vao;
 
         // buffer for faces
         struct EBO ebo_faces = EBO_Create(); // Bound
@@ -570,11 +602,14 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
         }
 
         // buffer for vertex texture coordinates
-        const size_t number_of_tex_coords = sizeof(mesh->mTextureCoords) / sizeof(mesh->mTextureCoords[0]);
-        if (number_of_tex_coords != 0)
+        // const size_t number_of_tex_coords = sizeof(mesh->mTextureCoords) / sizeof(mesh->mTextureCoords[0]);
+
+        // const bool HasTextureCoords = 0 >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? false : mesh->mTextureCoords[0] != NULL;
+
+        if (mesh->mTextureCoords[0] != NULL)
         {
             float *texCoords = (float *)malloc(sizeof(float) * 2 * mesh->mNumVertices);
-            for (unsigned int k = 0; k < mesh->mNumVertices; ++k)
+            for (unsigned int k = 0; k < mesh->mNumVertices; k++)
             {
                 texCoords[k * 2 + 0] = mesh->mTextureCoords[0][k].x;
                 texCoords[k * 2 + 1] = mesh->mTextureCoords[0][k].y;
@@ -596,11 +631,12 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
         const enum aiReturn ret = aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &texPath, NULL, NULL, NULL, NULL, NULL, NULL);
         if (ret == AI_SUCCESS)
         {
-            for (size_t i = 0; i < my_mesh.tex_count; i++)
+            for (size_t i = 0; i < my_mesh.texInfo.tex_count; i++)
             {
-                if (strcmp(my_mesh.tex_names[i], texPath.data) == 0)
+                if (strcmp(my_mesh.texInfo.texture_file_paths[i], texPath.data) == 0)
                 {
-                    model.tex = my_mesh.textures[i];
+                    model.tex = my_mesh.texInfo.textures[i];
+                    // Texture_Uniform();
                     break;
                 }
             }
@@ -646,12 +682,12 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
         model.material_vbo = materials;
 
         model.material_info = material_info;
-        my_mesh.models[i] = model;
+        my_mesh.models[i]   = model;
     }
 
     // recursive_render(my_mesh, scene, scene->mRootNode);
 
-    fprintf(stderr, "[MODEL] Mesh loading complete!\n");
+    fprintf(stderr, "[MODEL] Mesh loading complete!\n\n");
     return my_mesh;
 }
 
@@ -663,33 +699,31 @@ static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, co
     float aux[16];
     memcpy(aux, &mTrans, sizeof(float) * 16);
 
-    // Default values
-    mat4 matrix = GLM_MAT4_IDENTITY_INIT;
-    vec3 translation = {0.0f, 0.0f, 0.0f};
-    versor rotation = {-0.7071068f, 0.0f, 0.0f, 0.7071068f};
-    vec3 scale = {1.0f, 1.0f, 1.0f};
-
     // Update trans, rot and scale
     mat4 mat_trans = GLM_MAT4_ZERO_INIT;
-    mat4 mat_rot = GLM_MAT4_ZERO_INIT;
+    mat4 mat_rot   = GLM_MAT4_ZERO_INIT;
     mat4 mat_scale = GLM_MAT4_ZERO_INIT;
 
-    glm_translate_make(mat_trans, translation);
-    glm_quat_mat4(rotation, mat_rot);
-    glm_scale_make(mat_scale, scale);
+    glm_translate_make(mat_trans, m.translation);
+    glm_quat_mat4(m.rotation, mat_rot);
+    glm_scale_make(mat_scale, m.scale);
+
+    // uniform mat4 model;
+    // uniform mat4 translation;
+    // uniform mat4 rotation;
+    // uniform mat4 scale;
 
     // Send to shader uniforms
-    Shader_Uniform_Mat4_Floats(m.shader, "translation", aux);
+    Shader_Uniform_Mat4_Floats(m.shader, "translation", mat_trans);
     Shader_Uniform_Mat4(m.shader, "rotation", mat_rot);
     Shader_Uniform_Mat4(m.shader, "scale", mat_scale);
-    Shader_Uniform_Mat4(m.shader, "model", matrix);
+    Shader_Uniform_Mat4(m.shader, "model", m.matrix);
 
     // draw all meshes assigned to this node
     for (unsigned int n = 0; n < nd->mNumMeshes; n++)
     {
         // bind material uniform
         UBO_Bind_Buffer_To_Index(m.models[nd->mMeshes[n]].material_vbo.ID, 0, 0, sizeof(struct MaterialInfo));
-        // glBindBufferRange(GL_UNIFORM_BUFFER, 0, m.models[nd->mMeshes[n]].material_vbo.ID, 0, sizeof(struct MaterialInfo));
 
         Texture_Bind(m.models[nd->mMeshes[n]].tex);
 
@@ -703,6 +737,21 @@ static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, co
     {
         _Recursive_Mesh_Renderer(m, sc, nd->mChildren[n]);
     }
+}
+
+void Mesh_Set_Translation(struct Mesh *mesh, vec3 new_translation)
+{
+    glm_vec3_copy(new_translation, mesh->translation);
+}
+
+void Mesh_Set_Rotation(struct Mesh *mesh, vec4 new_rotation)
+{
+    glm_vec4_copy(new_rotation, mesh->rotation);
+}
+
+void Mesh_Set_Scale(struct Mesh *mesh, vec3 new_scale)
+{
+    glm_vec3_copy(new_scale, mesh->scale);
 }
 
 void Mesh_Draw(struct Mesh m)

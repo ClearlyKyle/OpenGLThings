@@ -63,11 +63,16 @@ struct Mesh
     GLuint material_ubo_index;
     GLsizeiptr ubo_size;
 
-    unsigned int tex_count;
-    struct Texture *textures;
-    struct aiString *texture_names;
-    char *tex_names[32]; // array of pointers
+    struct TextureInfo texInfo;
+
+    // Default values
+    mat4 matrix;
+    vec3 translation;
+    vec4 rotation;
+    vec3 scale;
 };
+
+typedef struct Mesh Mesh_t;
 
 // "tinyobj_parse_obj" methods
 struct Model Model_Import(const char *file_path, const char *vertex_shader_path, const char *fragment_shader_path, size_t n, struct VertexAttribute attributes[]);
@@ -76,8 +81,12 @@ struct Model Model_Import_Shader(const char *file_path, struct Shader ShaderColo
 void Model_Draw(struct Model model, struct Camera cam);
 void Model_Free(struct Model model);
 
+void Mesh_Set_Translation(struct Mesh *mesh, vec3 new_translation);
+void Mesh_Set_Rotation(struct Mesh *mesh, vec4 new_rotation);
+void Mesh_Set_Scale(struct Mesh *mesh, vec3 new_scale);
+
 // "assimp" methods
-struct Mesh Mesh_Load(const struct Shader shader, const char *file_path);
+Mesh_t Mesh_Load(const struct Shader shader, const char *file_path);
 void Mesh_Draw(struct Mesh m);
 void Mesh_Free(struct Mesh mesh);
 
