@@ -38,6 +38,19 @@ struct Model
     struct MaterialInfo material_info;
 };
 
+struct TextureInfo
+{
+    struct Texture *textures;
+
+    // How many textures currently loaded into texture_file_paths
+    unsigned int tex_count;
+
+    // All unique texture file paths will be added here
+    char *texture_file_paths[32]; // array of pointers
+
+    enum aiTextureType texture_type[32];
+};
+
 struct Mesh
 {
     struct aiScene *scene;
