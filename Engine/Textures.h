@@ -11,7 +11,9 @@ struct Texture
     GLenum type;
 };
 
-struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot, GLenum format, GLenum pixel_type);
+typedef struct Texture Texture_t;
+
+Texture_t Texture_Create(const char *path, GLenum texture_type, GLuint slot, GLenum format, GLenum pixel_type);
 
 void Texture_Bind(const struct Texture t);
 void Texture_Unbind();

@@ -5,10 +5,11 @@
 
 struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot, GLenum format, GLenum pixel_type)
 {
-    assert(slot < GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+    assert((GL_TEXTURE0 + slot) < GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
 
     struct Texture t;
     t.type = texture_type;
+    t.slot = slot; // slot is used for "glActiveTexture(GL_TEXTURE0 + slot)"
 
     // Stores the width, height, and the number of color channels of the image
     int image_width, image_height, image_bpp;
@@ -18,19 +19,16 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
 
     // Reads the image from a file and stores it in bytes
     unsigned char *image_bytes = stbi_load(path, &image_width, &image_height, &image_bpp, STBI_rgb_alpha);
-    if (image_bytes == NULL)
-    {
-        fprintf(stderr, "[ERROR] (stbi_load) : %s\n", path);
-        exit(1);
-    }
-    // assert_message(image_bytes != NULL, ("Error with image path :  %s\n", path));F
+    check_that(image_bytes != NULL, "[ERROR] (stbi_load) : %s\n", path);
 
     // Generates an OpenGL texture object
     glGenTextures(1, &t.ID);
 
+    // OpenGL 4.5+
+    // glBindTextureUnit(slot, t.ID); // same as glActiveTexture + glBindTexture
+
     // Assigns the texture to a Texture Unit
     glActiveTexture(GL_TEXTURE0 + slot);
-    t.slot = slot;                     // slot is used for "glActiveTexture(GL_TEXTURE0 + slot)"
     glBindTexture(texture_type, t.ID); // ID is used for "glBindTexture(..., ID)"
 
     // Configures the type of algorithm that is used to make the image smaller or bigger
@@ -58,6 +56,7 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
 
 void Texture_Bind(const struct Texture t)
 {
+    glActiveTexture(GL_TEXTURE0 + t.slot);
     glBindTexture(t.type, t.ID);
 }
 
