@@ -41,14 +41,15 @@ void Transparancy_Init()
                                                      {.index = 2, .name = "aColor"},
                                                      {.index = 3, .name = "aTex"}});
 
-    struct Shader shader_grass  = Shader_Create("../../Examples/12 - Transparancy/default.vs",
-                                                "../../Examples/12 - Transparancy/grass.fs",
-                                                4,
-                                                (struct VertexAttribute[]){
-                                                    {.index = 0, .name = "aPos"},
-                                                    {.index = 1, .name = "aNormal"},
-                                                    {.index = 2, .name = "aColor"},
-                                                    {.index = 3, .name = "aTex"}});
+    struct Shader shader_grass = Shader_Create("../../Examples/12 - Transparancy/default.vs",
+                                               "../../Examples/12 - Transparancy/grass.fs",
+                                               4,
+                                               (struct VertexAttribute[]){
+                                                   {.index = 0, .name = "aPos"},
+                                                   {.index = 1, .name = "aNormal"},
+                                                   {.index = 2, .name = "aColor"},
+                                                   {.index = 3, .name = "aTex"}});
+
     struct Shader shader_window = Shader_Create("../../Examples/12 - Transparancy/default.vs",
                                                 "../../Examples/12 - Transparancy/windows.fs",
                                                 4,
@@ -75,6 +76,8 @@ void Transparancy_Init()
     glCullFace(GL_BACK);                               // Keeps front faces
     glFrontFace(GL_CCW);                               // Uses counter clock-wise standard
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Configures the blending function
+    // glBlendFunc(source, destnation) : C_s * T_s - C_d * T_d
+    // glBlendEquation : to change the glBlendFunc function, ex: Src + Dst, Src - Dst...
 
     struct Camera cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f}, 45.0f, 0.1f, 100.0f);
 
