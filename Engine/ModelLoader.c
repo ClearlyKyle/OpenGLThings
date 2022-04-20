@@ -8,8 +8,8 @@
 
 static void _Load_File(void *ctx, const char *filename, const int is_mtl, const char *obj_filename, char **buffer, size_t *len)
 {
-    size_t string_size = 0, read_size = 0;
-    FILE *handler;
+    size_t  string_size = 0, read_size = 0;
+    FILE   *handler;
     errno_t err;
 
     // Open for read (will fail if file "crt_fopen_s.c" doesn't exist)
@@ -75,9 +75,9 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
 {
     struct Model m;
 
-    tinyobj_shape_t *shape       = NULL;
+    tinyobj_shape_t    *shape    = NULL;
     tinyobj_material_t *material = NULL;
-    tinyobj_attrib_t attrib;
+    tinyobj_attrib_t    attrib;
 
     size_t num_shapes;
     size_t num_materials;
@@ -98,18 +98,18 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
 
     // VERTICIES
     const GLsizeiptr vertex_data_size = sizeof(GLfloat) * ((m.num_indicies) * 3);
-    GLfloat *vertex_data              = (GLfloat *)malloc(vertex_data_size);
+    GLfloat         *vertex_data      = (GLfloat *)malloc(vertex_data_size);
 
     // NORMALS
     const GLsizeiptr normal_data_size = sizeof(GLfloat) * ((m.num_indicies) * 3);
-    GLfloat *normal_data              = (GLfloat *)malloc(normal_data_size);
+    GLfloat         *normal_data      = (GLfloat *)malloc(normal_data_size);
 
     // TEXTURES
     const GLsizeiptr texture_data_size = sizeof(GLfloat) * ((m.num_indicies) * 2);
-    GLfloat *texture_data              = (GLfloat *)malloc(texture_data_size);
+    GLfloat         *texture_data      = (GLfloat *)malloc(texture_data_size);
 
     const GLsizeiptr index_data_size = sizeof(unsigned int) * (m.num_indicies);
-    unsigned int *index_data         = (unsigned int *)malloc(index_data_size);
+    unsigned int    *index_data      = (unsigned int *)malloc(index_data_size);
 
     for (unsigned int i = 0; i < attrib.num_face_num_verts; i++)
     {
@@ -211,9 +211,9 @@ struct Model Model_Import(const char *file_path, const char *vertex_shader_path,
     Shader_Uniform_Mat4(shader, "model", model_transform);
 
     // TEXTURES
-    const char *texture_file_path = "../../Examples/res/models/Dog House/Doghouse_PBR_BaseColor.png";
-    struct Texture tex            = Texture_Create(texture_file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    m.tex                         = tex;
+    const char    *texture_file_path = "../../Examples/res/models/Dog House/Doghouse_PBR_BaseColor.png";
+    struct Texture tex               = Texture_Create(texture_file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    m.tex                            = tex;
 
     Shader_Uniform_Texture2D(shader, "tex0", tex);
 
@@ -232,9 +232,9 @@ struct Model Model_Import_Shader(const char *file_path, struct Shader shader)
 
     fprintf(stderr, "Loading mode : %s\n", file_path);
 
-    tinyobj_shape_t *shape       = NULL;
+    tinyobj_shape_t    *shape    = NULL;
     tinyobj_material_t *material = NULL;
-    tinyobj_attrib_t attrib;
+    tinyobj_attrib_t    attrib;
 
     size_t num_shapes;
     size_t num_materials;
@@ -267,18 +267,18 @@ struct Model Model_Import_Shader(const char *file_path, struct Shader shader)
 
     // VERTICIES
     const GLsizeiptr vertex_data_size = sizeof(GLfloat) * ((m.num_indicies) * 3);
-    GLfloat *vertex_data              = (GLfloat *)malloc(vertex_data_size);
+    GLfloat         *vertex_data      = (GLfloat *)malloc(vertex_data_size);
 
     // NORMALS
     const GLsizeiptr normal_data_size = sizeof(GLfloat) * ((m.num_indicies) * 3);
-    GLfloat *normal_data              = (GLfloat *)malloc(normal_data_size);
+    GLfloat         *normal_data      = (GLfloat *)malloc(normal_data_size);
 
     // TEXTURES
     const GLsizeiptr texture_data_size = sizeof(GLfloat) * ((m.num_indicies) * 2);
-    GLfloat *texture_data              = (GLfloat *)malloc(texture_data_size);
+    GLfloat         *texture_data      = (GLfloat *)malloc(texture_data_size);
 
     const GLsizeiptr index_data_size = sizeof(unsigned int) * (m.num_indicies);
-    unsigned int *index_data         = (unsigned int *)malloc(index_data_size);
+    unsigned int    *index_data      = (unsigned int *)malloc(index_data_size);
 
     for (unsigned int i = 0; i < attrib.num_face_num_verts; i++)
     {
@@ -365,7 +365,7 @@ struct Model Model_Import_Shader(const char *file_path, struct Shader shader)
     // TEXTURES
     const char *texture_name   = "Doghouse_PBR_BaseColor.png";
     const char *base_file_path = "../../Examples/res/models/Dog House/";
-    char texture_file_path[256];
+    char        texture_file_path[256];
     sprintf(texture_file_path, "%s%s", base_file_path, texture_name);
 
     struct Texture tex = Texture_Create(texture_file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
@@ -468,9 +468,17 @@ void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh, const char *
             break;
         }
         case aiTextureType_SPECULAR:
+        {
             Shader_Uniform_Texture2D(mesh->shader, "specular0", tex);
             fprintf(stderr, "[slot - %lld](type: %s) %s\n", i, "specular0", buff);
             break;
+        }
+        case aiTextureType_NORMALS:
+        {
+            Shader_Uniform_Texture2D(mesh->shader, "normal0", tex);
+            fprintf(stderr, "[slot - %lld](type: %s) %s\n", i, "normal0", buff);
+            break;
+        }
 
         default:
             break;
@@ -493,7 +501,7 @@ static void _aiColor4D_to_glm_vec4(struct aiColor4D col, vec4 glm_col)
 
 static void _Get_Path_To_File(const char *full_path, char *path_to_file, char sperator)
 {
-    char *last                 = strrchr(full_path, sperator);
+    char        *last          = strrchr(full_path, sperator);
     const size_t full_path_len = strlen(full_path);
 
     if (last != NULL)
@@ -515,7 +523,8 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
 
     my_mesh.shader = shader;
 
-    struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_Quality);
+    // struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_Quality);
+    struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_FlipWindingOrder);
     if (!scene) // If the import failed, report it
     {
         fprintf(stderr, "[MODEL] Error with 'aiImportFile'\n%s\n", aiGetErrorString());
@@ -546,7 +555,7 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
 
         // Convert Assimp faces format to array format
         unsigned int *faceArray = (unsigned int *)malloc(sizeof(unsigned int) * mesh->mNumFaces * 3);
-        unsigned int faceIndex  = 0;
+        unsigned int  faceIndex = 0;
 
         for (unsigned int f = 0; f < mesh->mNumFaces; f++)
         {
@@ -602,10 +611,6 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
         }
 
         // buffer for vertex texture coordinates
-        // const size_t number_of_tex_coords = sizeof(mesh->mTextureCoords) / sizeof(mesh->mTextureCoords[0]);
-
-        // const bool HasTextureCoords = 0 >= AI_MAX_NUMBER_OF_TEXTURECOORDS ? false : mesh->mTextureCoords[0] != NULL;
-
         if (mesh->mTextureCoords[0] != NULL)
         {
             float *texCoords = (float *)malloc(sizeof(float) * 2 * mesh->mNumVertices);
@@ -627,7 +632,7 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
         struct aiMaterial *mtl = scene->mMaterials[mesh->mMaterialIndex];
 
         // Look for textures
-        struct aiString texPath; // contains filename of texture
+        struct aiString     texPath; // contains filename of texture
         const enum aiReturn ret = aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &texPath, NULL, NULL, NULL, NULL, NULL, NULL);
         if (ret == AI_SUCCESS)
         {
@@ -670,7 +675,7 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
             _aiColor4D_to_glm_vec4(emission, material_info.emission);
         }
 
-        float shininess = 0.0f;
+        float        shininess = 0.0f;
         unsigned int max;
         if (AI_SUCCESS == aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &shininess, &max))
         {
@@ -696,7 +701,7 @@ static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, co
     // Get node transformation matrix
     // OpenGL matrices are column major
     struct aiMatrix4x4 mTrans = nd->mTransformation;
-    float aux[16];
+    float              aux[16];
     memcpy(aux, &mTrans, sizeof(float) * 16);
 
     // Update trans, rot and scale
@@ -714,7 +719,8 @@ static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, co
     // uniform mat4 scale;
 
     // Send to shader uniforms
-    Shader_Uniform_Mat4_Floats(m.shader, "translation", mat_trans);
+    // Shader_Uniform_Mat4_Floats(m.shader, "translation", aux);
+    Shader_Uniform_Mat4(m.shader, "translation", mat_trans);
     Shader_Uniform_Mat4(m.shader, "rotation", mat_rot);
     Shader_Uniform_Mat4(m.shader, "scale", mat_scale);
     Shader_Uniform_Mat4(m.shader, "model", m.matrix);
