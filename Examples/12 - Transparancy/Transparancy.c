@@ -1,5 +1,9 @@
 #include "Transparancy.h"
 
+#include <time.h>
+
+#define NUMBER_OF_WINDOWS 100
+
 static struct Transparancy
 {
     struct Camera cam;
@@ -7,22 +11,23 @@ static struct Transparancy
     struct Mesh grass;
     struct Mesh window;
 
-    struct Texture tex_tmp1;
-    struct Texture tex_tmp2;
+    // Window Texture Properties
+    vec3 window_positions[NUMBER_OF_WINDOWS];
+    float window_rotations[NUMBER_OF_WINDOWS];
+    float distanceCamera[NUMBER_OF_WINDOWS];
+    unsigned int window_draw_order[NUMBER_OF_WINDOWS];
 } trans;
-
-#define NUMBER_OF_WINDOWS 100
-
-// Generates all windows
-vec3 window_positions[NUMBER_OF_WINDOWS];
-float window_rotations[NUMBER_OF_WINDOWS];
-unsigned int window_draw_order[NUMBER_OF_WINDOWS];
-float distanceCamera[NUMBER_OF_WINDOWS];
 
 int window_compare_function(const void *a, const void *b)
 {
-    const double diff = distanceCamera[*(int *)b] - distanceCamera[*(int *)a];
+    const double diff = trans.distanceCamera[*(int *)b] - trans.distanceCamera[*(int *)a];
     return (0 < diff) - (diff < 0);
+}
+
+float FLOAT_RAND(float min, float max)
+{
+    const float scale = rand() / (float)RAND_MAX; /* [0, 1.0] */
+    return min + scale * (max - min);             /* [min, max] */
 }
 
 void Transparancy_Init()
@@ -66,10 +71,10 @@ void Transparancy_Init()
 
     // OpenGL settings
     glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_CULL_FACE);                            // Enables Cull Facing
-    // glCullFace(GL_BACK);                               // Keeps front faces
-    // glFrontFace(GL_CCW);                               // Uses counter clock-wise standard
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Configures the blending function
+    glEnable(GL_CULL_FACE);                            // Enables Cull Facing
+    glCullFace(GL_BACK);                               // Keeps front faces
+    glFrontFace(GL_CCW);                               // Uses counter clock-wise standard
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Configures the blending function
 
     struct Camera cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f}, 45.0f, 0.1f, 100.0f);
 
@@ -80,33 +85,26 @@ void Transparancy_Init()
 
     trans.cam = cam;
 
+    // struct Mesh ground = Mesh_Load(shader_default, "../../Examples/res/models/ground/ground.obj"); // Y axis flipped
     struct Mesh ground = Mesh_Load(shader_default, "../../Examples/res/models/ground/scene.gltf");
-    // struct Mesh grass  = Mesh_Load(shader_grass, "../../Examples/res/models/grass/scene.gltf");
-    // struct Mesh window = Mesh_Load(shader_window, "../../Examples/res/models/windows/scene.gltf");
+    struct Mesh grass  = Mesh_Load(shader_grass, "../../Examples/res/models/grass/scene.gltf");
+    struct Mesh window = Mesh_Load(shader_window, "../../Examples/res/models/windows/scene.gltf");
 
     trans.ground = ground;
-    // trans.grass  = grass;
-    // trans.window = window;
+    trans.grass  = grass;
+    trans.window = window;
+
+    srand((unsigned int)time(NULL));
 
     for (size_t i = 0; i < NUMBER_OF_WINDOWS; i++)
     {
-        window_positions[i][0] = (float)(-15.0f + (rand()) / ((float)(RAND_MAX / (15.0f - (-15.0f)))));
-        window_positions[i][1] = (float)(1.0f + (rand()) / ((float)(RAND_MAX / (4.0f - 1.0f))));
-        window_positions[i][2] = (float)(-15.0f + (rand()) / ((float)(RAND_MAX / (15.0f - (-15.0f)))));
+        trans.window_positions[i][0] = (float)(FLOAT_RAND(-15.0f, 15.0f));
+        trans.window_positions[i][1] = (float)(FLOAT_RAND(2.0f, 8.0f));
+        trans.window_positions[i][2] = (float)(FLOAT_RAND(-15.0f, 15.0f));
 
-        window_rotations[i]  = (float)(rand()) / ((float)(RAND_MAX / 1.0f));
-        window_draw_order[i] = (unsigned int)i;
+        trans.window_rotations[i]  = (float)(FLOAT_RAND(-1.0f, 1.0f));
+        trans.window_draw_order[i] = (unsigned int)i;
     }
-
-    const char *file_path1 = "../../Examples/res/models/ground/diffuse.png";
-    struct Texture tex1    = Texture_Create(file_path1, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
-    trans.tex_tmp1         = tex1;
-    const char *file_path2 = "../../Examples/res/models/ground/specular.png";
-    struct Texture tex2    = Texture_Create(file_path2, GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE);
-    trans.tex_tmp2         = tex2;
-
-    Shader_Uniform_Texture2D(shader_default, "diffuse0", tex1);
-    Shader_Uniform_Texture2D(shader_default, "specular0", tex2);
 }
 
 void Transparancy_Update()
@@ -116,42 +114,39 @@ void Transparancy_Update()
     Shader_Uniform_Vec3(trans.ground.shader, "camPos", trans.cam.position);
     Camera_View_Projection_To_Shader(trans.cam, trans.ground.shader, "camMatrix");
 
-    // Shader_Uniform_Vec3(trans.grass.shader, "camPos", trans.cam.position);
-    // Camera_View_Projection_To_Shader(trans.cam, trans.grass.shader, "camMatrix");
+    Shader_Uniform_Vec3(trans.grass.shader, "camPos", trans.cam.position);
+    Camera_View_Projection_To_Shader(trans.cam, trans.grass.shader, "camMatrix");
 
-    // Shader_Uniform_Vec3(trans.window.shader, "camPos", trans.cam.position);
-    // Camera_View_Projection_To_Shader(trans.cam, trans.window.shader, "camMatrix");
+    Shader_Uniform_Vec3(trans.window.shader, "camPos", trans.cam.position);
+    Camera_View_Projection_To_Shader(trans.cam, trans.window.shader, "camMatrix");
 
-    Texture_Bind(trans.tex_tmp1);
-    Texture_Bind(trans.tex_tmp2);
     Mesh_Draw(trans.ground);
 
-    //// Disable cull face so that grass and windows have both faces
-    // glDisable(GL_CULL_FACE);
-    // Mesh_Draw(trans.grass);
+    // Disable cull face so that grass and windows have both faces
+    Mesh_Draw(trans.grass);
 
-    // glEnable(GL_BLEND); // Enable blending for windows
+    glEnable(GL_BLEND); // Enable blending for windows
 
-    //// Get distance from each window to the camera
-    // for (size_t i = 0; i < NUMBER_OF_WINDOWS; i++)
-    //{
-    //     distanceCamera[i] = glm_vec3_distance(trans.cam.position, window_positions[i]);
-    //     // distanceCamera[i] = glm_vec3_distance2(trans.cam.position, window_positions[i]);
-    // }
+    // Get distance from each window to the camera
+    for (size_t i = 0; i < NUMBER_OF_WINDOWS; i++)
+    {
+        trans.distanceCamera[i] = glm_vec3_distance(trans.cam.position, trans.window_positions[i]);
+        // distanceCamera[i] = glm_vec3_distance2(trans.cam.position, trans.window_positions[i]);
+    }
 
-    //// Sort windows by distance from camera
-    // qsort(window_draw_order, NUMBER_OF_WINDOWS, sizeof(unsigned int), window_compare_function);
+    // Sort windows by distance from camera
+    qsort(trans.window_draw_order, NUMBER_OF_WINDOWS, sizeof(*trans.window_draw_order), window_compare_function);
 
-    //// Draw windows
-    // for (size_t i = 0; i < NUMBER_OF_WINDOWS; i++)
-    //{
-    //     Mesh_Set_Translation(&trans.window, window_positions[window_draw_order[i]]);
-    //     Mesh_Set_Rotation(&trans.window, (vec4){1.0f, 0.0f, window_rotations[window_draw_order[i]], 0.0f});
-    //     Mesh_Draw(trans.window);
-    // }
+    // Draw windows
+    for (size_t i = 0; i < NUMBER_OF_WINDOWS; i++)
+    {
+        Mesh_Set_Translation(&trans.window, trans.window_positions[trans.window_draw_order[i]]);
+        Mesh_Set_Rotation(&trans.window, (vec4){1.0f, 0.0f, trans.window_rotations[trans.window_draw_order[i]], 0.0f});
+        Mesh_Draw(trans.window);
+    }
 
-    // glDisable(GL_BLEND);
-    // glEnable(GL_CULL_FACE);
+    glDisable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
 }
 
 void Transparancy_OnExit()
