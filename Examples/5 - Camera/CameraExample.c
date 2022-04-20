@@ -56,14 +56,14 @@ void CameraExample_Init()
 
     // Texture
     const char *file_path = "../../Examples/res/textures/brick.png";
-    struct Texture tex = Texture_Create(file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    cam_example.tex = tex;
+    struct Texture tex    = Texture_Create(file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    cam_example.tex       = tex;
 
-    Texture_Uniform(shader, tex, "tex0", 0);
+    Shader_Uniform_Texture2D(shader, "tex0", tex);
 
     // Camera
     struct Camera cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f}, 45.0f, 0.1f, 100.0f);
-    cam_example.cam = cam;
+    cam_example.cam   = cam;
 
     // EBO_Unbind();
 }

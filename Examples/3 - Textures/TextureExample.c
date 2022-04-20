@@ -50,10 +50,10 @@ void TextureExample_Init()
 
     // Texture
     const char *file_path = "../../Examples/res/textures/stone.png";
-    struct Texture tex = Texture_Create(file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    texture_example.tex = tex;
+    struct Texture tex    = Texture_Create(file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    texture_example.tex   = tex;
 
-    Texture_Uniform(shader, tex, "tex0", 0);
+    Shader_Uniform_Texture2D(shader, "tex0", tex);
 
     // Unbind all to prevent accidentally modifying them
     // VAO_Unbind();

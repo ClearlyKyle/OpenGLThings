@@ -137,7 +137,7 @@ void LightingExample_Init()
     // EBO_Unbind();
     /* LIGHT SAHDER ---------------------------------------------------------------------*/
 
-    vec4 light_colour = {1.0f, 1.0f, 1.0f, 1.0f};
+    vec4 light_colour   = {1.0f, 1.0f, 1.0f, 1.0f};
     vec3 light_position = {0.5f, 0.5f, 0.5f};
     mat4 light_model;
     glm_translate_make(light_model, light_position);
@@ -158,14 +158,14 @@ void LightingExample_Init()
 
     // Texture
     const char *file_path = "../../Examples/res/textures/brick.png";
-    struct Texture tex = Texture_Create(file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    lights.tex = tex;
+    struct Texture tex    = Texture_Create(file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    lights.tex            = tex;
 
-    Texture_Uniform(lights.shader[0], tex, "tex0", 0);
+    Shader_Uniform_Texture2D(lights.shader[0], "tex0", tex);
 
     // Camera
     struct Camera cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f}, 45.0f, 0.1f, 100.0f);
-    lights.cam = cam;
+    lights.cam        = cam;
 }
 
 void LightingExample_Update()

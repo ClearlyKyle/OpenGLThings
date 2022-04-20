@@ -53,10 +53,10 @@ void Basic3D_Init()
 
     // Texture
     const char *file_path = "../../Examples/res/textures/brick.png";
-    struct Texture tex = Texture_Create(file_path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    basic3d.tex = tex;
+    struct Texture tex    = Texture_Create(file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    basic3d.tex           = tex;
 
-    Texture_Uniform(basic3d.shader, tex, "tex0", 0);
+    Shader_Uniform_Texture2D(basic3d.shader, "tex0", tex);
 
     // VAO_Unbind();
     // VBO_Unbind();
