@@ -1,4 +1,5 @@
 .vscode
+.clang-format
 build/*
 bin/*
 Engine/libs/cglm/*
