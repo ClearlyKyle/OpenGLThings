@@ -205,25 +205,11 @@ void Shader_Uniform_Mat4_Floats(struct Shader shader, const char *name, const fl
     LOCATION_CHECK(location, name, glUniformMatrix4fv(location, 1, GL_FALSE, matrix));
 }
 
-void Shader_Uniform_Texture2D(struct Shader shader, char *name, const struct Texture texture)
+void Shader_Uniform_Texture2D(struct Shader shader, const char *name, const struct Texture texture)
 {
     Shader_Bind(shader);
     Texture_Bind(texture);
-    glActiveTexture(GL_TEXTURE0 + texture.slot);
 
     const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
     LOCATION_CHECK(location, name, glUniform1i(location, texture.slot));
-}
-
-// Move this to Shder file?
-void Texture_Uniform(struct Shader shader, const struct Texture texture, const char *uniform, GLuint unit)
-{
-    // Shader needs to be activated before changing the value of a uniform
-    Shader_Bind(shader);
-
-    glActiveTexture(GL_TEXTURE0 + unit);
-    glBindTexture(texture.type, texture.ID);
-
-    const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)uniform);
-    LOCATION_CHECK(location, uniform, glUniform1i(location, unit));
 }
