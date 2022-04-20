@@ -13,6 +13,7 @@
 #include "StencilBuffer.h"       // Example 10 - Stencil Buffer
 #include "FaceCulling.h"         // Example 11 - Face Culling
 #include "Transparancy.h"        // Example 12 - Transparancy
+#include "FrameProcess.h"        // Example 13 - Framebuffer and Post Process
 #include "UBOExample.h"          // Example 20 - Drawing Triangles with use of UBO
 //#include "challanges.h"
 
@@ -54,7 +55,10 @@ int main(int argc, char *argv[])
     // Window_Init(800, 800, FaceCulling_Init, FaceCulling_Update, FaceCulling_OnExit);
 
     // Example 12 - Transparancy
-    Window_Init(800, 800, Transparancy_Init, Transparancy_Update, Transparancy_OnExit);
+    // Window_Init(800, 800, Transparancy_Init, Transparancy_Update, Transparancy_OnExit);
+
+    // Example 13 - Framebuffer and Post Process
+    Window_Init(800, 800, FrameProcess_Init, FrameProcess_Update, FrameProcess_OnExit);
 
     // Example 20 - Drawing Triangles with use of UBO
     // Window_Init(800, 800, UBOExample_Init, UBOExample_Update, UBOExample_OnExit);
