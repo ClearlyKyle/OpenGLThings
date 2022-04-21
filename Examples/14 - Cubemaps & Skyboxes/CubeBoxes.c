@@ -6,7 +6,7 @@ static struct CubeBox
 {
     struct Mesh   model;
     struct Camera cam;
-    struct Shader sky_box_shader;
+    struct Shader skybox_shader;
 
     GLuint skybox_VAO;
     GLuint cubemap_texture;
@@ -57,11 +57,11 @@ void CubeBoxes_Init()
                                                      {.index = 2, .name = "aColor"},
                                                      {.index = 3, .name = "aTex"}});
 
-    struct Shader sky_box_shader = Shader_Create("../../Examples/14 - Cubemaps & Skyboxes/skybox.vs",
-                                                 "../../Examples/14 - Cubemaps & Skyboxes/skybox.fs",
-                                                 1,
-                                                 (struct VertexAttribute[]){
-                                                     {.index = 0, .name = "inPos"}});
+    struct Shader skybox_shader = Shader_Create("../../Examples/14 - Cubemaps & Skyboxes/skybox.vs",
+                                                "../../Examples/14 - Cubemaps & Skyboxes/skybox.fs",
+                                                1,
+                                                (struct VertexAttribute[]){
+                                                    {.index = 0, .name = "inPos"}});
 
     // Take care of all the light related things
     vec4 lightColor = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -71,9 +71,9 @@ void CubeBoxes_Init()
     Shader_Uniform_Vec4(shader_default, "lightColor", lightColor);
     Shader_Uniform_Vec3(shader_default, "lightPos", lightPos);
 
-    Shader_Bind(sky_box_shader);
-    glUniform1i(glGetUniformLocation(sky_box_shader.shader_id, "skybox"), 0);
-    cb.sky_box_shader = sky_box_shader;
+    Shader_Bind(skybox_shader);
+    glUniform1i(glGetUniformLocation(skybox_shader.shader_id, "skybox"), 0);
+    cb.skybox_shader = skybox_shader;
 
     glEnable(GL_DEPTH_TEST); // Enables the Depth Buffer
     glEnable(GL_CULL_FACE);  // Enables Cull Facing
@@ -127,7 +127,6 @@ void CubeBoxes_Init()
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap_texture);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // These are very important to prevent seams
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -138,12 +137,12 @@ void CubeBoxes_Init()
     // Cycles through all the textures and attaches them to the cubemap object
     for (unsigned int i = 0; i < 6; i++)
     {
+        stbi_set_flip_vertically_on_load(false);
+
         int            width, height, bpp;
         unsigned char *image_data = stbi_load(cube_map_face_images[i], &width, &height, &bpp, 0);
 
         check_that(image_data, "Failed to load texture: %s\n", cube_map_face_images[i]);
-
-        stbi_set_flip_vertically_on_load(false);
 
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                      0,
@@ -171,10 +170,11 @@ void CubeBoxes_Update()
 
     Mesh_Draw(cb.model); // Draw the airplane model
 
+    // SKYBOX DRAW START ------------------------
     // Since the cubemap will always have a depth of 1.0, we need that equal sign so it doesn't get discarded
     glDepthFunc(GL_LEQUAL);
 
-    Shader_Bind(cb.sky_box_shader);
+    Shader_Bind(cb.skybox_shader);
 
     mat4 view_matrix = GLM_MAT4_IDENTITY_INIT;
     mat4 projection  = GLM_MAT4_IDENTITY_INIT;
@@ -193,8 +193,8 @@ void CubeBoxes_Update()
 
     glm_perspective(glm_rad(45.0f), (float)window.width / window.heigh, 0.1f, 100.0f, projection);
 
-    Shader_Uniform_Mat4(cb.sky_box_shader, "view", view_matrix);
-    Shader_Uniform_Mat4(cb.sky_box_shader, "projection", projection);
+    Shader_Uniform_Mat4(cb.skybox_shader, "view", view_matrix);
+    Shader_Uniform_Mat4(cb.skybox_shader, "projection", projection);
 
     // Draws the cubemap as the last object so we can save a bit of performance by discarding all fragments
     // where an object is present (a depth of 1.0f will always fail against any object's depth value)
@@ -206,6 +206,8 @@ void CubeBoxes_Update()
 
     // Switch back to the normal depth function
     glDepthFunc(GL_LESS);
+
+    // SKYBOX DRAW END --------------------------
 }
 
 void CubeBoxes_OnExit()
@@ -213,7 +215,7 @@ void CubeBoxes_OnExit()
     Camera_Print_Values(cb.cam);
 
     Mesh_Free(cb.model);
-    Shader_Destroy(cb.sky_box_shader);
+    Shader_Destroy(cb.skybox_shader);
 
     glDeleteVertexArrays(1, &cb.skybox_VAO);
     glDeleteTextures(1, &cb.cubemap_texture);
