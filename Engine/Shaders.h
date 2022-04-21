@@ -9,7 +9,7 @@
 // layout (location = 1) in vec2 uv;          "index = 1, name = uv"
 struct VertexAttribute
 {
-    GLuint index;
+    GLuint        index;
     const GLchar *name;
 };
 
@@ -18,14 +18,16 @@ struct Shader
     GLuint shader_id;
     GLuint vs_handle;
     GLuint fs_handle;
+    GLuint gs_handle;
 };
 
 typedef struct Shader Shader_t;
 
 // Shader Functions
 Shader_t Shader_Create(const char *vertex_shader_path, const char *fragment_shader_path, size_t n, struct VertexAttribute attributes[]);
-void Shader_Destroy(const struct Shader shader);
-void Shader_Bind(const struct Shader shader);
+Shader_t Shader_Create2(const char *vs_path, const char *fs_path, const char *gs_path, size_t n, struct VertexAttribute attributes[]);
+void     Shader_Destroy(const struct Shader shader);
+void     Shader_Bind(const struct Shader shader);
 
 // Uniforms
 void Shader_Uniform_Float(struct Shader shader, const char *name, float f);
