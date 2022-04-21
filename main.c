@@ -15,6 +15,7 @@
 #include "Transparancy.h"        // Example 12 - Transparancy
 #include "FrameProcess.h"        // Example 13 - Framebuffer and Post Process
 #include "CubeBoxes.h"           // Example 14 - Cubemaps & Skyboxes
+#include "Geometry.h"            // Example 15 - Geometry Shader
 #include "UBOExample.h"          // Example 20 - Drawing Triangles with use of UBO
 //#include "challanges.h"
 
@@ -62,7 +63,10 @@ int main(int argc, char *argv[])
     // Window_Init(800, 800, FrameProcess_Init, FrameProcess_Update, FrameProcess_OnExit);
 
     // Example 14 - Cubemaps & Skyboxes
-    Window_Init(800, 800, CubeBoxes_Init, CubeBoxes_Update, CubeBoxes_OnExit);
+    // Window_Init(800, 800, CubeBoxes_Init, CubeBoxes_Update, CubeBoxes_OnExit);
+
+    // Example 15 - Geometry Shader
+    Window_Init(800, 800, Geometry_Init, Geometry_Update, Geometry_OnExit);
 
     // Example 20 - Drawing Triangles with use of UBO
     // Window_Init(800, 800, UBOExample_Init, UBOExample_Update, UBOExample_OnExit);
