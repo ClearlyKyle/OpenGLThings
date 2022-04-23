@@ -17,6 +17,7 @@
 #include "CubeBoxes.h"           // Example 14 - Cubemaps & Skyboxes
 #include "Geometry.h"            // Example 15 - Geometry Shader
 #include "Instancing.h"          // Example 16 - Instancing
+#include "AntiAliasing.h"        // Example 17 - Anti-Aliasing (MSAA)
 #include "UBOExample.h"          // Example 20 - Drawing Triangles with use of UBO
 //#include "challanges.h"
 
@@ -70,7 +71,10 @@ int main(int argc, char *argv[])
     // Window_Init(800, 800, Geometry_Init, Geometry_Update, Geometry_OnExit);
 
     // Example 16 - Instancing
-    Window_Init(800, 800, Instancing_Init, Instancing_Update, Instancing_OnExit);
+    // Window_Init(800, 800, Instancing_Init, Instancing_Update, Instancing_OnExit);
+
+    // Example 17 - Anti-Aliasing (MSAA)
+    Window_Init(800, 800, AntiAliasing_Init, AntiAliasing_Update, AntiAliasing_OnExit);
 
     // Example 20 - Drawing Triangles with use of UBO
     // Window_Init(800, 800, UBOExample_Init, UBOExample_Update, UBOExample_OnExit);
