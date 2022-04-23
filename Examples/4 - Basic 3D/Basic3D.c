@@ -52,9 +52,9 @@ void Basic3D_Init()
     VAO_Attr(vao, vbo, 2, 2, GL_FLOAT, 8 * sizeof(GLfloat), (const GLvoid *)(6 * sizeof(GLfloat)));
 
     // Texture
-    const char *file_path = "../../Examples/res/textures/brick.png";
-    struct Texture tex    = Texture_Create(file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
-    basic3d.tex           = tex;
+    const char    *file_path = "../../Examples/res/textures/brick.png";
+    struct Texture tex       = Texture_Create(file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    basic3d.tex              = tex;
 
     Shader_Uniform_Texture2D(basic3d.shader, "tex0", tex);
 
@@ -77,12 +77,34 @@ void Basic3D_Update()
     mat4 view;
     mat4 proj;
 
+    vec3 trans = {1.0f, 0.0f, -2.0f};
+    vec3 rot   = {0.0f, 1.0f, 0.0f};
+    vec4 qRot  = {1.0f, 0.0f, 0.0f, 0.0f};
+    vec3 scale = {1.5f, 1.0f, 1.0f};
+
+    // Do the Model Matrix calculation on the CPU
+    // Transform the matrices to their correct form
+    mat4 mat_trans;
+    mat4 mat_rot;
+    mat4 mat_scale;
+    mat4 matrix = GLM_MAT4_ZERO_INIT;
+    glm_translate_make(mat_trans, trans);
+    glm_quat_mat4(qRot, mat_rot);
+    glm_scale_make(mat_scale, scale);
+
+    // trans * rot * sca
+    glm_mat4_mul(mat_trans, mat_rot, matrix);
+    glm_mat4_mul(matrix, mat_scale, matrix);
+
+    Shader_Uniform_Mat4(basic3d.shader, "matrix", matrix);
+
+    // Do the Model Matrix calculation on the GPU in the shader
+    // Outputs the matrices into the Vertex Shader
     // Assigns different transformations to each matrix
-    glm_translate_make(view, (vec3){0.0f, -0.5f, -2.0f});
-    glm_rotate_make(model, glm_rad(rotation), (vec3){0.0f, 1.0f, 0.0f});
+    glm_translate_make(view, (vec3){0.0f, 0.0f, -2.0f});
+    glm_rotate_make(model, glm_rad(rotation), trans);
     glm_perspective(glm_rad(45.0f), (float)window.heigh / window.width, 0.1f, 100.0f, proj);
 
-    // Outputs the matrices into the Vertex Shader
     Shader_Uniform_Mat4(basic3d.shader, "model", model);
     Shader_Uniform_Mat4(basic3d.shader, "view", view);
     Shader_Uniform_Mat4(basic3d.shader, "proj", proj);

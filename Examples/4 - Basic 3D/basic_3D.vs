@@ -22,13 +22,21 @@ uniform float scale;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
+uniform mat4 matrix;
 
-void main() {
-  // Outputs the positions/coordinates of all vertices
-  gl_Position = proj * view * model * vec4(aPos, 1.0f);
-  // gl_Position = vec4(aPos, 1.0f);
-  // Assigns the colors from the Vertex Data to "color"
-  color = aColor;
-  // Assigns the texture coordinates from the Vertex Data to "texCoord"
-  texCoord = aTex;
+void main()
+{
+    // http://www.opengl-tutorial.org/assets/images/tuto-3-matrix/MVP.png
+    // Outputs the positions/coordinates of all vertices
+    gl_Position = proj * view * matrix * vec4(aPos, 1.0f);
+    // gl_Position = proj * view * model * vec4(aPos, 1.0f);
+    // gl_Position = proj * matrix * vec4(aPos, 1.0f);
+    // gl_Position = vec4(aPos, 1.0f);
+    // Assigns the colors from the Vertex Data to "color"
+    color = aColor;
+    // Assigns the texture coordinates from the Vertex Data to "texCoord"
+    texCoord = aTex;
+
+    // vec3 crntPos = vec3(matrix * vec4(aPos, 1.0f));
+    // gl_Position  = proj * vec4(crntPos, 1.0);
 }
