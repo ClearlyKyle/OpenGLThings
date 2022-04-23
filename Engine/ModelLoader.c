@@ -512,7 +512,7 @@ static void _Get_Path_To_File(const char *full_path, char *path_to_file, char sp
     }
 }
 
-struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
+static struct Mesh _Mesh_Load_Data(const struct Shader shader, unsigned int instance_count, mat4 *matrix, const char *file_path)
 {
     struct Mesh my_mesh = {
         .matrix      = GLM_MAT4_IDENTITY_INIT,
@@ -521,7 +521,9 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
         .scale       = {1.0f, 1.0f, 1.0f}};
     struct Model model;
 
-    my_mesh.shader = shader;
+    my_mesh.shader            = shader;
+    my_mesh.instancing.count  = instance_count;
+    my_mesh.instancing.matrix = NULL;
 
     // struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_Quality);
     struct aiScene *scene = aiImportFile(file_path, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_FlipWindingOrder);
@@ -624,6 +626,26 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
             VAO_Attr(vao, tex_coordinates, 2, 2, GL_FLOAT, 2 * sizeof(float), (const GLvoid *)(0));
         }
 
+        // Instanced matrix
+        if (my_mesh.instancing.count > 1 && matrix != NULL)
+        {
+            struct VBO instance_VBO = VBO_Create(GL_ARRAY_BUFFER);
+            VBO_Buffer(instance_VBO, instance_count * sizeof(mat4), (const GLvoid *)matrix);
+
+            // Can't link to a mat4 so you need to link four vec4s
+            VAO_Attr(vao, instance_VBO, 4, 4, GL_FLOAT, sizeof(mat4), (const GLvoid *)0);
+            VAO_Attr(vao, instance_VBO, 5, 4, GL_FLOAT, sizeof(mat4), (const GLvoid *)(1 * sizeof(vec4)));
+            VAO_Attr(vao, instance_VBO, 6, 4, GL_FLOAT, sizeof(mat4), (const GLvoid *)(2 * sizeof(vec4)));
+            VAO_Attr(vao, instance_VBO, 7, 4, GL_FLOAT, sizeof(mat4), (const GLvoid *)(3 * sizeof(vec4)));
+
+            // Makes it so the transform is only switched when drawing the next instance
+            VAO_Bind(vao); // DONT FORGET TO BIND VAO BEFORE glVertexAttribDivisor
+            glVertexAttribDivisor(4, 1);
+            glVertexAttribDivisor(5, 1);
+            glVertexAttribDivisor(6, 1);
+            glVertexAttribDivisor(7, 1);
+        }
+
         // unbind buffers
         VAO_Unbind();
         VBO_Unbind();
@@ -641,7 +663,6 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
                 if (strcmp(my_mesh.texInfo.texture_file_paths[i], texPath.data) == 0)
                 {
                     model.tex = my_mesh.texInfo.textures[i];
-                    // Texture_Uniform();
                     break;
                 }
             }
@@ -690,40 +711,56 @@ struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
         my_mesh.models[i]   = model;
     }
 
-    // recursive_render(my_mesh, scene, scene->mRootNode);
-
     fprintf(stderr, "[MODEL] Mesh loading complete!\n\n");
     return my_mesh;
+}
+
+Mesh_t Mesh_Load_Instancing(const struct Shader shader, GLuint count, mat4 *matrix, const char *file_path)
+{
+    check_that(count > 1, "Why are you using this with only one instance?\n");
+
+    fprintf(stderr, "[MODEL INSTANCING] Loading instancing!\n\n");
+
+    Mesh_t mesh = _Mesh_Load_Data(shader, count, matrix, file_path);
+
+    fprintf(stderr, "[MODEL INSTANCING] instancing ready to use...\n\n");
+    return mesh;
+}
+
+struct Mesh Mesh_Load(const struct Shader shader, const char *file_path)
+{
+    return _Mesh_Load_Data(shader, 1, NULL, file_path);
+}
+
+void Mesh_Instance_Load_Vectors(Mesh_t *mesh, GLuint index, vec3 trans, versor rot, vec3 scale)
+{
+    // TODO : Move this calculation to the shader?
+
+    // Initialize matrices
+    mat4 mat_trans = GLM_MAT4_IDENTITY_INIT;
+    mat4 mat_rot   = GLM_MAT4_IDENTITY_INIT;
+    mat4 mat_scale = GLM_MAT4_IDENTITY_INIT;
+
+    // Transform the matrices to their correct form
+    glm_translate_make(mat_trans, trans);
+    glm_quat_mat4(rot, mat_rot);
+    glm_scale_make(mat_scale, scale);
+
+    // trans * rot * sca
+    mat4 matrix_res = GLM_MAT4_IDENTITY_INIT;
+    glm_mat4_mul(mat_trans, mat_rot, matrix_res);
+    glm_mat4_mul(matrix_res, mat_scale, matrix_res);
+
+    glm_mat4_copy(matrix_res, mesh->instancing.matrix[index]);
 }
 
 static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, const struct aiNode *nd)
 {
     // Get node transformation matrix
     // OpenGL matrices are column major
-    struct aiMatrix4x4 mTrans = nd->mTransformation;
-    float              aux[16];
-    memcpy(aux, &mTrans, sizeof(float) * 16);
-
-    // Update trans, rot and scale
-    mat4 mat_trans = GLM_MAT4_ZERO_INIT;
-    mat4 mat_rot   = GLM_MAT4_ZERO_INIT;
-    mat4 mat_scale = GLM_MAT4_ZERO_INIT;
-
-    glm_translate_make(mat_trans, m.translation);
-    glm_quat_mat4(m.rotation, mat_rot);
-    glm_scale_make(mat_scale, m.scale);
-
-    // uniform mat4 model;
-    // uniform mat4 translation;
-    // uniform mat4 rotation;
-    // uniform mat4 scale;
-
-    // Send to shader uniforms
-    // Shader_Uniform_Mat4_Floats(m.shader, "translation", aux);
-    Shader_Uniform_Mat4(m.shader, "translation", mat_trans);
-    Shader_Uniform_Mat4(m.shader, "rotation", mat_rot);
-    Shader_Uniform_Mat4(m.shader, "scale", mat_scale);
-    Shader_Uniform_Mat4(m.shader, "model", m.matrix);
+    // struct aiMatrix4x4 mTrans = nd->mTransformation;
+    // float              aux[16];
+    // memcpy(aux, &mTrans, sizeof(float) * 16);
 
     // draw all meshes assigned to this node
     for (unsigned int n = 0; n < nd->mNumMeshes; n++)
@@ -735,7 +772,37 @@ static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, co
 
         VAO_Bind(m.models[nd->mMeshes[n]].vao);
 
-        glDrawElements(GL_TRIANGLES, m.models[nd->mMeshes[n]].num_indicies * 3, GL_UNSIGNED_INT, 0);
+        if (m.instancing.count > 1)
+        {
+            glDrawElementsInstanced(GL_TRIANGLES, m.models[nd->mMeshes[n]].num_indicies * 3, GL_UNSIGNED_INT, 0, m.instancing.count);
+        }
+        else
+        {
+            // NORMAL NON INSTANCED DRAWING
+            // Update trans, rot and scale
+            mat4 mat_trans = GLM_MAT4_ZERO_INIT;
+            mat4 mat_rot   = GLM_MAT4_ZERO_INIT;
+            mat4 mat_scale = GLM_MAT4_ZERO_INIT;
+
+            glm_translate_make(mat_trans, m.translation);
+            glm_quat_mat4(m.rotation, mat_rot);
+            glm_scale_make(mat_scale, m.scale);
+
+            // uniform mat4 model;
+            // uniform mat4 translation;
+            // uniform mat4 rotation;
+            // uniform mat4 scale;
+
+            // Send to shader uniforms
+            // Shader_Uniform_Mat4_Floats(m.shader, "translation", aux);
+            Shader_Uniform_Mat4(m.shader, "translation", mat_trans);
+            Shader_Uniform_Mat4(m.shader, "rotation", mat_rot);
+            Shader_Uniform_Mat4(m.shader, "scale", mat_scale);
+            Shader_Uniform_Mat4(m.shader, "model", m.matrix);
+
+            glDrawElements(GL_TRIANGLES, m.models[nd->mMeshes[n]].num_indicies * 3, GL_UNSIGNED_INT, 0);
+        }
+        VAO_Unbind();
     }
 
     // draw all children
@@ -784,6 +851,11 @@ void Mesh_Free(struct Mesh mesh)
     }
 
     Shader_Destroy(mesh.shader);
+
+    if (mesh.instancing.count > 1)
+    {
+        free(mesh.instancing.matrix);
+    }
 
     free(mesh.models);
     mesh.models = NULL;

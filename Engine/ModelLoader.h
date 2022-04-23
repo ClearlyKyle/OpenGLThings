@@ -16,18 +16,18 @@
 
 struct MaterialInfo
 {
-    vec4 ambient;
-    vec4 diffuse;
-    vec4 specular;
-    vec4 emission;
+    vec4  ambient;
+    vec4  diffuse;
+    vec4  specular;
+    vec4  emission;
     float shininess;
 };
 
 struct Model
 {
-    struct VAO vao;
-    struct VBO material_vbo;
-    struct Shader shader;
+    struct VAO     vao;
+    struct VBO     material_vbo;
+    struct Shader  shader;
     struct Texture tex;
 
     vec3 model_position;
@@ -51,6 +51,17 @@ struct TextureInfo
     enum aiTextureType texture_type[32];
 };
 
+struct InstancingInfo
+{
+    GLuint count;
+
+    // vec4 *translation;
+    // vec4 *rotation;
+    // vec4 *scale;
+
+    mat4 *matrix;
+};
+
 struct Mesh
 {
     struct aiScene *scene;
@@ -60,7 +71,9 @@ struct Mesh
 
     unsigned int num_models;
 
-    GLuint material_ubo_index;
+    struct InstancingInfo instancing;
+
+    GLuint     material_ubo_index;
     GLsizeiptr ubo_size;
 
     struct TextureInfo texInfo;
@@ -87,6 +100,10 @@ void Mesh_Set_Scale(struct Mesh *mesh, vec3 new_scale);
 
 // "assimp" methods
 Mesh_t Mesh_Load(const struct Shader shader, const char *file_path);
+
+Mesh_t Mesh_Load_Instancing(const struct Shader shader, GLuint count, mat4 *matrix, const char *file_path);
+void   Mesh_Instance_Load_Vectors(Mesh_t *mesh, GLuint index, vec3 trans, versor rot, vec3 scale);
+
 void Mesh_Draw(struct Mesh m);
 void Mesh_Free(struct Mesh mesh);
 
