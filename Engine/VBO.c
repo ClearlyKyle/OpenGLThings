@@ -3,7 +3,7 @@
 struct VBO VBO_Create(GLint type)
 {
     struct VBO vbo = {0};
-    vbo.type = type;
+    vbo.type       = type;
 
     // 1 - number of buffer object names to be generated
     // an array in which the generated buffer object names are stored
