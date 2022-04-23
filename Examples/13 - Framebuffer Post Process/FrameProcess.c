@@ -74,10 +74,6 @@ void FrameProcess_Init()
     struct Mesh crow = Mesh_Load(shader_default, "../../Examples/res/models/crow/scene.gltf");
     fp.model         = crow;
 
-    int  i = 10;
-    int *j = &i;
-    
-
     // Prepare FRAMEBUFFER rectangle VBO and VAO
     GLuint rect_VAO, rect_VBO;
     glGenVertexArrays(1, &rect_VAO);
@@ -101,7 +97,9 @@ void FrameProcess_Init()
     GLuint frame_buffer_texture;
     glGenTextures(1, &frame_buffer_texture);
     glBindTexture(GL_TEXTURE_2D, frame_buffer_texture);
+
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window.width, window.heigh, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // Prevents edge bleeding
