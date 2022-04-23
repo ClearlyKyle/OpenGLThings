@@ -103,4 +103,5 @@ void main()
 {
     // outputs final color
     FragColor = direcLight();
+    // FragColor = texture(diffuse0, texCoord);
 }
