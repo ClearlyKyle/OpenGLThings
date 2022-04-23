@@ -8,5 +8,6 @@
 #include "Textures.h"
 #include "ModelLoader.h"
 #include "Camera.h"
+#include "features/skybox.h"
 
 #endif // __ENGINE_H__
