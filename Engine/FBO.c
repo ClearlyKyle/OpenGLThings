@@ -121,8 +121,8 @@ void FBO_Add_RBO(FBO_t *fbo, GLenum internalformat, GLenum attachment)
 
     // Check width and height
     GLint max_size;
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_MAX_RENDERBUFFER_SIZE, &max_size);
-    check_that((fbo->width < max_size && fbo->height < max_size), "GL_MAX_RENDERBUFFER_SIZE error\n");
+    glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &max_size);
+    check_that((fbo->width < max_size && fbo->height < max_size), "GL_MAX_RENDERBUFFER_SIZE error, Max Size = %d\n", max_size);
 
     // Create Render Buffer Object
     GLuint RBO;
@@ -188,7 +188,7 @@ void FBO_UnBind(const FBO_t fbo)
 void Framebuffer_Draw_Init(struct FBO fbo)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo.FBO);
-    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+    // glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST); // Enable depth testing since it's disabled when drawing the framebuffer rectangle
 }
