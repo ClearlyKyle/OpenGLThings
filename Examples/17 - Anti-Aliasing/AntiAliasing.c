@@ -4,7 +4,8 @@ static struct AntiAliasing
 {
     Camera_t    cam;
     struct Mesh model;
-    FBO_t       fbo;
+    FBO_t       msaa_fbo;
+    FBO_t       post_processing_fbo;
 } aa;
 
 void AntiAliasing_Init()
@@ -72,10 +73,20 @@ void AntiAliasing_Init()
     VAO_Attr(rectVAO, rectVBO, 0, 2, GL_FLOAT, 4 * sizeof(GLfloat), (const GLvoid *)(0));
     VAO_Attr(rectVAO, rectVBO, 1, 2, GL_FLOAT, 4 * sizeof(GLfloat), (const GLvoid *)(2 * sizeof(GLfloat)));
 
-    FBO_t fbo = FBO_Texture2D(shader_framebuffer, GL_TEXTURE_2D, window.width, window.heigh);
-    FBO_Add_RBO(fbo);
-    fbo.VAO = rectVAO.ID;
-    aa.fbo  = fbo;
+    // FBO_t fbo = FBO_Texture2D(shader_framebuffer, GL_TEXTURE_2D, window.width, window.heigh);
+    // FBO_Add_RBO(fbo);
+    // fbo.VAO = rectVAO.ID;
+    // aa.fbo  = fbo;
+
+    FBO_t msaa_fbo = FBO_Create(shader_framebuffer, GL_TEXTURE_2D_MULTISAMPLE, window.width, window.heigh, 4);
+    FBO_Add_RBO(&msaa_fbo, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT);
+    msaa_fbo.VAO = rectVAO.ID;
+    aa.msaa_fbo  = msaa_fbo;
+
+    FBO_t post_processing_fbo = FBO_Create(shader_framebuffer, GL_TEXTURE_2D, window.width, window.heigh, 0);
+    FBO_Add_RBO(&post_processing_fbo, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT);
+    post_processing_fbo.VAO = rectVAO.ID;
+    aa.post_processing_fbo  = post_processing_fbo;
 
     // Load in models
     struct Mesh crow = Mesh_Load(shader_default, "../../Examples/res/models/crow/scene.gltf");
@@ -84,16 +95,21 @@ void AntiAliasing_Init()
 
 void AntiAliasing_Update()
 {
-    Framebuffer_Bind(aa.fbo);
+    Framebuffer_Draw_Init(aa.post_processing_fbo);
+    // Framebuffer_Draw_Init(aa.msaa_fbo);
 
     Camera_Inputs(&aa.cam);
 
+    // TODO : Move this into the model Draw call
     Shader_Uniform_Vec3(aa.model.shader, "camPos", aa.cam.position);
     Camera_View_Projection_To_Shader(aa.cam, aa.model.shader, "camMatrix");
 
     Mesh_Draw(aa.model);
 
-    Framebuffer_Draw(aa.fbo);
+    // Framebuffer_Update(aa.msaa_fbo, aa.post_processing_fbo);
+
+    // Bind the default framebuffer
+    Framebuffer_Draw(aa.post_processing_fbo);
 }
 
 void AntiAliasing_OnExit()
@@ -101,5 +117,6 @@ void AntiAliasing_OnExit()
     Camera_Print_Values(aa.cam);
 
     Mesh_Free(aa.model);
-    Framebuffer_Destroy(aa.fbo);
+    Framebuffer_Destroy(aa.msaa_fbo);
+    Framebuffer_Destroy(aa.post_processing_fbo);
 }
