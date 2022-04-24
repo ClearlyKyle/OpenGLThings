@@ -19,6 +19,7 @@
 #include "Instancing.h"          // Example 16 - Instancing
 #include "AntiAliasing.h"        // Example 17 - Anti-Aliasing (MSAA)
 #include "BlinnPhong.h"          // Example 18 - Blin-Phong Lighting
+#include "Gamma.h"               // Example 19 - Gamma Correction
 #include "UBOExample.h"          // Example 20 - Drawing Triangles with use of UBO
 //#include "challanges.h"
 
@@ -78,7 +79,10 @@ int main(int argc, char *argv[])
     // Window_Init(800, 800, AntiAliasing_Init, AntiAliasing_Update, AntiAliasing_OnExit);
 
     // Example 18 - Blinn-Phong Lighting
-    Window_Init(800, 800, BlinnPhong_Init, BlinnPhong_Update, BlinnPhong_OnExit);
+    // Window_Init(800, 800, BlinnPhong_Init, BlinnPhong_Update, BlinnPhong_OnExit);
+
+    // Example 19 - Gamma Correction
+    Window_Init(800, 800, Gamma_Init, Gamma_Update, Gamma_OnExit);
 
     // Example 20 - Drawing Triangles with use of UBO
     // Window_Init(800, 800, UBOExample_Init, UBOExample_Update, UBOExample_OnExit);
