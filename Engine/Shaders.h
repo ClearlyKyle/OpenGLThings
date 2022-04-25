@@ -30,6 +30,7 @@ void     Shader_Destroy(const struct Shader shader);
 void     Shader_Bind(const struct Shader shader);
 
 // Uniforms
+void Shader_Uniform_Int(struct Shader shader, const char *name, int f);
 void Shader_Uniform_Float(struct Shader shader, const char *name, float f);
 void Shader_Uniform_Mat4_Floats(struct Shader shader, const char *name, const float *matrix);
 void Shader_Uniform_Mat4(struct Shader shader, const char *name, const mat4 m);

@@ -226,6 +226,12 @@ void Shader_Bind(const struct Shader shader)
     else                                                                                                               \
         (FUNCTION);
 
+void Shader_Uniform_Int(struct Shader shader, const char *name, int f)
+{
+    const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
+    LOCATION_CHECK(location, name, glUniform1i(location, f));
+}
+
 void Shader_Uniform_Float(struct Shader shader, const char *name, float f)
 {
     const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
@@ -262,6 +268,8 @@ void Shader_Uniform_Texture2D(struct Shader shader, const char *name, const stru
 {
     Shader_Bind(shader);
     Texture_Bind(texture);
+
+    // Shader_Uniform_Int(shader, name, texture.slot);
 
     const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
     LOCATION_CHECK(location, name, glUniform1i(location, texture.slot));
