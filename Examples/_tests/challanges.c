@@ -21,8 +21,8 @@ void challanges_Init()
     challange.size = sizeof(indicies) / sizeof(GLuint);
 
     struct Shader shader = Shader_Create(
-        "../../shaders/test/default.vs",
-        "../../shaders/test/default.fs",
+        "../../Examples/_tests/default.vs",
+        "../../Examples/_tests/default.fs",
         1,
         (struct VertexAttribute[]){{.index = 0, .name = "aPos"}});
 
