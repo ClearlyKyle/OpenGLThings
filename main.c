@@ -20,7 +20,10 @@
 #include "AntiAliasing.h"        // Example 17 - Anti-Aliasing (MSAA)
 #include "BlinnPhong.h"          // Example 18 - Blin-Phong Lighting
 #include "Gamma.h"               // Example 19 - Gamma Correction
-#include "UBOExample.h"          // Example 20 - Drawing Triangles with use of UBO
+#include "SM_With_Cubes.h"
+#include "Ortho.h"
+#include "challanges.h"
+#include "UBOExample.h" // Example 20 - Drawing Triangles with use of UBO
 //#include "challanges.h"
 
 int main(int argc, char *argv[])
@@ -82,7 +85,10 @@ int main(int argc, char *argv[])
     // Window_Init(800, 800, BlinnPhong_Init, BlinnPhong_Update, BlinnPhong_OnExit);
 
     // Example 19 - Gamma Correction
-    Window_Init(800, 800, Gamma_Init, Gamma_Update, Gamma_OnExit);
+    // Window_Init(800, 800, Gamma_Init, Gamma_Update, Gamma_OnExit);
+    Window_Init(1024, 1024, ShadowMapCubes_Init, ShadowMapCubes_Update, ShadowMapCubes_OnExit);
+
+    // Window_Init(800, 800, Ortho_Init, Ortho_Update, Ortho_OnExit);
 
     // Example 20 - Drawing Triangles with use of UBO
     // Window_Init(800, 800, UBOExample_Init, UBOExample_Update, UBOExample_OnExit);
