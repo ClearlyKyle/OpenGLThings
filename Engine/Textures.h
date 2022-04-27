@@ -15,6 +15,7 @@ typedef struct Texture Texture_t;
 
 Texture_t Texture_Create(const char *path, GLenum texture_type, GLuint slot, GLenum format, GLenum pixel_type);
 
+void Texture_Bind_Slot(const struct Texture t, GLuint slot);
 void Texture_Bind(const struct Texture t);
 void Texture_Unbind();
 

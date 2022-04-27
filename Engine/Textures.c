@@ -21,6 +21,19 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
     unsigned char *image_bytes = stbi_load(path, &image_width, &image_height, &image_bpp, STBI_rgb_alpha);
     check_that(image_bytes != NULL, "[ERROR] (stbi_load) : %s\n", path);
 
+    GLenum image_format;
+    if (image_bpp == 1)
+        image_format = GL_RED;
+    else if (image_bpp == 3)
+        image_format = GL_RGB;
+    else if (image_bpp == 4)
+        image_format = GL_RGBA;
+
+    if (image_format != format)
+    {
+        fprintf(stderr, "Image format might not be correct %d != %d\n", image_format, format);
+    }
+
     // Generates an OpenGL texture object
     glGenTextures(1, &t.ID);
 
@@ -54,9 +67,16 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
     return t;
 }
 
+// TODO : Remove this and update all examples.. enjoy
 void Texture_Bind(const struct Texture t)
 {
     glActiveTexture(GL_TEXTURE0 + t.slot);
+    glBindTexture(t.type, t.ID);
+}
+
+void Texture_Bind_Slot(const struct Texture t, GLuint slot)
+{
+    glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(t.type, t.ID);
 }
 
