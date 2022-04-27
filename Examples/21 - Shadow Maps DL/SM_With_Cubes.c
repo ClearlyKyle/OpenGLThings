@@ -261,7 +261,7 @@ void ShadowMapCubes_Init()
 
     // LOAD TEXTURES
     struct Texture plane_tex = Texture_Create("../../Examples/res/textures/planks.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
-    // struct Texture cube_tex  = Texture_Create("../../Examples/res/textures/woodne_box.png", GL_TEXTURE_2D, 2, GL_RGBA, GL_UNSIGNED_BYTE);
+    struct Texture cube_tex  = Texture_Create("../../Examples/res/textures/woodne_box.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
 
     // Shader_Uniform_Texture2D(shader_cube, "diffuseTexture", plane_tex);
     //  Shader_Uniform_Int(shader_cube, "shadowMap", 1);
@@ -269,7 +269,7 @@ void ShadowMapCubes_Init()
     //   Shader_Uniform_Texture2D(shader_cube, "tex0", cube_tex);
 
     sm.plane_tex = plane_tex;
-    //  sm.cube_tex  = cube_tex;
+    sm.cube_tex  = cube_tex;
 
     // PLANE
     // Shader_Bind(sm.plane_shader);
@@ -303,14 +303,14 @@ void ShadowMapCubes_Init()
     sm.cam = cam;
 
     // LIGHTING
-    vec3 light_position              = {-2.0f, 4.0f, -1.0f};
-    mat4 light_orthogonal_projection = GLM_MAT4_IDENTITY_INIT;
-    mat4 light_view                  = GLM_MAT4_IDENTITY_INIT;
-    mat4 light_matrix                = GLM_MAT4_IDENTITY_INIT;
+    vec3 light_position   = {-2.0f, 4.0f, -1.0f};
+    mat4 light_orthogonal = GLM_MAT4_IDENTITY_INIT;
+    mat4 light_view       = GLM_MAT4_IDENTITY_INIT;
+    mat4 light_matrix     = GLM_MAT4_IDENTITY_INIT;
 
-    glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f, light_orthogonal_projection);
+    glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f, light_orthogonal);
     glm_lookat(light_position, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, light_view);
-    glm_mat4_mul(light_orthogonal_projection, light_view, light_matrix);
+    glm_mat4_mul(light_orthogonal, light_view, light_matrix);
 
     Shader_Bind(shader_cube);
     Shader_Uniform_Mat4(shader_cube, "lightMatrix", light_matrix);
@@ -402,7 +402,7 @@ void ShadowMapCubes_Update()
     Shader_Uniform_Vec3(sm.cube_shader, "viewPos", sm.cam.position);
     Camera_View_Projection_To_Shader(sm.cam, sm.cube_shader, "camMatrix");
 
-    // Texture_Bind(sm.plane_tex);
+    Texture_Bind(sm.plane_tex);
     glActiveTexture(GL_TEXTURE0 + 0);
     glBindTexture(GL_TEXTURE_2D, sm.plane_tex.ID);
     glActiveTexture(GL_TEXTURE0 + 1);
@@ -410,6 +410,9 @@ void ShadowMapCubes_Update()
 
     Shader_Uniform_Mat4(sm.cube_shader, "model", sm.plane);
     Draw_Plane(sm.plane_VAO);
+
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, sm.cube_tex.ID);
 
     Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube1);
     Draw_Cube(sm.cube_VAO);
