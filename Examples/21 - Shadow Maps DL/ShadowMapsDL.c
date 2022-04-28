@@ -27,32 +27,34 @@ void ShadowMap_Init()
             -1.0f, 1.0f, 0.0f, 1.0f};
 
     // Generates shaders
-    struct Shader shader_default     = Shader_Create("../../Examples/21 - Shadow Maps DL/default.vs",
-                                                     "../../Examples/21 - Shadow Maps DL/default.fs",
-                                                     4,
-                                                     (struct VertexAttribute[]){
-                                                         {.index = 0, .name = "aPos"},
-                                                         {.index = 1, .name = "aNormal"},
-                                                         {.index = 2, .name = "aTex"},
-                                                         {.index = 3, .name = "aColor"}});
+    struct Shader shader_default = Shader_Create("../../Examples/21 - Shadow Maps DL/default.vs",
+                                                 "../../Examples/21 - Shadow Maps DL/default.fs",
+                                                 4,
+                                                 (struct VertexAttribute[]){
+                                                     {.index = 0, .name = "aPos"},
+                                                     {.index = 1, .name = "aNormal"},
+                                                     {.index = 2, .name = "aTex"},
+                                                     {.index = 3, .name = "aColor"}});
+
     struct Shader shader_framebuffer = Shader_Create("../../Examples/21 - Shadow Maps DL/framebuffer.vs",
                                                      "../../Examples/21 - Shadow Maps DL/framebuffer.fs",
                                                      2,
                                                      (struct VertexAttribute[]){
                                                          {.index = 0, .name = "inPos"},
                                                          {.index = 1, .name = "inTexCoords"}});
-    struct Shader shader_shadowmap   = Shader_Create("../../Examples/21 - Shadow Maps DL/shadowMap.vs",
-                                                     "../../Examples/21 - Shadow Maps DL/shadowMap.fs",
-                                                     1,
-                                                     (struct VertexAttribute[]){
-                                                         {.index = 0, .name = "aPos"}});
+
+    struct Shader shader_shadowmap = Shader_Create("../../Examples/21 - Shadow Maps DL/shadowMap.vs",
+                                                   "../../Examples/21 - Shadow Maps DL/shadowMap.fs",
+                                                   1,
+                                                   (struct VertexAttribute[]){
+                                                       {.index = 0, .name = "aPos"}});
 
     // Take care of all the light related things
     vec4 lightColor = {1.0f, 1.0f, 1.0f, 1.0f};
-    vec3 lightPos   = {-0.5f, 0.5f, -0.5f};
+    vec3 lightPos   = {-0.5f, 0.5f, 0.5f};
 
     // Controls the gamma function
-    sm.gamma = 2.2f;
+    sm.gamma = 1.0f;
 
     Shader_Bind(shader_default);
     Shader_Uniform_Vec4(shader_default, "lightColor", lightColor);
@@ -90,7 +92,7 @@ void ShadowMap_Init()
 
     // POST PROCESSING FBO
     FBO_t post_processing_fbo = FBO_Create(shader_framebuffer, GL_TEXTURE_2D, window.width, window.heigh, 0);
-    FBO_Add_RBO(&post_processing_fbo, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT);
+    // FBO_Add_RBO(&post_processing_fbo, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT);
     post_processing_fbo.VAO = rectVAO.ID;
     sm.post_processing_fbo  = post_processing_fbo;
 
@@ -99,10 +101,11 @@ void ShadowMap_Init()
     FBO_t   shadowmap_fbo = FBO_Create(shader_framebuffer, GL_TEXTURE_2D, shadowMap_width, shadowmap_height, 0);
     sm.shadowmap_fbo      = shadowmap_fbo;
 
-    glBindTexture(GL_TEXTURE_2D, shadowmap_fbo.FBO_tex);
-    const float clampColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clampColor);
+    // glBindTexture(GL_TEXTURE_2D, shadowmap_fbo.FBO_tex);
+    // const float clampColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    // glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clampColor);
 
+    FBO_Bind(shadowmap_fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowmap_fbo.FBO_tex, 0);
     // Needed since we don't touch the color buffer
     glDrawBuffer(GL_NONE);
@@ -151,6 +154,7 @@ void ShadowMap_Update()
     glBindFramebuffer(GL_FRAMEBUFFER, sm.post_processing_fbo.FBO);
     // Specify the color of the background
     // glClearColor((GLfloat)pow(0.07, sm.gamma), (GLfloat)pow(0.13, sm.gamma), (GLfloat)(0.17, sm.gamma), 1.0f);
+    // glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
     // Clean the back buffer and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Enable depth testing since it's disabled when drawing the framebuffer rectangle

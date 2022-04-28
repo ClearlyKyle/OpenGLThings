@@ -86,10 +86,10 @@ void BlinnPhong_Init()
     EBO_Buffer(surface_ebo, sizeof(surface_indicies), (void *)surface_indicies);
 
     // Links surface_vbo attributes such as coordinates and colors to surface_vao
-    VAO_Attr(surface_vao, surface_vbo, 0, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(0));
-    VAO_Attr(surface_vao, surface_vbo, 1, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(3 * sizeof(GLfloat)));
-    VAO_Attr(surface_vao, surface_vbo, 2, 2, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(6 * sizeof(GLfloat)));
-    VAO_Attr(surface_vao, surface_vbo, 3, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(8 * sizeof(GLfloat)));
+    VAO_Attr(surface_vao, surface_vbo, 0, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(0));                   // POS
+    VAO_Attr(surface_vao, surface_vbo, 1, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(3 * sizeof(GLfloat))); // COLOURS
+    VAO_Attr(surface_vao, surface_vbo, 2, 2, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(6 * sizeof(GLfloat))); // TEX
+    VAO_Attr(surface_vao, surface_vbo, 3, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(8 * sizeof(GLfloat))); // NORMALS
 
     // Unbind all to prevent accidentally modifying them
     VAO_Unbind();

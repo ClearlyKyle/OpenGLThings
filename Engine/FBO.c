@@ -177,6 +177,7 @@ void Framebuffer_Update(const FBO_t msaa_fbo, const FBO_t post_processing_fbo)
 
 void FBO_Bind(const FBO_t fbo)
 {
+    // GL_FRAMEBUFFER binding target simply sets both the read and the write to the same FBO.
     glBindFramebuffer(GL_FRAMEBUFFER, fbo.FBO);
 }
 
