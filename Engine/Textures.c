@@ -22,16 +22,26 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
     check_that(image_bytes != NULL, "[ERROR] (stbi_load) : %s\n", path);
 
     GLenum image_format;
+    char  *format_text;
     if (image_bpp == 1)
+    {
+        format_text  = "GL_RED";
         image_format = GL_RED;
+    }
     else if (image_bpp == 3)
+    {
+        format_text  = "GL_RGB";
         image_format = GL_RGB;
+    }
     else if (image_bpp == 4)
+    {
+        format_text  = "GL_RGBA";
         image_format = GL_RGBA;
+    }
 
     if (image_format != format)
     {
-        fprintf(stderr, "Image format might not be correct %d != %d\n", image_format, format);
+        fprintf(stderr, "Image format might not be correct : stbi_load returns (%d bpp), Texture_Create format is set to %s\n", image_bpp, format_text);
     }
 
     // Generates an OpenGL texture object
@@ -53,6 +63,7 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
     glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // Assigns the image to the OpenGL Texture object
+    // glTexImage2D(texture_type, 0, GL_RGBA, image_width, image_height, 0, image_format, pixel_type, image_bytes);
     glTexImage2D(texture_type, 0, GL_RGBA, image_width, image_height, 0, format, pixel_type, image_bytes);
 
     // Generates MipMaps
