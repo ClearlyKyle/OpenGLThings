@@ -119,7 +119,8 @@ struct Shader Shader_Create2(const char *vs_path, const char *fs_path, const cha
 {
     // TODO : Chest file extension for each shader
 
-    struct Shader shader;
+    struct Shader shader = {0};
+
     shader.vs_handle = _Compile_Shader(vs_path, GL_VERTEX_SHADER);
     shader.fs_handle = _Compile_Shader(fs_path, GL_FRAGMENT_SHADER);
     shader.shader_id = glCreateProgram();
@@ -160,16 +161,19 @@ struct Shader Shader_Create2(const char *vs_path, const char *fs_path, const cha
     glDeleteShader(shader.vs_handle);
     glDeleteShader(shader.fs_handle);
     glDeleteShader(shader.gs_handle);
+    shader.vs_handle = 0;
+    shader.fs_handle = 0;
+    shader.gs_handle = 0;
 
     return shader;
 }
 
 struct Shader Shader_Create(const char *vertex_shader_path, const char *fragment_shader_path, size_t n, struct VertexAttribute attributes[])
 {
-    struct Shader shader;
-    shader.vs_handle = _Compile_Shader(vertex_shader_path, GL_VERTEX_SHADER);
-    shader.fs_handle = _Compile_Shader(fragment_shader_path, GL_FRAGMENT_SHADER);
-    shader.shader_id = glCreateProgram();
+    struct Shader shader = {0};
+    shader.vs_handle     = _Compile_Shader(vertex_shader_path, GL_VERTEX_SHADER);
+    shader.fs_handle     = _Compile_Shader(fragment_shader_path, GL_FRAGMENT_SHADER);
+    shader.shader_id     = glCreateProgram();
 
     _Validate_Shader(shader.vs_handle, vertex_shader_path);
     _Validate_Shader(shader.fs_handle, fragment_shader_path);
@@ -201,15 +205,26 @@ struct Shader Shader_Create(const char *vertex_shader_path, const char *fragment
     glDetachShader(shader.shader_id, shader.vs_handle);
     glDeleteShader(shader.vs_handle);
     glDeleteShader(shader.fs_handle);
+    shader.vs_handle = 0;
+    shader.fs_handle = 0;
 
     return shader;
 }
 
 void Shader_Destroy(const struct Shader shader)
 {
+    if (shader.vs_handle)
+        glDeleteShader(shader.vs_handle);
+
+    if (shader.fs_handle)
+        glDeleteShader(shader.fs_handle);
+
+    if (shader.gs_handle)
+        glDeleteShader(shader.gs_handle);
+
     glDeleteProgram(shader.shader_id);
-    glDeleteShader(shader.vs_handle);
-    glDeleteShader(shader.fs_handle);
+
+    CHECK_GL_ERRORS;
 }
 
 void Shader_Bind(const struct Shader shader)
@@ -224,7 +239,7 @@ void Shader_Bind(const struct Shader shader)
     if ((LOCATION) < 0)                                                                                                \
         fprintf(stderr, _colour_RED "[UNIFORM ERROR] " _colour_COLOUR_X "Error locating uniform name : %s\n", (NAME)); \
     else                                                                                                               \
-        (FUNCTION);
+        CHECK_GL_FUNC(FUNCTION);
 
 void Shader_Uniform_Int(struct Shader shader, const char *name, int i)
 {
@@ -272,5 +287,5 @@ void Shader_Uniform_Texture2D(struct Shader shader, const char *name, const stru
     // Shader_Uniform_Int(shader, name, texture.slot);
 
     const GLuint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
-    LOCATION_CHECK(location, name, glUniform1i(location, texture.slot));
+    LOCATION_CHECK(location, name, glUniform1i(location, (GLint)texture.slot));
 }
