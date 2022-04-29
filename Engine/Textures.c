@@ -3,6 +3,21 @@
 #define STB_IMAGE_IMPLEMENTATION // use of stb functions once and for all
 #include "stb/stb_image.h"
 
+static const char *_PIXEL_FORMAT_NAME(const int value)
+{
+#define NAME(ERR) \
+    case ERR:     \
+        return #ERR;
+    switch (value)
+    {
+        NAME(GL_RED)
+        NAME(GL_RGB)
+        NAME(GL_RGBA)
+    }
+    return "unknown";
+#undef NAME
+}
+
 struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot, GLenum format, GLenum pixel_type)
 {
     assert((GL_TEXTURE0 + slot) < GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
@@ -18,30 +33,35 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
     stbi_set_flip_vertically_on_load(true);
 
     // Reads the image from a file and stores it in bytes
-    unsigned char *image_bytes = stbi_load(path, &image_width, &image_height, &image_bpp, STBI_rgb_alpha);
+    unsigned char *image_bytes = stbi_load(path, &image_width, &image_height, &image_bpp, 0);
     check_that(image_bytes != NULL, "[ERROR] (stbi_load) : %s\n", path);
 
-    GLenum image_format;
-    char  *format_text;
-    if (image_bpp == 1)
+    // Convert format to str
+    GLenum image_format; // could be used to get glTexImage2D format
+    char  *image_format_text;
+
+    switch (image_bpp) // returned from stbi_load
     {
-        format_text  = "GL_RED";
-        image_format = GL_RED;
-    }
-    else if (image_bpp == 3)
-    {
-        format_text  = "GL_RGB";
-        image_format = GL_RGB;
-    }
-    else if (image_bpp == 4)
-    {
-        format_text  = "GL_RGBA";
-        image_format = GL_RGBA;
+    case 1:
+        image_format_text = "GL_RED";
+        image_format      = GL_RED; // 6403
+        break;
+    case 3:
+        image_format_text = "GL_RGB";
+        image_format      = GL_RGB; // 6407
+        break;
+    case 4:
+        image_format_text = "GL_RGBA";
+        image_format      = GL_RGBA; // 6408
+        break;
+    default:
+        fprintf(stderr, "Something is wrong with the image format\n");
     }
 
     if (image_format != format)
     {
-        fprintf(stderr, "Image format might not be correct : stbi_load returns (%d bpp), Texture_Create format is set to %s\n", image_bpp, format_text);
+        fprintf(stderr, "Image format might not be correct : %s\n", path);
+        fprintf(stderr, "stbi_load returns %s (%d bpp), while Texture_Create format is set to %s\n", image_format_text, image_bpp, _PIXEL_FORMAT_NAME(format));
     }
 
     // Generates an OpenGL texture object
@@ -63,8 +83,8 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
     glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // Assigns the image to the OpenGL Texture object
-    // glTexImage2D(texture_type, 0, GL_RGBA, image_width, image_height, 0, image_format, pixel_type, image_bytes);
-    glTexImage2D(texture_type, 0, GL_RGBA, image_width, image_height, 0, format, pixel_type, image_bytes);
+    glTexImage2D(texture_type, 0, GL_RGBA, image_width, image_height, 0, image_format, pixel_type, image_bytes);
+    // glTexImage2D(texture_type, 0, GL_RGBA, image_width, image_height, 0, format, pixel_type, image_bytes);
 
     // Generates MipMaps
     // glGenerateMipmap(texture_type);
