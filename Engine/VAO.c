@@ -33,6 +33,7 @@ void VAO_Attr(struct VAO vao, struct VBO vbo, GLuint index, GLint size, GLenum t
     VAO_Bind(vao);
     VBO_Bind(vbo);
 
+    // NEWER OpenGL Method
     // const GLuint attrib_location = glGetAttribLocation(shader.id, name);
     // glVertexAttribPointer(attrib_location, size, type, GL_FALSE, stride, offset);
     // glEnableVertexAttribArray(attrib_location);
@@ -40,6 +41,6 @@ void VAO_Attr(struct VAO vao, struct VBO vbo, GLuint index, GLint size, GLenum t
     glEnableVertexAttribArray(index);
     glVertexAttribPointer(index, size, type, GL_FALSE, stride, offset);
 
-    VAO_Unbind();
-    VBO_Unbind();
+    // VAO_Unbind();
+    // VBO_Unbind();
 }
