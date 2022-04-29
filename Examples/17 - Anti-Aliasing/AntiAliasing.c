@@ -96,20 +96,24 @@ void AntiAliasing_Init()
     aa.model         = crow;
 }
 
+// FOR AA USE     : Framebuffer_Draw_Init(msaa) + Framebuffer_Update
+// WITHOUT AA USE : Framebuffer_Draw + Framebuffer_Draw_Init(post_processing)
+
 void AntiAliasing_Update()
 {
-    Framebuffer_Draw_Init(aa.post_processing_fbo);
-    // Framebuffer_Draw_Init(aa.msaa_fbo);
+    // Framebuffer_Draw_Init(aa.post_processing_fbo);
+    Framebuffer_Draw_Init(aa.msaa_fbo);
 
     Camera_Inputs(&aa.cam);
 
     // TODO : Move this into the model Draw call
+    Shader_Bind(aa.model.shader);
     Shader_Uniform_Vec3(aa.model.shader, "camPos", aa.cam.position);
     Camera_View_Projection_To_Shader(aa.cam, aa.model.shader, "camMatrix");
 
     Mesh_Draw(aa.model);
 
-    // Framebuffer_Update(aa.msaa_fbo, aa.post_processing_fbo);
+    Framebuffer_Update(aa.msaa_fbo, aa.post_processing_fbo);
 
     // Bind the default framebuffer
     Framebuffer_Draw(aa.post_processing_fbo);
@@ -120,6 +124,7 @@ void AntiAliasing_OnExit()
     Camera_Print_Values(aa.cam);
 
     Mesh_Free(aa.model);
-    Framebuffer_Destroy(aa.msaa_fbo);
-    Framebuffer_Destroy(aa.post_processing_fbo);
+
+    Framebuffer_Destroy(&aa.msaa_fbo);
+    Framebuffer_Destroy(&aa.post_processing_fbo);
 }
