@@ -448,6 +448,7 @@ void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh, const char *
 
     texInfo.textures = (struct Texture *)malloc(sizeof(struct Texture) * texInfo.tex_count);
 
+    Shader_Bind(mesh->shader);
     for (size_t i = 0; i <= texInfo.tex_count - 1; i++)
     {
         char buff[256];
@@ -827,9 +828,14 @@ void Mesh_Set_Scale(struct Mesh *mesh, vec3 new_scale)
     glm_vec3_copy(new_scale, mesh->scale);
 }
 
+// void Mesh_Draw(struct Mesh m, Camera_t cam)
 void Mesh_Draw(struct Mesh m)
 {
     Shader_Bind(m.shader);
+
+    // Shader_Uniform_Vec3(m.shader, "camPos", cam.position);
+    // Camera_View_Projection_To_Shader(cam, m.shader, "camMatrix");
+
     _Recursive_Mesh_Renderer(m, m.scene, m.scene->mRootNode);
 }
 
