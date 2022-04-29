@@ -57,11 +57,13 @@ FBO_t FBO_Create(Shader_t shader, GLenum target, const GLsizei width, const GLsi
     GLuint FBO;
     glGenFramebuffers(1, &FBO);
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    CHECK_GL_ERRORS;
 
     // Create Framebuffer Texture
     GLuint framebuffer_texture;
     glGenTextures(1, &framebuffer_texture);
     glBindTexture(target, framebuffer_texture);
+    CHECK_GL_ERRORS;
 
     if (samples > 0 && target == GL_TEXTURE_2D_MULTISAMPLE)
     {
@@ -74,11 +76,6 @@ FBO_t FBO_Create(Shader_t shader, GLenum target, const GLsizei width, const GLsi
 
         // GL_TEXTURE_2D_MULTISAMPLE for AA FB
         glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, width, height, GL_TRUE);
-
-        glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // Prevents edge bleeding
-        glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Prevents edge bleeding
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, framebuffer_texture, 0);
     }
@@ -99,7 +96,7 @@ FBO_t FBO_Create(Shader_t shader, GLenum target, const GLsizei width, const GLsi
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    FBO_t return_fbo;
+    FBO_t return_fbo   = {0};
     return_fbo.shader  = shader;
     return_fbo.FBO     = FBO;
     return_fbo.FBO_tex = framebuffer_texture;
@@ -189,9 +186,8 @@ void FBO_UnBind(const FBO_t fbo)
 void Framebuffer_Draw_Init(struct FBO fbo)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo.FBO);
-    // glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST); // Enable depth testing since it's disabled when drawing the framebuffer rectangle
+    glEnable(GL_DEPTH_TEST);
 }
 
 void Framebuffer_Draw(struct FBO fbo)
@@ -206,22 +202,26 @@ void Framebuffer_Draw(struct FBO fbo)
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void Framebuffer_Destroy(struct FBO fbo)
+void Framebuffer_Destroy(struct FBO *fbo)
 {
-    glDeleteFramebuffers(1, &fbo.FBO);
-    glDeleteTextures(1, &fbo.FBO_tex);
-
-    if (fbo.RBO)
+    if (fbo->RBO)
     {
-        glDeleteRenderbuffers(1, &fbo.RBO);
-        fbo.RBO = 0;
+        glDeleteRenderbuffers(1, &fbo->RBO);
+        fbo->RBO = 0;
     }
-    if (fbo.VAO)
+    if (fbo->FBO)
     {
-        glDeleteVertexArrays(1, &fbo.VAO);
-        fbo.VAO = 0;
+        glDeleteFramebuffers(1, &fbo->FBO);
+        fbo->FBO = 0;
     }
-
-    fbo.FBO     = 0;
-    fbo.FBO_tex = 0;
+    if (fbo->FBO_tex)
+    {
+        glDeleteTextures(1, &fbo->FBO_tex);
+        fbo->FBO_tex = 0;
+    }
+    if (fbo->VAO)
+    {
+        glDeleteVertexArrays(1, &fbo->VAO);
+        fbo->VAO = 0;
+    }
 }

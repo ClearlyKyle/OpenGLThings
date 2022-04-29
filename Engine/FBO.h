@@ -33,6 +33,6 @@ void FBO_UnBind(const FBO_t fbo);
 void Framebuffer_Draw_Init(struct FBO fbo);
 void Framebuffer_Draw(struct FBO fbo);
 
-void Framebuffer_Destroy(struct FBO fbo);
+void Framebuffer_Destroy(struct FBO *fbo);
 
 #endif // __FRAMEBUFFER_H__
