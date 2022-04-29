@@ -2,93 +2,6 @@
 
 struct Window window;
 
-void GLAPIENTRY MessageCallback(GLenum        source,
-                                GLenum        type,
-                                GLuint        id,
-                                GLenum        severity,
-                                GLsizei       length,
-                                const GLchar *message,
-                                const void   *userParam)
-{
-    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-            (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
-            type, severity, message);
-
-    printf("Debug message: id %d, %s\n", id, message);
-
-    printf("Message source: ");
-    switch (source)
-    {
-    case GL_DEBUG_SOURCE_API:
-        printf("API\n");
-        break;
-    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-        printf("Window System\n");
-        break;
-    case GL_DEBUG_SOURCE_SHADER_COMPILER:
-        printf("Shader Compiler\n");
-        break;
-    case GL_DEBUG_SOURCE_THIRD_PARTY:
-        printf("Third Party\n");
-        break;
-    case GL_DEBUG_SOURCE_APPLICATION:
-        printf("Application\n");
-        break;
-    case GL_DEBUG_SOURCE_OTHER:
-        printf("Other\n");
-        break;
-    }
-
-    printf("Error type: ");
-    switch (type)
-    {
-    case GL_DEBUG_TYPE_ERROR:
-        printf("Error\n");
-        break;
-    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-        printf("Deprecated Behaviour\n");
-        break;
-    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-        printf("Undefined Behaviour\n");
-        break;
-    case GL_DEBUG_TYPE_PORTABILITY:
-        printf("Portability\n");
-        break;
-    case GL_DEBUG_TYPE_PERFORMANCE:
-        printf("Performance\n");
-        break;
-    case GL_DEBUG_TYPE_MARKER:
-        printf("Marker\n");
-        break;
-    case GL_DEBUG_TYPE_PUSH_GROUP:
-        printf("Push Group\n");
-        break;
-    case GL_DEBUG_TYPE_POP_GROUP:
-        printf("Pop Group\n");
-        break;
-    case GL_DEBUG_TYPE_OTHER:
-        printf("Other\n");
-        break;
-    }
-
-    printf("Severity: ");
-    switch (severity)
-    {
-    case GL_DEBUG_SEVERITY_HIGH:
-        printf("High\n");
-        break;
-    case GL_DEBUG_SEVERITY_MEDIUM:
-        printf("Medium\n");
-        break;
-    case GL_DEBUG_SEVERITY_LOW:
-        printf("Low\n");
-        break;
-    case GL_DEBUG_SEVERITY_NOTIFICATION:
-        printf("Notification\n");
-        break;
-    }
-}
-
 void Window_Init(int width, int height,
                  Windowfunction_ptr init,
                  Windowfunction_ptr update,
@@ -163,9 +76,12 @@ void Window_Init(int width, int height,
 
     // ENABLE
     glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(MessageCallback, 0);
-    // glEnable(GL_DEPTH_TEST); // Enables the Depth Buffer
-    // glDepthFunc(GL_LESS);
+    // glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0,
+    //                      GL_DEBUG_SEVERITY_MEDIUM, -1, "error message here");
+    //  glEnable(GL_DEPTH_TEST); // Enables the Depth Buffer
+    //  glDepthFunc(GL_LESS);
 
     // glEnable(GL_STENCIL_TEST); // Enable stencil test
 

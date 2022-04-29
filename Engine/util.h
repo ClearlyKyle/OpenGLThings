@@ -30,6 +30,7 @@
 
 #define _colour_RED E_THINGY "[31m"
 #define _colour_GREEN E_THINGY "[32m"
+#define _colour_BLUE E_THINGY "[34m"
 #define _colour_YELLOW E_THINGY "[33m"
 #define _colour_WHITE E_THINGY "[1m"
 #define _colour_COLOUR_X E_THINGY "[m" // Resets the colour
@@ -59,49 +60,50 @@
         log_error(M, ##__VA_ARGS__); \
     }
 
-#define EXIT_ON_GL_ERROR
+//#define EXIT_ON_GL_ERROR
 #define CHECK_GL_ERRORS_TOGGLE
-
-static void gl_check_error(const char *function, const char *file, int line)
+// gl_function_name   - the name of the OpengGL function being checked
+// function_called_in - the name of the function the OpenGL function is being used in
+static void __gl_check_for_an_error(
+    const char *gl_function_name, const char *function_called_in, const char *file_name, int line_number)
 {
     GLenum error    = 0;
     bool   is_error = false;
+    char  *enum_string;
     while ((error = glGetError()) != GL_NO_ERROR)
     {
         is_error = true;
         switch (error)
         {
         case GL_INVALID_ENUM:
-            printf("GL_INVALID_ENUM");
+            enum_string = "GL_INVALID_ENUM";
             break;
         case GL_INVALID_VALUE:
-            printf("GL_INVALID_VALUE");
+            enum_string = "GL_INVALID_VALUE";
             break;
         case GL_INVALID_OPERATION:
-            printf("INVALID_OPERATION");
+            enum_string = "INVALID_OPERATION";
             break;
         case GL_STACK_OVERFLOW:
-            printf("STACK_OVERFLOW");
+            enum_string = "STACK_OVERFLOW";
             break;
         case GL_STACK_UNDERFLOW:
-            printf("STACK_UNDERFLOW");
+            enum_string = "STACK_UNDERFLOW";
             break;
         case GL_OUT_OF_MEMORY:
-            printf("OUT_OF_MEMORY");
+            enum_string = "OUT_OF_MEMORY";
             break;
         case GL_INVALID_FRAMEBUFFER_OPERATION:
-            printf("INVALID_FRAMEBUFFER_OPERATION");
+            enum_string = "INVALID_FRAMEBUFFER_OPERATION";
             break;
         case GL_CONTEXT_LOST:
-            printf("GL_CONTEXT_LOST");
+            enum_string = "GL_CONTEXT_LOST";
             break;
-        // case GL_TABLE_TOO_LARGE:
-        //     printf("GL_TABLE_TOO_LARGE");
-        //     break;
         default:
-            printf("Unknown error code %d", error);
+            fprintf(stderr, "Unknown error code %d", error);
         }
-        printf(" : '%s' (%s:%d)\n", function, file, line);
+        fprintf(stderr, _colour_RED "ERROR with : " _colour_BLUE "%s" _colour_COLOUR_X " - %s\n", gl_function_name, enum_string);
+        fprintf(stderr, "(%s:%d - %s)\n", file_name, line_number, function_called_in);
     }
 #ifdef EXIT_ON_GL_ERROR
     if (is_error)
@@ -112,9 +114,100 @@ static void gl_check_error(const char *function, const char *file, int line)
 }
 
 #ifdef CHECK_GL_ERRORS_TOGGLE
-#define CHECK_GL_ERRORS gl_check_error(__FUNCTION__, __FILE__, __LINE__)
+#define CHECK_GL_ERRORS __gl_check_for_an_error("An OpenGL function call has a problem...", __FUNCTION__, __FILE__, __LINE__)
+#define CHECK_GL_FUNC(FUNCTION) \
+    (FUNCTION);                 \
+    __gl_check_for_an_error(#FUNCTION, __FUNCTION__, __FILE__, __LINE__);
 #else
 #define CHECK_GL_ERRORS
+#define CHECK_GL_FUNC
 #endif
+
+static void GLAPIENTRY MessageCallback(const GLenum  source,
+                                       const GLenum  type,
+                                       const GLuint  id,
+                                       const GLenum  severity,
+                                       const GLsizei length,
+                                       const GLchar *message,
+                                       const void   *userParam)
+{
+    switch (severity)
+    {
+    case GL_DEBUG_SEVERITY_HIGH:
+        // fprintf(stderr, _colour_RED "[GL CALLBACK] Severity: High (id %d)" _colour_COLOUR_X, id);
+        fprintf(stderr, _colour_RED "[GL CALLBACK] Severity: High" _colour_COLOUR_X);
+        break;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+        fprintf(stderr, _colour_YELLOW "[GL CALLBACK] Severity: Medium" _colour_COLOUR_X);
+        break;
+    case GL_DEBUG_SEVERITY_LOW:
+        fprintf(stderr, "[GL CALLBACK] Severity: Low ");
+        break;
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+        fprintf(stderr, "[GL CALLBACK] Severity: Notification ");
+        break;
+        // return;
+    }
+
+    printf(" - ");
+
+    switch (source)
+    {
+    case GL_DEBUG_SOURCE_API:
+        printf("API");
+        break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+        printf("Window System");
+        break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER:
+        printf("Shader Compiler");
+        break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY:
+        printf("Third Party");
+        break;
+    case GL_DEBUG_SOURCE_APPLICATION:
+        printf("Application");
+        break;
+    case GL_DEBUG_SOURCE_OTHER:
+        printf("Other");
+        break;
+    }
+
+    printf(" - ");
+
+    switch (type)
+    {
+    case GL_DEBUG_TYPE_ERROR:
+        printf("Error");
+        break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+        printf("Deprecated Behaviour");
+        break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+        printf("Undefined Behaviour");
+        break;
+    case GL_DEBUG_TYPE_PORTABILITY:
+        printf("Portability");
+        break;
+    case GL_DEBUG_TYPE_PERFORMANCE:
+        printf("Performance");
+        break;
+    case GL_DEBUG_TYPE_MARKER:
+        printf("Marker");
+        break;
+    case GL_DEBUG_TYPE_PUSH_GROUP:
+        printf("Push Group");
+        break;
+    case GL_DEBUG_TYPE_POP_GROUP:
+        printf("Pop Group");
+        break;
+    case GL_DEBUG_TYPE_OTHER:
+        printf("Other");
+        break;
+    }
+
+    // fprintf(stderr, "\n");
+    fprintf(stderr, "\n%s\n", message);
+}
 
 #endif // __UTIL2_H__
