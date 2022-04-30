@@ -78,12 +78,12 @@ void BlinnPhong_Init()
     // Generates Vertex Array Object and binds it
     struct VAO surface_vao = VAO_Create();
 
+    struct EBO surface_ebo = EBO_Create();
+    EBO_Buffer(surface_ebo, sizeof(surface_indicies), (void *)surface_indicies);
+
     // Generates Vertex Buffer Object and links it to vertices
     struct VBO surface_vbo = VBO_Create(GL_ARRAY_BUFFER);
     VBO_Buffer(surface_vbo, sizeof(surface_verticies), (const GLvoid *)surface_verticies);
-
-    struct EBO surface_ebo = EBO_Create();
-    EBO_Buffer(surface_ebo, sizeof(surface_indicies), (void *)surface_indicies);
 
     // Links surface_vbo attributes such as coordinates and colors to surface_vao
     VAO_Attr(surface_vao, surface_vbo, 0, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(0));                   // POS
@@ -92,8 +92,8 @@ void BlinnPhong_Init()
     VAO_Attr(surface_vao, surface_vbo, 3, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(8 * sizeof(GLfloat))); // NORMALS
 
     // Unbind all to prevent accidentally modifying them
-    VAO_Unbind();
-    VBO_Unbind();
+    // VAO_Unbind();
+    // VBO_Unbind();
 
     bp.surface_shader = surface_shader;
     bp.surface_VAO    = surface_vao;
@@ -113,19 +113,19 @@ void BlinnPhong_Init()
     // Generates Vertex Array Object and binds it
     struct VAO light_vao = VAO_Create();
 
+    struct EBO light_ebo = EBO_Create();
+    EBO_Buffer(light_ebo, sizeof(light_indices), (void *)light_indices);
+
     // Generates Vertex Buffer Object and links it to vertices
     struct VBO light_abo = VBO_Create(GL_ARRAY_BUFFER);
     VBO_Buffer(light_abo, sizeof(light_vertices), (const GLvoid *)light_vertices);
-
-    struct EBO light_ebo = EBO_Create();
-    EBO_Buffer(light_ebo, sizeof(light_indices), (void *)light_indices);
 
     // Links VBO attributes such as coordinates and colors to VAO
     VAO_Attr(light_vao, light_abo, 0, 3, GL_FLOAT, 3 * sizeof(GLfloat), (const GLvoid *)(0));
 
     // Unbind all to prevent accidentally modifying them
-    VAO_Unbind();
-    VBO_Unbind();
+    // VAO_Unbind();
+    // VBO_Unbind();
 
     bp.light_shader = light_shader;
     bp.light_VAO    = light_vao;
@@ -157,9 +157,10 @@ void BlinnPhong_Init()
     bp.tex1                   = tex1;
 
     const char    *file_path2 = "../../Examples/res/textures/planksSpec.png";
-    struct Texture tex2       = Texture_Create(file_path2, GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+    struct Texture tex2       = Texture_Create(file_path2, GL_TEXTURE_2D, 1, GL_RED, GL_UNSIGNED_BYTE);
     bp.tex2                   = tex2;
 
+    Shader_Bind(surface_shader);
     Shader_Uniform_Texture2D(surface_shader, "tex0", tex1);
     Shader_Uniform_Texture2D(surface_shader, "tex1", tex2);
 
@@ -171,7 +172,6 @@ void BlinnPhong_Init()
     // glm_vec3_copy((vec3){0.810961f, -0.213032f, -0.544940f}, cam.orientation);
     // cam.pitch = -12.300069f;
     // cam.yaw   = -33.899826f;
-
     bp.cam = cam;
 }
 
@@ -217,4 +217,6 @@ void BlinnPhong_OnExit()
 
     Texture_Delete(bp.tex1);
     Texture_Delete(bp.tex2);
+
+    CHECK_GL_ERRORS;
 }
