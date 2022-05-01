@@ -25,6 +25,5 @@ void main()
     vs_out.Normal            = transpose(inverse(mat3(model))) * aNormal;
     vs_out.TexCoords         = aTex;
     vs_out.FragPosLightSpace = lightMatrix * vec4(vs_out.FragPos, 1.0);
-    gl_Position              = camMatrix * model * vec4(aPos, 1.0);
-    // gl_Position              = camMatrix * vec4(vs_out.FragPos, 1.0);
+    gl_Position              = camMatrix * vec4(vs_out.FragPos, 1.0);
 }
