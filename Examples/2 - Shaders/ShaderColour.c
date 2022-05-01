@@ -71,5 +71,5 @@ void ShaderColour_Update()
 void ShaderColour_OnExit()
 {
     VAO_Destroy(sc.vao);
-    Shader_Destroy(sc.shader);
+    Shader_Destroy(&sc.shader);
 }

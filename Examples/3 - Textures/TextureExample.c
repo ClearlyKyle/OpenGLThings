@@ -85,5 +85,5 @@ void TextureExample_OnExit()
 {
     VAO_Destroy(texture_example.vao);
     Texture_Delete(texture_example.tex);
-    Shader_Destroy(texture_example.shader);
+    Shader_Destroy(&texture_example.shader);
 }

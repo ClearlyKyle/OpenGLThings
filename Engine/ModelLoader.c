@@ -841,7 +841,7 @@ void Mesh_Draw(struct Mesh m)
 
 void Model_Free(struct Model model)
 {
-    Shader_Destroy(model.shader);
+    Shader_Destroy(&model.shader);
     VAO_Destroy(model.vao);
 }
 
@@ -856,7 +856,7 @@ void Mesh_Free(struct Mesh mesh)
         Texture_Delete(mesh.models[i].tex);
     }
 
-    Shader_Destroy(mesh.shader);
+    Shader_Destroy(&mesh.shader);
 
     if (mesh.instancing.count > 1)
     {

@@ -208,7 +208,7 @@ void LightingExample_OnExit()
 {
     VAO_Destroy(lights.vao[0]);
     VAO_Destroy(lights.vao[1]);
-    Shader_Destroy(lights.shader[0]);
-    Shader_Destroy(lights.shader[1]);
+    Shader_Destroy(&lights.shader[0]);
+    Shader_Destroy(&lights.shader[1]);
     Texture_Delete(lights.tex);
 }

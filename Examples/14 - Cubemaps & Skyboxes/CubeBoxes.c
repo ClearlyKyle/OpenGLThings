@@ -215,7 +215,7 @@ void CubeBoxes_OnExit()
     Camera_Print_Values(cb.cam);
 
     Mesh_Free(cb.model);
-    Shader_Destroy(cb.skybox_shader);
+    Shader_Destroy(&cb.skybox_shader);
 
     glDeleteVertexArrays(1, &cb.skybox_VAO);
     glDeleteTextures(1, &cb.cubemap_texture);

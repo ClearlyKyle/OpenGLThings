@@ -60,7 +60,7 @@ void challanges_Update()
 
 void challanges_OnExit()
 {
-    Shader_Destroy(challange.shader);
+    Shader_Destroy(&challange.shader);
     VBO_Unbind();
     VAO_Unbind();
 }

@@ -218,8 +218,8 @@ void SpecularMaps_OnExit()
 
     VAO_Destroy(spec_maps.vao[0]);
     VAO_Destroy(spec_maps.vao[1]);
-    Shader_Destroy(spec_maps.shader[0]);
-    Shader_Destroy(spec_maps.shader[1]);
+    Shader_Destroy(&spec_maps.shader[0]);
+    Shader_Destroy(&spec_maps.shader[1]);
     Texture_Delete(spec_maps.tex[0]);
     Texture_Delete(spec_maps.tex[1]);
 }

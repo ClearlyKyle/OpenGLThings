@@ -91,7 +91,7 @@ void CameraExample_Update()
 
 void CameraExample_OnExit()
 {
-    Shader_Destroy(cam_example.shader);
+    Shader_Destroy(&cam_example.shader);
     Texture_Delete(cam_example.tex);
     VAO_Destroy(cam_example.vao);
 }

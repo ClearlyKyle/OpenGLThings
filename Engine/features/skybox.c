@@ -184,7 +184,7 @@ void Skybox_Draw(Skybox_t skybox, Camera_t cam)
 
 void Skybox_Free(Skybox_t skybox)
 {
-    Shader_Destroy(skybox.shader);
+    Shader_Destroy(&skybox.shader);
     glDeleteVertexArrays(1, &skybox.VAO);
     glDeleteTextures(1, &skybox.texture);
 }

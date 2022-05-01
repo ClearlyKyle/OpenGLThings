@@ -45,7 +45,7 @@ static void _Validate_Program(struct Shader shader, GLenum status, const char *v
 
         fprintf(stderr, "[Shader %s error] \n%s\n%s\n", "COMPILE", file_paths, logtext);
 
-        Shader_Destroy(shader);
+        Shader_Destroy(&shader);
 
         exit(1);
     }
@@ -211,20 +211,31 @@ struct Shader Shader_Create(const char *vertex_shader_path, const char *fragment
     return shader;
 }
 
-void Shader_Destroy(const struct Shader shader)
+void Shader_Destroy(struct Shader *shader)
 {
-    if (shader.vs_handle)
-        glDeleteShader(shader.vs_handle);
+    if (shader->vs_handle)
+    {
+        glDeleteShader(shader->vs_handle);
+        shader->vs_handle = 0;
+    }
 
-    if (shader.fs_handle)
-        glDeleteShader(shader.fs_handle);
+    if (shader->fs_handle)
+    {
+        glDeleteShader(shader->fs_handle);
+        shader->fs_handle = 0;
+    }
 
-    if (shader.gs_handle)
-        glDeleteShader(shader.gs_handle);
+    if (shader->gs_handle)
+    {
+        glDeleteShader(shader->gs_handle);
+        shader->gs_handle = 0;
+    }
 
-    glDeleteProgram(shader.shader_id);
-
-    CHECK_GL_ERRORS;
+    if (shader->shader_id)
+    {
+        glDeleteProgram(shader->shader_id);
+        shader->shader_id = 0;
+    }
 }
 
 void Shader_Bind(const struct Shader shader)

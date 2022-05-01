@@ -110,6 +110,6 @@ void Ortho_Update()
 
 void Ortho_OnExit()
 {
-    Shader_Destroy(od.shader);
+    Shader_Destroy(&od.shader);
     VAO_Destroy(od.VAO);
 }

@@ -111,6 +111,6 @@ void Gamma_OnExit()
     Camera_Print_Values(gam.cam);
 
     Mesh_Free(gam.model);
-    Framebuffer_Destroy(gam.msaa_fbo);
-    Framebuffer_Destroy(gam.post_processing_fbo);
+    Framebuffer_Destroy(&gam.msaa_fbo);
+    Framebuffer_Destroy(&gam.post_processing_fbo);
 }

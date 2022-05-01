@@ -129,6 +129,6 @@ void Basic3D_OnExit()
     // VBO_Destroy(basic3d.vbo);
     // EBO_Destroy(basic3d.ebo);
 
-    Shader_Destroy(basic3d.shader);
+    Shader_Destroy(&basic3d.shader);
     Texture_Delete(basic3d.tex);
 }

@@ -212,8 +212,8 @@ void BlinnPhong_OnExit()
     VAO_Destroy(bp.surface_VAO);
     VAO_Destroy(bp.light_VAO);
 
-    Shader_Destroy(bp.surface_shader);
-    Shader_Destroy(bp.light_shader);
+    Shader_Destroy(&bp.surface_shader);
+    Shader_Destroy(&bp.light_shader);
 
     Texture_Delete(bp.tex1);
     Texture_Delete(bp.tex2);

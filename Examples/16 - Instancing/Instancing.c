@@ -272,8 +272,8 @@ void Instancing_OnExit()
     Mesh_Free(ins.asteroid_normal);
     Mesh_Free(ins.jupiter);
 
-    Shader_Destroy(ins.default_shader);
-    Shader_Destroy(ins.asteroid_shader);
+    Shader_Destroy(&ins.default_shader);
+    Shader_Destroy(&ins.asteroid_shader);
 
     Skybox_Free(ins.skybox);
 }

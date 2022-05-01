@@ -69,6 +69,6 @@ void BasicTriangle_Update()
 
 void BasicTriangle_OnExit()
 {
-    Shader_Destroy(bt.shader);
+    Shader_Destroy(&bt.shader);
     VAO_Destroy(bt.vao);
 }

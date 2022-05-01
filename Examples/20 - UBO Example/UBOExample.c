@@ -200,8 +200,8 @@ void UBOExample_Update()
 void UBOExample_OnExit()
 {
     VAO_Destroy(uboexample.vao);
-    Shader_Destroy(uboexample.shader_red);
-    Shader_Destroy(uboexample.shader_blue);
-    Shader_Destroy(uboexample.shader_green);
-    Shader_Destroy(uboexample.shader_yellow);
+    Shader_Destroy(&uboexample.shader_red);
+    Shader_Destroy(&uboexample.shader_blue);
+    Shader_Destroy(&uboexample.shader_green);
+    Shader_Destroy(&uboexample.shader_yellow);
 }
