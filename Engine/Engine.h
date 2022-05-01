@@ -10,5 +10,6 @@
 #include "ModelLoader.h"
 #include "Camera.h"
 #include "features/skybox.h"
+#include "features/shadowmap.h"
 
 #endif // __ENGINE_H__
