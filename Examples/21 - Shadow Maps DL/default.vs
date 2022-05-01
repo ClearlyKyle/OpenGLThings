@@ -2,11 +2,8 @@
 
 // Positions/Coordinates
 layout(location = 0) in vec3 aPos;
-// Normals (not necessarily normalized)
 layout(location = 1) in vec3 aNormal;
-// Texture Coordinates
 layout(location = 2) in vec2 aTex;
-// Colors
 layout(location = 3) in vec3 aColor;
 
 // Outputs the current position for the Fragment Shader
@@ -28,7 +25,7 @@ uniform mat4 translation;
 uniform mat4 rotation;
 uniform mat4 scale;
 // Imports the light matrix
-uniform mat4 lightProjection;
+uniform mat4 lightMatrix;
 
 void main()
 {
@@ -41,7 +38,7 @@ void main()
     // Assigns the texture coordinates from the Vertex Data to "texCoord"
     texCoord = aTex;
     // Calculates the position of the light fragment for the fragment shader
-    fragPosLight = lightProjection * vec4(crntPos, 1.0f);
+    fragPosLight = lightMatrix * vec4(crntPos, 1.0f);
 
     // Outputs the positions/coordinates of all vertices
     gl_Position = camMatrix * vec4(crntPos, 1.0);
