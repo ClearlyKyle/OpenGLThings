@@ -1,14 +1,5 @@
 #include "SM_With_Cubes.h"
 
-struct Shadowmap
-{
-    GLuint        FBO_Id;
-    GLuint        tex_Id;
-    GLuint        width;
-    GLuint        height;
-    struct Shader shader;
-};
-
 static struct SMCubes
 {
     Camera_t cam;
@@ -38,70 +29,21 @@ static void Draw_Plane(GLuint plane_VAO)
 {
     glBindVertexArray(plane_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0); // Unbind
+    // glBindVertexArray(0); // Unbind
 }
 
 static void Draw_Cube(GLuint cube_VAO)
 {
     glBindVertexArray(cube_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindVertexArray(0); // Unbind
+    // glBindVertexArray(0); // Unbind
 }
 
 static void Render_Depth_Debug_Map(GLuint debug_VAO)
 {
     glBindVertexArray(debug_VAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindVertexArray(0);
-}
-
-struct Shadowmap Shadowmap_Create(struct Shader shader)
-{
-    // configure depth map FBO
-    // -----------------------
-    const unsigned int SHADOW_WIDTH  = 1024;
-    const unsigned int SHADOW_HEIGHT = 1024;
-
-    GLuint depth_map_FBO;
-    glGenFramebuffers(1, &depth_map_FBO);
-
-    // create depth texture
-    GLuint depth_map_tex;
-    glGenTextures(1, &depth_map_tex);
-    glBindTexture(GL_TEXTURE_2D, depth_map_tex);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-    GLfloat borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-    // attach depth texture as FBO's depth buffer
-    glBindFramebuffer(GL_FRAMEBUFFER, depth_map_FBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_map_tex, 0);
-
-    // Disable writes to the color buffer
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-
-    const GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
-    if (Status != GL_FRAMEBUFFER_COMPLETE)
-    {
-        printf("FB error, status: 0x%x\n", Status);
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    return (struct Shadowmap){
-        .FBO_Id = depth_map_FBO,
-        .tex_Id = depth_map_tex,
-        .height = SHADOW_HEIGHT,
-        .width  = SHADOW_WIDTH,
-        .shader = shader};
+    // glBindVertexArray(0);
 }
 
 void ShadowMapCubes_Init()
@@ -397,35 +339,35 @@ void ShadowMapCubes_Update()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw Scene normally now ------ init
-    Shader_Bind(sm.cube_shader);
+    // Shader_Bind(sm.cube_shader);
 
-    Shader_Uniform_Vec3(sm.cube_shader, "viewPos", sm.cam.position);
-    Camera_View_Projection_To_Shader(sm.cam, sm.cube_shader, "camMatrix");
+    // Shader_Uniform_Vec3(sm.cube_shader, "viewPos", sm.cam.position);
+    // Camera_View_Projection_To_Shader(sm.cam, sm.cube_shader, "camMatrix");
 
-    Texture_Bind(sm.plane_tex);
-    glActiveTexture(GL_TEXTURE0 + 0);
-    glBindTexture(GL_TEXTURE_2D, sm.plane_tex.ID);
-    glActiveTexture(GL_TEXTURE0 + 1);
-    glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
-
-    Shader_Uniform_Mat4(sm.cube_shader, "model", sm.plane);
-    Draw_Plane(sm.plane_VAO);
-
-    glActiveTexture(GL_TEXTURE0 + 0);
-    glBindTexture(GL_TEXTURE_2D, sm.cube_tex.ID);
-
-    Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube1);
-    Draw_Cube(sm.cube_VAO);
-    Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube2);
-    Draw_Cube(sm.cube_VAO);
-    Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube3);
-    Draw_Cube(sm.cube_VAO);
-
-    // DEBUG DEPTH
-    // Shader_Bind(sm.shader_depth_debug);
-    // glActiveTexture(GL_TEXTURE0);
+    // Texture_Bind(sm.plane_tex);
+    // glActiveTexture(GL_TEXTURE0 + 0);
+    // glBindTexture(GL_TEXTURE_2D, sm.plane_tex.ID);
+    // glActiveTexture(GL_TEXTURE0 + 1);
     // glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
-    // Render_Depth_Debug_Map(sm.debug_VAO);
+
+    // Shader_Uniform_Mat4(sm.cube_shader, "model", sm.plane);
+    // Draw_Plane(sm.plane_VAO);
+
+    // glActiveTexture(GL_TEXTURE0 + 0);
+    // glBindTexture(GL_TEXTURE_2D, sm.cube_tex.ID);
+
+    // Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube1);
+    // Draw_Cube(sm.cube_VAO);
+    // Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube2);
+    // Draw_Cube(sm.cube_VAO);
+    // Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube3);
+    // Draw_Cube(sm.cube_VAO);
+
+    // DEBUG DEPTH (Comment out all code after init)
+    Shader_Bind(sm.shader_depth_debug);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
+    Render_Depth_Debug_Map(sm.debug_VAO);
 }
 
 void ShadowMapCubes_OnExit()
