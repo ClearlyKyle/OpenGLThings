@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     // Window_Init(800, 800, Instancing_Init, Instancing_Update, Instancing_OnExit);
 
     // Example 17 - Anti-Aliasing (MSAA)
-    Window_Init(800, 800, AntiAliasing_Init, AntiAliasing_Update, AntiAliasing_OnExit);
+    // Window_Init(800, 800, AntiAliasing_Init, AntiAliasing_Update, AntiAliasing_OnExit);
 
     // Example 18 - Blinn-Phong Lighting
     // Window_Init(800, 800, BlinnPhong_Init, BlinnPhong_Update, BlinnPhong_OnExit);
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     // Window_Init(800, 800, Gamma_Init, Gamma_Update, Gamma_OnExit);
 
     // Example 21 - Shadow Mapping with Directional Lighting
-    // Window_Init(1024, 1024, ShadowMap_Init, ShadowMap_Update, ShadowMap_OnExit);
+    Window_Init(1024, 1024, ShadowMap_Init, ShadowMap_Update, ShadowMap_OnExit);
     // Window_Init(1024, 1024, ShadowMapCubes_Init, ShadowMapCubes_Update, ShadowMapCubes_OnExit);
 
     // Window_Init(800, 800, Ortho_Init, Ortho_Update, Ortho_OnExit);

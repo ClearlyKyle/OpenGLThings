@@ -8,6 +8,8 @@
 struct VAO
 {
     GLuint ID;
+
+    // TODO : Hold number of triangles / indicies
 };
 
 typedef struct VAO VAO_t;
