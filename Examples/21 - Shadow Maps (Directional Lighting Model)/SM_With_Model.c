@@ -1,4 +1,4 @@
-#include "ShadowMapsDL.h"
+#include "SM_With_Model.h"
 
 static struct ShadowMap
 {

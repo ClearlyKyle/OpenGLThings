@@ -128,30 +128,30 @@ void ShadowMapCubes_Init()
     };
 
     // Generates shaders
-    struct Shader shader_plane = Shader_Create("../../Examples/21 - Shadow Maps DL/plane_shader.vs",
-                                               "../../Examples/21 - Shadow Maps DL/plane_shader.fs",
+    struct Shader shader_plane = Shader_Create("../../Examples/21 - Shadow Maps (Directional Lighting Cubes)/plane_shader.vs",
+                                               "../../Examples/21 - Shadow Maps (Directional Lighting Cubes)/plane_shader.fs",
                                                3,
                                                (struct VertexAttribute[]){
                                                    {.index = 0, .name = "aPos"},
                                                    {.index = 1, .name = "aNormal"},
                                                    {.index = 2, .name = "aTex"}});
 
-    struct Shader shader_cube = Shader_Create("../../Examples/21 - Shadow Maps DL/cube_shader.vs",
-                                              "../../Examples/21 - Shadow Maps DL/cube_shader.fs",
+    struct Shader shader_cube = Shader_Create("../../Examples/21 - Shadow Maps (Directional Lighting Cubes)/cube_shader.vs",
+                                              "../../Examples/21 - Shadow Maps (Directional Lighting Cubes)/cube_shader.fs",
                                               3,
                                               (struct VertexAttribute[]){
                                                   {.index = 0, .name = "aPos"},
                                                   {.index = 1, .name = "aNormal"},
                                                   {.index = 2, .name = "aTex"}});
 
-    struct Shader shader_shadowmap = Shader_Create("../../Examples/21 - Shadow Maps DL/shadowMap.vs",
-                                                   "../../Examples/21 - Shadow Maps DL/shadowMap.fs",
+    struct Shader shader_shadowmap = Shader_Create("../../Examples/21 - Shadow Maps (Directional Lighting Cubes)/shadowMap.vs",
+                                                   "../../Examples/21 - Shadow Maps (Directional Lighting Cubes)/shadowMap.fs",
                                                    1,
                                                    (struct VertexAttribute[]){
                                                        {.index = 0, .name = "aPos"}});
 
-    struct Shader shader_depth_debug = Shader_Create("../../Examples/21 - Shadow Maps DL/depthdebug.vs",
-                                                     "../../Examples/21 - Shadow Maps DL/depthdebug.fs",
+    struct Shader shader_depth_debug = Shader_Create("../../Examples/21 - Shadow Maps (Directional Lighting Cubes)/depthdebug.vs",
+                                                     "../../Examples/21 - Shadow Maps (Directional Lighting Cubes)/depthdebug.fs",
                                                      2,
                                                      (struct VertexAttribute[]){
                                                          {.index = 0, .name = "aPos"},

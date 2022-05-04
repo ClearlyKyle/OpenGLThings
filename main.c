@@ -20,11 +20,12 @@
 #include "AntiAliasing.h"        // Example 17 - Anti-Aliasing (MSAA)
 #include "BlinnPhong.h"          // Example 18 - Blin-Phong Lighting
 #include "Gamma.h"               // Example 19 - Gamma Correction
-#include "ShadowMapsDL.h"        // Example 21 - Shadow Mapping with Directional Lighting
-#include "SM_With_Cubes.h"
+#include "UBOExample.h"          // Example 20 - Drawing Triangles with use of UBO
+#include "SM_With_Cubes.h"       // Example 21 - Shadow Mapping with Directional Lighting Using Cubes
+#include "SM_With_Model.h"       // Example 22 - Shadow Mapping with Directional Lighting Using a Model
+#include "SM_With_SP_PL.h"       // Example 23 - Shadow Mapping with Spotlights and Point Lights
 #include "Ortho.h"
 #include "challanges.h"
-#include "UBOExample.h" // Example 20 - Drawing Triangles with use of UBO
 #include "challanges.h"
 
 int main(int argc, char *argv[])
