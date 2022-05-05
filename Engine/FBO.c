@@ -225,3 +225,55 @@ void Framebuffer_Destroy(struct FBO *fbo)
         fbo->VAO = 0;
     }
 }
+
+static struct Debug_FBO
+{
+    GLuint VAO_id; // Used for debug quad
+    GLuint shader_id;
+} debug_fbo;
+
+void Debug_FBO_Init()
+{
+    const GLfloat quad_verticies[] = {
+        // positions        // texture Coords
+        0.5f, 0.9f, 0.0f, 1.0f,  //
+        0.5f, 0.5f, 0.0f, 0.0f, //
+        0.9f, 0.9f, 1.0f, 1.0f,   //
+        0.9f, 0.5f, 1.0f, 0.0f,  //
+    };
+
+    GLuint VAO, VBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quad_verticies), &quad_verticies, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (const GLvoid *)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (const GLvoid *)(2 * sizeof(GLfloat)));
+
+    debug_fbo.VAO_id = VAO;
+
+    // Create Shader
+    const Shader_t shader = Shader_Create("../../Engine/shaders/fbo_debug.vs",
+                                          "../../Engine/shaders/fbo_debug.fs",
+                                          2,
+                                          (struct VertexAttribute[]){
+                                              {.index = 0, .name = "position"},
+                                              {.index = 1, .name = "texCoords"}});
+
+    debug_fbo.shader_id = shader.shader_id;
+}
+
+void Debug_FBO_Draw(const GLuint fbo_tex)
+{
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fbo_tex);
+
+    glBindVertexArray(debug_fbo.VAO_id);
+    glUseProgram(debug_fbo.shader_id);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}

@@ -35,4 +35,7 @@ void Framebuffer_Draw(struct FBO fbo);
 
 void Framebuffer_Destroy(struct FBO *fbo);
 
+void Debug_FBO_Init();
+void Debug_FBO_Draw(const GLuint fbo_tex);
+
 #endif // __FRAMEBUFFER_H__
