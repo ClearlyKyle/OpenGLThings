@@ -3,8 +3,8 @@
 
 #include "Engine.h"
 
-void ShadowMap_Init();
-void ShadowMap_Update();
-void ShadowMap_OnExit();
+void ShadowMapModel_Init();
+void ShadowMapModel_Update();
+void ShadowMapModel_OnExit();
 
 #endif // __SM_WITH_MODEL_H__

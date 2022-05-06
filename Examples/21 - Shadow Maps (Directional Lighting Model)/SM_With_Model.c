@@ -54,7 +54,7 @@ static VAO_t Shadowmap_Debug_Init()
     return debug_VAO;
 }
 
-void ShadowMap_Init()
+void ShadowMapModel_Init()
 {
     const GLfloat rectangle_verticies[] =
         {
@@ -68,8 +68,8 @@ void ShadowMap_Init()
             -1.0f, 1.0f, 0.0f, 1.0f};
 
     // Generates shaders
-    struct Shader shader_default = Shader_Create("../../Examples/21 - Shadow Maps DL/default.vs",
-                                                 "../../Examples/21 - Shadow Maps DL/default.fs",
+    struct Shader shader_default = Shader_Create("../../Examples/21 - Shadow Maps (Directional Lighting Model)/default.vs",
+                                                 "../../Examples/21 - Shadow Maps (Directional Lighting Model)/default.fs",
                                                  4,
                                                  (struct VertexAttribute[]){
                                                      {.index = 0, .name = "aPos"},
@@ -77,21 +77,21 @@ void ShadowMap_Init()
                                                      {.index = 2, .name = "aTex"},
                                                      {.index = 3, .name = "aColor"}});
 
-    struct Shader shader_framebuffer = Shader_Create("../../Examples/21 - Shadow Maps DL/framebuffer.vs",
-                                                     "../../Examples/21 - Shadow Maps DL/framebuffer.fs",
+    struct Shader shader_framebuffer = Shader_Create("../../Examples/21 - Shadow Maps (Directional Lighting Model)/framebuffer.vs",
+                                                     "../../Examples/21 - Shadow Maps (Directional Lighting Model)/framebuffer.fs",
                                                      2,
                                                      (struct VertexAttribute[]){
                                                          {.index = 0, .name = "inPos"},
                                                          {.index = 1, .name = "inTexCoords"}});
 
-    struct Shader shader_shadowmap = Shader_Create("../../Examples/21 - Shadow Maps DL/shadowMap.vs",
-                                                   "../../Examples/21 - Shadow Maps DL/shadowMap.fs",
+    struct Shader shader_shadowmap = Shader_Create("../../Examples/21 - Shadow Maps (Directional Lighting Model)/shadowMap.vs",
+                                                   "../../Examples/21 - Shadow Maps (Directional Lighting Model)/shadowMap.fs",
                                                    1,
                                                    (struct VertexAttribute[]){
                                                        {.index = 0, .name = "aPos"}});
 
-    struct Shader shader_depth_debug = Shader_Create("../../Examples/21 - Shadow Maps DL/depthdebug.vs",
-                                                     "../../Examples/21 - Shadow Maps DL/depthdebug.fs",
+    struct Shader shader_depth_debug = Shader_Create("../../Examples/21 - Shadow Maps (Directional Lighting Model)/depthdebug.vs",
+                                                     "../../Examples/21 - Shadow Maps (Directional Lighting Model)/depthdebug.fs",
                                                      2,
                                                      (struct VertexAttribute[]){
                                                          {.index = 0, .name = "aPos"},
@@ -178,7 +178,7 @@ void ShadowMap_Init()
     Shader_Uniform_Int(shader_depth_debug, "depthMap", 0);
 }
 
-void ShadowMap_Update()
+void ShadowMapModel_Update()
 {
     // Depth testing needed for Shadow Map
     glEnable(GL_DEPTH_TEST);
@@ -224,7 +224,7 @@ void ShadowMap_Update()
     // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-void ShadowMap_OnExit()
+void ShadowMapModel_OnExit()
 {
     Camera_Print_Values(sm.cam);
 
