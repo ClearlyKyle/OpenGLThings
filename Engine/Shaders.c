@@ -115,6 +115,56 @@ static void _Get_Active_Uniforms(struct Shader shader)
     }
 }
 
+static void _Print_Active_Uniforms_Attribs(const Shader_t shader)
+{
+    // https://stackoverflow.com/questions/440144/in-opengl-is-there-a-way-to-get-a-list-of-all-uniforms-attribs-used-by-a-shade
+    GLchar name[128];
+    GLenum type;
+    GLint  size;
+
+    GLint numActiveAttribs  = 0;
+    GLint numActiveUniforms = 0;
+    glGetProgramiv(shader.shader_id, GL_ACTIVE_ATTRIBUTES, &numActiveAttribs);
+    glGetProgramiv(shader.shader_id, GL_ACTIVE_UNIFORMS, &numActiveUniforms);
+
+    // glGetProgramInterfaceiv(shader.shader_id, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numActiveAttribs);
+    // glGetProgramInterfaceiv(shader.shader_id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &numActiveUniforms);
+
+    for (int i = 0; i < numActiveUniforms; i++)
+    {
+        glGetActiveUniform(shader.shader_id,
+                           i,
+                           128,
+                           NULL,
+                           &size,
+                           &type,
+                           name);
+
+        const GLint location = glGetUniformLocation(shader.shader_id, name);
+
+        fprintf(stderr, "Uniform : %s  - %d - %d - %d\n", name, location, size, type);
+    }
+
+    GLenum properties[3] = {GL_NAME_LENGTH, GL_TYPE, GL_LOCATION};
+    GLuint values[3];
+    GLchar nameData[128];
+
+    for (int attrib = 0; attrib < numActiveAttribs; ++attrib)
+    {
+        glGetProgramResourceiv(shader.shader_id,
+                               GL_PROGRAM_INPUT,
+                               attrib,
+                               3,
+                               &properties,
+                               3,
+                               NULL,
+                               &values);
+
+        // nameData.resize(values[0]); // The length of the name.
+        glGetProgramResourceName(shader.shader_id, GL_PROGRAM_INPUT, attrib, values[0], NULL, &nameData);
+    }
+}
+
 struct Shader Shader_Create2(const char *vs_path, const char *fs_path, const char *gs_path, size_t n, struct VertexAttribute attributes[])
 {
     // TODO : Chest file extension for each shader
@@ -199,6 +249,7 @@ struct Shader Shader_Create(const char *vertex_shader_path, const char *fragment
     _Validate_Program(shader, GL_LINK_STATUS, vertex_shader_path, fragment_shader_path, NULL);
 
     //_Get_Active_Uniforms(shader);
+    // _
 
     // Detch after successful linkg, and destroy as we dont need them anymore
     glDetachShader(shader.shader_id, shader.fs_handle);
