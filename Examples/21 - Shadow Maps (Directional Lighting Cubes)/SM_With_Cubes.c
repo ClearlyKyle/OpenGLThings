@@ -271,6 +271,9 @@ void ShadowMapCubes_Init()
     // DEBUG DEPTH
     Shader_Bind(shader_depth_debug);
     Shader_Uniform_Int(shader_depth_debug, "depthMap", 0);
+
+    // Debug FBO Testing
+    Debug_FBO_Init();
 }
 
 static void Do_Shadowmapping_Rendering()
@@ -339,35 +342,38 @@ void ShadowMapCubes_Update()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Draw Scene normally now ------ init
-    // Shader_Bind(sm.cube_shader);
+    Shader_Bind(sm.cube_shader);
 
-    // Shader_Uniform_Vec3(sm.cube_shader, "viewPos", sm.cam.position);
-    // Camera_View_Projection_To_Shader(sm.cam, sm.cube_shader, "camMatrix");
+    Shader_Uniform_Vec3(sm.cube_shader, "viewPos", sm.cam.position);
+    Camera_View_Projection_To_Shader(sm.cam, sm.cube_shader, "camMatrix");
 
-    // Texture_Bind(sm.plane_tex);
-    // glActiveTexture(GL_TEXTURE0 + 0);
-    // glBindTexture(GL_TEXTURE_2D, sm.plane_tex.ID);
-    // glActiveTexture(GL_TEXTURE0 + 1);
-    // glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
+    Texture_Bind(sm.plane_tex);
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, sm.plane_tex.ID);
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
 
-    // Shader_Uniform_Mat4(sm.cube_shader, "model", sm.plane);
-    // Draw_Plane(sm.plane_VAO);
+    Shader_Uniform_Mat4(sm.cube_shader, "model", sm.plane);
+    Draw_Plane(sm.plane_VAO);
 
-    // glActiveTexture(GL_TEXTURE0 + 0);
-    // glBindTexture(GL_TEXTURE_2D, sm.cube_tex.ID);
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, sm.cube_tex.ID);
 
-    // Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube1);
-    // Draw_Cube(sm.cube_VAO);
-    // Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube2);
-    // Draw_Cube(sm.cube_VAO);
-    // Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube3);
-    // Draw_Cube(sm.cube_VAO);
+    Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube1);
+    Draw_Cube(sm.cube_VAO);
+    Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube2);
+    Draw_Cube(sm.cube_VAO);
+    Shader_Uniform_Mat4(sm.cube_shader, "model", sm.cube3);
+    Draw_Cube(sm.cube_VAO);
 
     // DEBUG DEPTH (Comment out all code after init)
-    Shader_Bind(sm.shader_depth_debug);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
-    Render_Depth_Debug_Map(sm.debug_VAO);
+    // Shader_Bind(sm.shader_depth_debug);
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
+    // Render_Depth_Debug_Map(sm.debug_VAO);
+
+    // FBO Debug testing
+    Debug_FBO_Draw(sm.shadowmap.tex_Id);
 }
 
 void ShadowMapCubes_OnExit()
