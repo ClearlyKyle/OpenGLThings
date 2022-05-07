@@ -145,7 +145,7 @@ static void _Print_Active_Uniforms_Attribs(const Shader_t shader)
         fprintf(stderr, "Uniform : %s  - %d - %d - %d\n", name, location, size, type);
     }
 
-    GLenum properties[3] = {GL_NAME_LENGTH, GL_TYPE, GL_LOCATION};
+    const GLenum properties[3] = {GL_NAME_LENGTH, GL_TYPE, GL_LOCATION};
     GLuint values[3];
     GLchar nameData[128];
 
@@ -155,13 +155,13 @@ static void _Print_Active_Uniforms_Attribs(const Shader_t shader)
                                GL_PROGRAM_INPUT,
                                attrib,
                                3,
-                               &properties,
+                               properties,
                                3,
                                NULL,
-                               &values);
+                               values);
 
         // nameData.resize(values[0]); // The length of the name.
-        glGetProgramResourceName(shader.shader_id, GL_PROGRAM_INPUT, attrib, values[0], NULL, &nameData);
+        glGetProgramResourceName(shader.shader_id, GL_PROGRAM_INPUT, attrib, values[0], NULL, nameData);
     }
 }
 
@@ -249,7 +249,6 @@ struct Shader Shader_Create(const char *vertex_shader_path, const char *fragment
     _Validate_Program(shader, GL_LINK_STATUS, vertex_shader_path, fragment_shader_path, NULL);
 
     //_Get_Active_Uniforms(shader);
-    // _
 
     // Detch after successful linkg, and destroy as we dont need them anymore
     glDetachShader(shader.shader_id, shader.fs_handle);
