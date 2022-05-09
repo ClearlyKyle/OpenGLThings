@@ -11,6 +11,42 @@ static struct ShadowMapLights
     VAO_t       debug_VAO;
 } sm;
 
+static VAO_t Shadowmap_Debug_Init()
+{
+    const GLfloat depth_debug_verticies[] = {
+        // positions        // texture Coords
+        -1.0f,
+        1.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        -1.0f,
+        -1.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        0.0f,
+        1.0f,
+        1.0f,
+        1.0f,
+        -1.0f,
+        0.0f,
+        1.0f,
+        0.0f,
+    };
+
+    // DEBUG
+    struct VAO debug_VAO = VAO_Create();
+    struct VBO debug_VBO = VBO_Create(GL_ARRAY_BUFFER);
+    VBO_Buffer(debug_VBO, sizeof(depth_debug_verticies), (const GLvoid *)depth_debug_verticies);
+    VAO_Attr(debug_VAO, debug_VBO, 0, 3, GL_FLOAT, 5 * sizeof(GLfloat), (const GLvoid *)(0));
+    VAO_Attr(debug_VAO, debug_VBO, 1, 2, GL_FLOAT, 5 * sizeof(GLfloat), (const GLvoid *)(3 * sizeof(GLfloat)));
+
+    return debug_VAO;
+}
+
 void ShadowMapLights_Init()
 {
     const GLfloat rectangle_verticies[] =
@@ -140,6 +176,65 @@ void ShadowMapLights_Init()
 
     Shader_Bind(shader_depth_debug);
     Shader_Uniform_Int(shader_depth_debug, "depthMap", 0);
+
+    // CUBEMAP SHADOW MAP
+    const float shadowMapWidth  = (float)window.width;
+    const float shadowMapHeight = (float)window.heigh;
+
+    // Framebuffer for Cubemap Shadow Map
+    unsigned int pointShadowMapFBO;
+    glGenFramebuffers(1, &pointShadowMapFBO);
+
+    // Texture for Cubemap Shadow Map FBO
+    unsigned int depthCubemap;
+    glGenTextures(1, &depthCubemap);
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+    for (unsigned int i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
+                     shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, pointShadowMapFBO);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Matrices needed for the light's perspective on all faces of the cubemap
+    mat4 shadowProj;
+    glm_perspective(glm_rad(90.0f), 1.0f, 0.1f, farPlane, shadowProj);
+
+    mat4 shadowTransforms[6];
+
+    glm_lookat(light_position, (vec3){light_position[0] + 1.0f, light_position[1], light_position[2]}, (vec3){0.0f, -1.0f, 0.0f}, shadowTransforms[0]);
+    glm_lookat(light_position, (vec3){light_position[0] - 1.0f, light_position[1], light_position[2]}, (vec3){0.0f, -1.0f, 0.0f}, shadowTransforms[1]);
+    glm_lookat(light_position, (vec3){light_position[0], light_position[1] + 1.0f, light_position[2]}, (vec3){0.0f, 0.0f, 1.0f}, shadowTransforms[2]);
+    glm_lookat(light_position, (vec3){light_position[0], light_position[1] - 1.0f, light_position[2]}, (vec3){0.0f, 0.0f, -1.0f}, shadowTransforms[3]);
+    glm_lookat(light_position, (vec3){light_position[0], light_position[1], light_position[2] + 1.0f}, (vec3){0.0f, -1.0f, 0.0f}, shadowTransforms[4]);
+    glm_lookat(light_position, (vec3){light_position[0], light_position[1], light_position[2] - 1.0f}, (vec3){0.0f, -1.0f, 0.0f}, shadowTransforms[5]);
+
+    glm_mat4_mul(shadowProj, shadowTransforms[0], shadowTransforms[0]);
+    glm_mat4_mul(shadowProj, shadowTransforms[1], shadowTransforms[1]);
+    glm_mat4_mul(shadowProj, shadowTransforms[2], shadowTransforms[2]);
+    glm_mat4_mul(shadowProj, shadowTransforms[3], shadowTransforms[3]);
+    glm_mat4_mul(shadowProj, shadowTransforms[4], shadowTransforms[4]);
+    glm_mat4_mul(shadowProj, shadowTransforms[5], shadowTransforms[5]);
+
+    // Export all matrices to shader
+    Shader_Bind(shader_cube_map);
+    Shader_Uniform_Mat4(shader_cube_map, "shadowMatrices[0]", shadowTransforms[0]);
+    Shader_Uniform_Mat4(shader_cube_map, "shadowMatrices[1]", shadowTransforms[1]);
+    Shader_Uniform_Mat4(shader_cube_map, "shadowMatrices[2]", shadowTransforms[2]);
+    Shader_Uniform_Mat4(shader_cube_map, "shadowMatrices[3]", shadowTransforms[3]);
+    Shader_Uniform_Mat4(shader_cube_map, "shadowMatrices[4]", shadowTransforms[4]);
+    Shader_Uniform_Mat4(shader_cube_map, "shadowMatrices[5]", shadowTransforms[5]);
+    Shader_Uniform_Vec3(shader_cube_map, "lightPos", light_position);
+    Shader_Uniform_Float(shader_cube_map, "farPlane", farPlane);
 }
 
 void ShadowMapLights_Update()
