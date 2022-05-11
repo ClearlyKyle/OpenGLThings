@@ -3,12 +3,21 @@
 static struct ShadowMapLights
 {
     Camera_t    cam;
-    Mesh_t      ground;
+    Mesh_t      scene;
     Mesh_t      trees;
     FBO_t       post_processing_fbo;
     FBO_t       msaa_fbo;
     Shadowmap_t shadowmap;
     VAO_t       debug_VAO;
+
+    GLuint pointShadowMapFBO;
+
+    struct Shader shader_default;
+    struct Shader shader_framebuffer;
+    struct Shader shader_shadowmap;
+    struct Shader shader_depth_debug;
+    struct Shader shader_cube_map;
+
 } sm;
 
 static VAO_t Shadowmap_Debug_Init()
@@ -77,19 +86,19 @@ void ShadowMapLights_Init()
                                                          {.index = 0, .name = "inPos"},
                                                          {.index = 1, .name = "inTexCoords"}});
 
-    struct Shader shader_shadowmap = Shader_Create2("../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowMap.vs",
-                                                    "../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowMap.fs",
-                                                    "../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowMap.gs",
-                                                    1,
-                                                    (struct VertexAttribute[]){
-                                                        {.index = 0, .name = "aPos"}});
+    struct Shader shader_shadowmap = Shader_Create("../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowMap.vs",
+                                                   "../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowMap.fs",
+                                                   1,
+                                                   (struct VertexAttribute[]){
+                                                       {.index = 0, .name = "aPos"}});
 
-    struct Shader shader_cube_map = Shader_Create("../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowCubeMap.vs",
-                                                  "../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowCubeMap.fs",
-                                                  2,
-                                                  (struct VertexAttribute[]){
-                                                      {.index = 0, .name = "aPos"},
-                                                      {.index = 1, .name = "aTexCoords"}});
+    struct Shader shader_cube_map = Shader_Create2("../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowCubeMap.vs",
+                                                   "../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowCubeMap.fs",
+                                                   "../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowCubeMap.gs",
+                                                   2,
+                                                   (struct VertexAttribute[]){
+                                                       {.index = 0, .name = "aPos"},
+                                                       {.index = 1, .name = "aTexCoords"}});
 
     struct Shader shader_depth_debug = Shader_Create("../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/depthdebug.vs",
                                                      "../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/depthdebug.fs",
@@ -97,6 +106,12 @@ void ShadowMapLights_Init()
                                                      (struct VertexAttribute[]){
                                                          {.index = 0, .name = "aPos"},
                                                          {.index = 1, .name = "aTexCoords"}});
+
+    sm.shader_default     = shader_default;
+    sm.shader_framebuffer = shader_framebuffer;
+    sm.shader_shadowmap   = shader_shadowmap;
+    sm.shader_depth_debug = shader_depth_debug;
+    sm.shader_cube_map    = shader_cube_map;
 
     glEnable(GL_DEPTH_TEST);  // Enables the Depth Buffer
     glEnable(GL_MULTISAMPLE); // Enables Multisampling
@@ -117,10 +132,10 @@ void ShadowMapLights_Init()
     sm.cam = cam;
 
     // Load in models
-    struct Mesh ground = Mesh_Load(shader_default, "../../Examples/res/models/crow/scene.gltf");
-    struct Mesh trees  = Mesh_Load(shader_default, "../../Examples/res/models/crow/scene.gltf");
-    sm.ground          = ground;
-    sm.trees           = trees;
+    struct Mesh scene = Mesh_Load(shader_default, "../../Examples/res/models/Low Poly Scene/Low-Poly_Models.obj");
+    // struct Mesh trees = Mesh_Load(shader_default, "../../Examples/res/models/trees/scene.gltf");
+    sm.scene = scene;
+    // sm.trees = trees;
 
     // POST PROCESSING FBO
     struct VAO rectVAO = VAO_Create();
@@ -161,10 +176,12 @@ void ShadowMapLights_Init()
     Shader_Uniform_Mat4(shader_shadowmap, "lightProjection", lightProjection);
 
     Shader_Bind(shader_default);
-    Shader_Uniform_Vec4(shader_default, "lightColour", light_colour);
+    Shader_Uniform_Vec4(shader_default, "lightColor", light_colour);
     Shader_Uniform_Vec3(shader_default, "lightPos", light_position);
     Shader_Uniform_Mat4(shader_default, "lightProjection", lightProjection);
     Shader_Uniform_Int(shader_default, "shadowMap", 2);
+    // Shader_Uniform_Int(shader_default, "shadowCubeMap", 2);
+    Shader_Uniform_Float(shader_default, "farPlane", farPlane);
 
     Shader_Bind(shader_framebuffer);
     Shader_Uniform_Float(shader_framebuffer, "gamma", 1.0f); // GAMMA value
@@ -178,8 +195,8 @@ void ShadowMapLights_Init()
     Shader_Uniform_Int(shader_depth_debug, "depthMap", 0);
 
     // CUBEMAP SHADOW MAP
-    const float shadowMapWidth  = (float)window.width;
-    const float shadowMapHeight = (float)window.heigh;
+    const GLsizei shadowMapWidth  = (GLsizei)window.width;
+    const GLsizei shadowMapHeight = (GLsizei)window.heigh;
 
     // Framebuffer for Cubemap Shadow Map
     unsigned int pointShadowMapFBO;
@@ -204,6 +221,7 @@ void ShadowMapLights_Init()
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    sm.pointShadowMapFBO = pointShadowMapFBO;
 
     // Matrices needed for the light's perspective on all faces of the cubemap
     mat4 shadowProj;
@@ -239,8 +257,91 @@ void ShadowMapLights_Init()
 
 void ShadowMapLights_Update()
 {
+    //// Depth testing needed for Shadow Map
+    // glEnable(GL_DEPTH_TEST);
+
+    //// START Draw from light POV
+    //// Render the Scene for the cameras perspective
+    // glViewport(0, 0, sm.shadowmap.width, sm.shadowmap.height);
+
+    //// Commented code is for Spotlights and Directional Lights
+    //// glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+    //// glClear(GL_DEPTH_BUFFER_BIT);
+
+    ////// Draw scene for shadow map
+    //// BIND Shader for use in shadowmap
+    //// sm.scene.shader = sm.shader_shadowmap;
+    //// sm.trees.shader  = sm.shader_shadowmap;
+    //// Mesh_Draw(sm.scene); // DRAW model
+    //// Mesh_Draw(sm.trees);  // DRAW model
+    //// sm.scene.shader = sm.shader_default;
+    //// sm.trees.shader  = sm.shader_default;
+
+    //// Code for Point Lights
+    // glBindFramebuffer(GL_FRAMEBUFFER, sm.pointShadowMapFBO);
+    // glClear(GL_DEPTH_BUFFER_BIT);
+
+    //// Draw scene with shadowCubeMapProgram
+    // sm.scene.shader = sm.shader_cube_map;
+    // sm.trees.shader = sm.shader_cube_map;
+    // Mesh_Draw(sm.scene); // DRAW model
+    //// Mesh_Draw(sm.trees); // DRAW model
+    // sm.scene.shader = sm.shader_default;
+    // sm.trees.shader = sm.shader_default;
+
+    //// Switch back to the default framebuffer
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0);         // Switch back to the default framebuffer
+    // glViewport(0, 0, window.width, window.heigh); // Switch back to the default viewport
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //// Enable depth testing since it's disabled when drawing the framebuffer rectangle
+    // glEnable(GL_DEPTH_TEST);
+
+    Camera_Inputs(&sm.cam);
+
+    //// Bind the Shadow Map
+    //// glActiveTexture(GL_TEXTURE0 + 2);
+    //// glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
+    //// Shader_Bind(sm.shader_default);
+    //// Shader_Uniform_Int(sm.shader_default, "shadowMap", 2);
+
+    //// Bind the Cubemap Shadow Map
+    // glActiveTexture(GL_TEXTURE0 + 2);
+    // glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
+    // Shader_Bind(sm.shader_default);
+    // Shader_Uniform_Int(sm.shader_default, "shadowCubeMap", 2);
+
+    // Shader_Uniform_Vec3(sm.scene.shader, "camPos", sm.cam.position);
+    // Camera_View_Projection_To_Shader(sm.cam, sm.scene.shader, "camMatrix");
+
+    Framebuffer_Draw_Init(sm.msaa_fbo);
+
+    Shader_Uniform_Vec3(sm.scene.shader, "camPos", sm.cam.position);
+    Camera_View_Projection_To_Shader(sm.cam, sm.scene.shader, "camMatrix");
+
+    // Draw the normal model
+    Mesh_Draw(sm.scene); // DRAW model
+
+    // Make it so the multisampling FBO is read while the post-processing FBO is drawn
+    Framebuffer_Update(sm.msaa_fbo, sm.post_processing_fbo);
+    Framebuffer_Draw(sm.post_processing_fbo);
+
+    // DEBUG DEPTH (Comment out all code after init)
+    // Shader_Bind(sm.shader_depth_debug);
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
+    // Render_Depth_Debug_Map(sm.debug_VAO);
+
+    // FBO Debug testing
+    // Debug_FBO_Draw(sm.shadowmap.tex_Id);
 }
 
 void ShadowMapLights_OnExit()
 {
+    Mesh_Free(sm.scene);
+
+    Shader_Destroy(&sm.shader_default);
+    Shader_Destroy(&sm.shader_framebuffer);
+    Shader_Destroy(&sm.shader_shadowmap);
+    Shader_Destroy(&sm.shader_depth_debug);
+    Shader_Destroy(&sm.shader_cube_map);
 }
