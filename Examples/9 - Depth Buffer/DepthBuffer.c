@@ -14,6 +14,9 @@ void DepthBuffer_Init()
             {.index = 2, .name = "aTex"},
             {.index = 3, .name = "aColour"}});
 
+    // Enables the Depth Buffer
+    glEnable(GL_DEPTH_TEST);
+
     vec4 light_colour   = {1.0f, 1.0f, 1.0f, 1.0f};
     vec3 light_position = {0.5f, 0.5f, 0.5f};
     mat4 light_model;
