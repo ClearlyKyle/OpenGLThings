@@ -15,12 +15,13 @@ uniform mat4 translation;
 uniform mat4 rotation;
 uniform mat4 scale;
 
-layout(std140) uniform Matrices {
-  vec4 ambient;
-  vec4 diffuse;
-  vec4 specular;
-  vec4 emission;
-  float shininess;
+layout(std140) uniform Matrices
+{
+    vec4 ambient;
+    vec4 diffuse;
+    vec4 specular;
+    vec4 emission;
+    float shininess;
 };
 
 // OUTPUTS to Fragment Shader
@@ -31,23 +32,23 @@ out vec3 fNormal;
 out vec3 fColor;
 out vec2 fTexCoords;
 
-void main() {
-  // calculates current position
-  fCurrentPosition =
-      vec3(model * translation * rotation * scale * vec4(aPos, 1.0f));
-  // Assigns the normal from the Vertex Data to "Normal"
-  fNormal = aNormal;
-  // Assigns the colors from the Vertex Data to "color"
-  fColor = aColour;
-  // Assigns the texture coordinates from the Vertex Data to "texCoord"
-  // fTexCoords = mat2(0.0, -1.0, 1.0, 0.0) * aTex;
-  fTexCoords = aTex;
+void main()
+{
+    // calculates current position
+    fCurrentPosition = vec3(model * translation * rotation * scale * vec4(aPos, 1.0f));
+    // Assigns the normal from the Vertex Data to "Normal"
+    fNormal = aNormal;
+    // Assigns the colors from the Vertex Data to "color"
+    fColor = aColour;
+    // Assigns the texture coordinates from the Vertex Data to "texCoord"
+    // fTexCoords = mat2(0.0, -1.0, 1.0, 0.0) * aTex;
+    fTexCoords = aTex;
 
-  // Outputs the positions/coordinates of all vertices
-  gl_Position = camMatrix * vec4(fCurrentPosition, 1.0);
+    // Outputs the positions/coordinates of all vertices
+    gl_Position = camMatrix * vec4(fCurrentPosition, 1.0);
 
-  // OUTPUT to Fragment Shader
-  // fAmbient = ambient;
-  // fDiffuse = diffuse;
-  // fTexCoords = aTex;
+    // OUTPUT to Fragment Shader
+    // fAmbient = ambient;
+    // fDiffuse = diffuse;
+    // fTexCoords = aTex;
 }
