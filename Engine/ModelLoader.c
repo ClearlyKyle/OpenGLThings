@@ -520,7 +520,6 @@ static struct Mesh _Mesh_Load_Data(const struct Shader shader, unsigned int inst
         .translation = {0.0f, 0.0f, 0.0f},
         .rotation    = {0.0f, 0.0f, 0.0f, 0.0f},
         .scale       = {1.0f, 1.0f, 1.0f}};
-    struct Model model;
 
     my_mesh.shader            = shader;
     my_mesh.instancing.count  = instance_count;
@@ -552,7 +551,8 @@ static struct Mesh _Mesh_Load_Data(const struct Shader shader, unsigned int inst
 
     for (unsigned int i = 0; i < scene->mNumMeshes; i++)
     {
-        struct MaterialInfo material_info;
+        struct MaterialInfo material_info = {0};
+        struct Model        model;
 
         const struct aiMesh *mesh = scene->mMeshes[i];
 
@@ -668,6 +668,11 @@ static struct Mesh _Mesh_Load_Data(const struct Shader shader, unsigned int inst
                 }
             }
         }
+        else
+        {
+            // TODO : Mesh does not use a texture..
+            fprintf(stderr, "Mesh does not use a texture..\n");
+        }
 
         // AMBIENT
         struct aiColor4D ambient = {0.2f, 0.2f, 0.2f, 1.0f};
@@ -769,6 +774,7 @@ static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, co
         // bind material uniform
         UBO_Bind_Buffer_To_Index(m.models[nd->mMeshes[n]].material_vbo.ID, 0, 0, sizeof(struct MaterialInfo));
 
+        // if (m.models[nd->mMeshes[n]].tex.ID < 10)
         Texture_Bind(m.models[nd->mMeshes[n]].tex);
 
         VAO_Bind(m.models[nd->mMeshes[n]].vao);
@@ -837,6 +843,18 @@ void Mesh_Draw(struct Mesh m)
     // Camera_View_Projection_To_Shader(cam, m.shader, "camMatrix");
 
     _Recursive_Mesh_Renderer(m, m.scene, m.scene->mRootNode);
+}
+
+void Mesh_Draw_Shader(struct Mesh m, struct Shader shader, struct Camera cam)
+{
+    Shader_Bind(shader);
+
+    Shader_Uniform_Vec3(shader, "camPos", cam.position);
+    Camera_View_Projection_To_Shader(cam, shader, "camMatrix");
+
+    m.shader = shader;
+    _Recursive_Mesh_Renderer(m, m.scene, m.scene->mRootNode);
+    //_Recursive_Mesh_Renderer(m, m.scene, m.scene->mRootNode, shader);
 }
 
 void Model_Free(struct Model model)
