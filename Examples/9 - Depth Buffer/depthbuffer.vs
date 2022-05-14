@@ -17,16 +17,19 @@ uniform mat4 scale;
 
 layout(std140) uniform Matrices
 {
-    vec4 ambient;
-    vec4 diffuse;
-    vec4 specular;
-    vec4 emission;
+    vec4  ambient;
+    vec4  diffuse;
+    vec4  specular;
+    vec4  emission;
     float shininess;
 };
 
 // OUTPUTS to Fragment Shader
-// out vec4 fAmbient;
-// out vec4 fDiffuse;
+out vec4  fSpecular;
+out vec4  fAmbient;
+out vec4  fDiffuse;
+out float fShininess;
+
 out vec3 fCurrentPosition;
 out vec3 fNormal;
 out vec3 fColor;
@@ -48,7 +51,8 @@ void main()
     gl_Position = camMatrix * vec4(fCurrentPosition, 1.0);
 
     // OUTPUT to Fragment Shader
-    // fAmbient = ambient;
-    // fDiffuse = diffuse;
-    // fTexCoords = aTex;
+    fAmbient   = ambient;
+    fDiffuse   = diffuse;
+    fSpecular  = specular;
+    fShininess = shininess;
 }

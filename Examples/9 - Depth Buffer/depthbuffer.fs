@@ -7,6 +7,11 @@ in vec3 fNormal;
 in vec3 fColor;
 in vec2 fTexCoords;
 
+in vec4  fSpecular;
+in vec4  fAmbient;
+in vec4  fDiffuse;
+in float fShininess;
+
 // TEXTURE DATA
 uniform sampler2D diffuseTex;
 
@@ -38,14 +43,14 @@ vec4 pointLight()
     float ambient = 0.20f;
 
     // diffuse lighting
-    vec3 fNormal        = normalize(fNormal);
-    vec3 lightDirection = normalize(lightVec);
-    float diffuse       = max(dot(fNormal, lightDirection), 0.0f);
+    vec3  fNormal        = normalize(fNormal);
+    vec3  lightDirection = normalize(lightVec);
+    float diffuse        = max(dot(fNormal, lightDirection), 0.0f);
 
     // specular lighting
-    float specularLight      = 0.50f;
-    vec3 viewDirection       = normalize(camPos - fCurrentPosition);
-    vec3 reflectionDirection = reflect(-lightDirection, fNormal);
+    float specularLight       = 0.50f;
+    vec3  viewDirection       = normalize(camPos - fCurrentPosition);
+    vec3  reflectionDirection = reflect(-lightDirection, fNormal);
     float specAmount =
         pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
     float specular = specAmount * specularLight;
@@ -58,17 +63,17 @@ vec4 pointLight()
 vec4 direcLight()
 {
     // ambient lighting
-    float ambient = 0.20f;
+    float ambient = 0.6f;
 
     // diffuse lighting
-    vec3 fNormal        = normalize(fNormal);
-    vec3 lightDirection = normalize(vec3(1.0f, 1.0f, 0.0f));
-    float diffuse       = max(dot(fNormal, lightDirection), 0.0f);
+    vec3  fNormal        = normalize(fNormal);
+    vec3  lightDirection = normalize(vec3(1.0f, 1.0f, 0.0f));
+    float diffuse        = max(dot(fNormal, lightDirection), 0.0f);
 
     // specular lighting
-    float specularLight      = 0.50f;
-    vec3 viewDirection       = normalize(camPos - fCurrentPosition);
-    vec3 reflectionDirection = reflect(-lightDirection, fNormal);
+    float specularLight       = 0.50f;
+    vec3  viewDirection       = normalize(camPos - fCurrentPosition);
+    vec3  reflectionDirection = reflect(-lightDirection, fNormal);
     float specAmount =
         pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
     float specular = specAmount * specularLight;
@@ -76,6 +81,31 @@ vec4 direcLight()
     return (texture(diffuse0, fTexCoords) * (diffuse + ambient) +
             texture(specular0, fTexCoords).r * specular) *
            lightColor;
+}
+
+vec4 direct_lighting_with_material_data()
+{
+    // ambient lighting
+    vec4 ambient_colour = 0.25 * fAmbient;
+
+    // diffuse lighting
+    vec3  fNormal        = normalize(fNormal);
+    vec3  lightDirection = normalize(vec3(1.0f, 1.0f, 0.0f));
+    float diffuse        = max(dot(fNormal, lightDirection), 0.0f);
+    vec4  diffuse_colour = lightColor * diffuse * fDiffuse;
+
+    // specular lighting
+    float specularLight       = 0.50f;
+    vec3  viewDirection       = normalize(camPos - fCurrentPosition);
+    vec3  reflectionDirection = reflect(-lightDirection, fNormal);
+    float specAmount          = pow(max(dot(viewDirection, reflectionDirection), 0.0f), fShininess);
+    float specular            = specAmount * specularLight;
+    vec4  specular_colour     = lightColor * specular * fSpecular;
+
+    // return (texture(diffuse0, fTexCoords) * (diffuse + ambient) +
+    //         texture(specular0, fTexCoords).r * specular) *
+    //        lightColor;
+    return texture(diffuse0, fTexCoords) * (ambient_colour + diffuse_colour + specular_colour);
 }
 
 vec4 spotLight()
@@ -88,14 +118,14 @@ vec4 spotLight()
     float ambient = 0.20f;
 
     // diffuse lighting
-    vec3 fNormal        = normalize(fNormal);
-    vec3 lightDirection = normalize(lightPos - fCurrentPosition);
-    float diffuse       = max(dot(fNormal, lightDirection), 0.0f);
+    vec3  fNormal        = normalize(fNormal);
+    vec3  lightDirection = normalize(lightPos - fCurrentPosition);
+    float diffuse        = max(dot(fNormal, lightDirection), 0.0f);
 
     // specular lighting
-    float specularLight      = 0.50f;
-    vec3 viewDirection       = normalize(camPos - fCurrentPosition);
-    vec3 reflectionDirection = reflect(-lightDirection, fNormal);
+    float specularLight       = 0.50f;
+    vec3  viewDirection       = normalize(camPos - fCurrentPosition);
+    vec3  reflectionDirection = reflect(-lightDirection, fNormal);
     float specAmount =
         pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
     float specular = specAmount * specularLight;
@@ -128,7 +158,11 @@ float logisticDepth(float depth, float steepness, float offset)
 void main()
 {
     // outputs final color
-    float depth = logisticDepth(gl_FragCoord.z, 0.5f, 5.0f);
-    FragColor   = direcLight() * (1.0f - depth) +
-                vec4(depth * vec3(0.85f, 0.85f, 0.90f), 1.0f);
+    // float depth = logisticDepth(gl_FragCoord.z, 0.5f, 5.0f);
+    // FragColor   = direcLight() * (1.0f - depth) +
+    //            vec4(depth * vec3(0.85f, 0.85f, 0.90f), 1.0f);
+    // FragColor = texture(diffuse0, fTexCoords);
+    // FragColor = vec4(fColor, 1.0);
+    // FragColor = texture(diffuse0, fTexCoords) * fDiffuse;
+    FragColor = direct_lighting_with_material_data();
 }
