@@ -597,7 +597,7 @@ static struct Mesh _Mesh_Load_Data(const struct Shader shader, unsigned int inst
 
         // buffer for vertex colours
         const size_t number_of_colours = sizeof(mesh->mColors) / sizeof(mesh->mColors[0]);
-        if (number_of_colours != 0)
+        if (mesh->mColors[0])
         {
             struct VBO colours = VBO_Create(GL_ARRAY_BUFFER);
             // VBO_Buffer(colours, sizeof(float) * 3 * mesh->mNumVertices, (const GLvoid *)mesh->mColors);
