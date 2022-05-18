@@ -112,35 +112,44 @@ vec4 direct_lighting_with_material_data()
 vec4 spotlight_lighting_with_material_data()
 {
     // controls how big the area that is lit up is
-    float outerCone = 0.30f;
-    float innerCone = 0.21f;
+    float outerCone = 0.952f; // cos(theta) : cos(radians(12.5f))
+    float innerCone = 0.978f; // cos(theta) : cos(radians(17.5f))
 
     // ambient lighting
-    vec4 ambient_colour = 0.25 * fAmbient;
+    float ambient        = 0.08;
+    vec4  ambient_colour = texture(diffuse0, fTexCoords) * ambient * fAmbient;
 
     // diffuse lighting
     vec3  fNormal        = normalize(fNormal);
     vec3  lightDirection = normalize(camPos - fCurrentPosition);
-    float diffuse        = max(dot(fNormal, lightDirection), 0.0f);
-    vec4  diffuse_colour = lightColor * diffuse * fDiffuse;
+    float diffuse        = max(dot(fNormal, lightDirection), 0.0);
+    vec4  diffuse_colour = lightColor * diffuse * texture(diffuse0, fTexCoords) * fDiffuse;
 
     // specular lighting
     float specularLight       = 0.50f;
     vec3  viewDirection       = normalize(camPos - fCurrentPosition);
     vec3  reflectionDirection = reflect(-lightDirection, fNormal);
-    float specAmount          = pow(max(dot(viewDirection, reflectionDirection), 0.0f), fShininess);
-    float specular            = specAmount * specularLight;
-    vec4  specular_colour     = lightColor * specular * fSpecular;
+    float specular            = pow(max(dot(viewDirection, reflectionDirection), 0.0), 32);
+    vec4  specular_colour     = lightColor * specular * fSpecular * specularLight;
 
     // calculates the intensity of the crntPos based on its angle to the center of the light cone
-    float angle = dot(normalize(-camFront), lightDirection);
-    // float angle = dot(vec3(0.0f, 0.0f, -1.0f), -lightDirection);
-    float inten = clamp((angle - outerCone) / (innerCone - outerCone), 0.0f, 1.0f);
+    float theta     = dot(lightDirection, normalize(-camFront));
+    float epsilon   = (innerCone - outerCone);
+    float intensity = clamp((theta - outerCone) / epsilon, 0.0, 1.0);
+    diffuse_colour *= intensity;
+    specular_colour *= intensity;
 
-    // return (texture(diffuse0, fTexCoords) * (diffuse * inten + ambient) +
-    //         texture(specular0, fTexCoords).r * specular * inten) *
+    // attenuation
+    float distance    = length(camPos - fCurrentPosition);
+    float attenuation = 1.0 / (1.0 + (0.09 * distance) + (0.032 * (distance * distance)));
+    ambient_colour *= attenuation;
+    diffuse_colour *= attenuation;
+    specular_colour *= attenuation;
+
+    // return (texture(diffuse0, fTexCoords) * (diffuse * intensity + ambient) +
+    //         texture(specular0, fTexCoords).r * specular * intensity) *
     //        lightColor;
-    return texture(diffuse0, fTexCoords) * (ambient_colour + diffuse_colour * inten + specular_colour * inten);
+    return ambient_colour + diffuse_colour + specular_colour;
 }
 
 float near = 0.1f;
@@ -160,5 +169,6 @@ float logisticDepth(float depth, float steepness, float offset)
 void main()
 {
     // FragColor = direct_lighting_with_material_data();
-    FragColor = spotlight_lighting_with_material_data();
+    vec4 res  = vec4(spotlight_lighting_with_material_data().rgb, 1.0);
+    FragColor = res;
 }
