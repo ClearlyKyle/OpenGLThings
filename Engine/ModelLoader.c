@@ -457,27 +457,30 @@ void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh, const char *
 
         const char *texture_type_str = TextureTypeToString(texInfo.texture_type[i]);
 
-        struct Texture tex  = Texture_Create(buff, GL_TEXTURE_2D, (GLuint)i, GL_RGBA, GL_UNSIGNED_BYTE);
-        texInfo.textures[i] = tex;
-
         switch (texInfo.texture_type[i])
         {
         case aiTextureType_DIFFUSE:
         {
+            struct Texture tex  = Texture_Create(buff, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+            texInfo.textures[i] = tex;
             Shader_Uniform_Texture2D(mesh->shader, "diffuse0", tex);
-            fprintf(stderr, "[slot - %lld](type: %s) %s\n", i, "diffuse0", buff);
+            fprintf(stderr, "[slot - %d](type: %s) %s\n", 0, "diffuse0", buff);
             break;
         }
         case aiTextureType_SPECULAR:
         {
+            struct Texture tex  = Texture_Create(buff, GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+            texInfo.textures[i] = tex;
             Shader_Uniform_Texture2D(mesh->shader, "specular0", tex);
-            fprintf(stderr, "[slot - %lld](type: %s) %s\n", i, "specular0", buff);
+            fprintf(stderr, "[slot - %d](type: %s) %s\n", 1, "specular0", buff);
             break;
         }
         case aiTextureType_NORMALS:
         {
+            struct Texture tex  = Texture_Create(buff, GL_TEXTURE_2D, 2, GL_RGBA, GL_UNSIGNED_BYTE);
+            texInfo.textures[i] = tex;
             Shader_Uniform_Texture2D(mesh->shader, "normal0", tex);
-            fprintf(stderr, "[slot - %lld](type: %s) %s\n", i, "normal0", buff);
+            fprintf(stderr, "[slot - %d](type: %s) %s\n", 2, "normal0", buff);
             break;
         }
 
