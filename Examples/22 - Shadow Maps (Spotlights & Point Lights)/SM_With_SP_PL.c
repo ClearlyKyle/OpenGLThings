@@ -18,6 +18,8 @@ static struct ShadowMapLights
     struct Shader shader_depth_debug;
     struct Shader shader_cube_map;
 
+    VAO_t         light_VAO;
+    struct Shader light_Shader;
 } sm;
 
 static VAO_t Shadowmap_Debug_Init()
@@ -58,6 +60,53 @@ static VAO_t Shadowmap_Debug_Init()
 
 void ShadowMapLights_Init()
 {
+    const GLfloat light_vertices[] =
+        {//     COORDINATES     //
+         -0.1f, -0.1f, 0.1f,
+         -0.1f, -0.1f, -0.1f,
+         0.1f, -0.1f, -0.1f,
+         0.1f, -0.1f, 0.1f,
+         -0.1f, 0.1f, 0.1f,
+         -0.1f, 0.1f, -0.1f,
+         0.1f, 0.1f, -0.1f,
+         0.1f, 0.1f, 0.1f};
+
+    const GLuint light_indices[] =
+        {
+            // front face
+            0, 1, 2, 2, 3, 0,
+            // top face
+            3, 2, 6, 6, 7, 3,
+            // back face
+            7, 6, 5, 5, 4, 7,
+            // left face
+            4, 0, 3, 3, 7, 4,
+            // bottom face
+            0, 4, 5, 5, 1, 0, // Back to front now.
+                              // right face
+            1, 5, 6, 6, 2, 1};
+
+    // LIGHT ---------------------------------------------------------
+    // Generates Shader object using shaders default.vert and default.frag
+    struct Shader light_shader = Shader_Create(
+        "../../Examples/18 - Blinn-Phong/lights.vs",
+        "../../Examples/18 - Blinn-Phong/lights.fs",
+        1,
+        (struct VertexAttribute[]){
+            {.index = 0, .name = "aPos"}});
+
+    struct VAO light_vao = VAO_Create();
+
+    struct EBO light_ebo = EBO_Create();
+    EBO_Buffer(light_ebo, sizeof(light_indices), (void *)light_indices);
+
+    struct VBO light_abo = VBO_Create(GL_ARRAY_BUFFER);
+    VBO_Buffer(light_abo, sizeof(light_vertices), (const GLvoid *)light_vertices);
+    VAO_Attr(light_vao, light_abo, 0, 3, GL_FLOAT, 3 * sizeof(GLfloat), (const GLvoid *)(0));
+
+    sm.light_Shader = light_shader;
+    sm.light_VAO    = light_vao;
+
     const GLfloat rectangle_verticies[] =
         {
             //  Coords   // texCoords
@@ -119,10 +168,6 @@ void ShadowMapLights_Init()
     glCullFace(GL_FRONT);     // Keeps front faces
     glFrontFace(GL_CCW);      // Uses counter clock-wise standard
 
-    // Take care of all the light related things
-    vec4 light_colour   = {1.0f, 1.0f, 1.0f, 1.0f};
-    vec3 light_position = {0.0f, 10.0f, 0.0f};
-
     // Creates camera object
     struct Camera cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f}, 45.0f, 0.1f, 1000.0f);
     // glm_vec3_copy((vec3){-10.752992f, 17.550270f, 1.919926f}, cam.position);
@@ -158,6 +203,10 @@ void ShadowMapLights_Init()
     // SHADOWMAP SETUP
     Shadowmap_t shadowmap = Shadowmap_Create(shader_shadowmap);
     sm.shadowmap          = shadowmap;
+
+    // Take care of all the light related things
+    vec4 light_colour   = {1.0f, 1.0f, 1.0f, 1.0f};
+    vec3 light_position = {0.0f, 2.0f, 5.0f};
 
     // Matrices needed for the light's perspective
     const float farPlane = 100.0f;
@@ -253,6 +302,12 @@ void ShadowMapLights_Init()
     Shader_Uniform_Mat4(shader_cube_map, "shadowMatrices[5]", shadowTransforms[5]);
     Shader_Uniform_Vec3(shader_cube_map, "lightPos", light_position);
     Shader_Uniform_Float(shader_cube_map, "farPlane", farPlane);
+
+    Shader_Bind(light_shader);
+    mat4 light_model = GLM_MAT4_ZERO_INIT;
+    glm_translate_make(light_model, light_position);
+    Shader_Uniform_Mat4(light_shader, "model", light_model);
+    Shader_Uniform_Vec4(light_shader, "lightColor", light_colour);
 }
 
 void ShadowMapLights_Update()
@@ -315,6 +370,7 @@ void ShadowMapLights_Update()
 
     Framebuffer_Draw_Init(sm.msaa_fbo);
 
+    Shader_Bind(sm.scene.shader);
     Shader_Uniform_Vec3(sm.scene.shader, "camPos", sm.cam.position);
     Camera_View_Projection_To_Shader(sm.cam, sm.scene.shader, "camMatrix");
 
@@ -324,6 +380,12 @@ void ShadowMapLights_Update()
     // Make it so the multisampling FBO is read while the post-processing FBO is drawn
     Framebuffer_Update(sm.msaa_fbo, sm.post_processing_fbo);
     Framebuffer_Draw(sm.post_processing_fbo);
+
+    // LIGHT SHADER
+    Shader_Bind(sm.light_Shader);
+    Camera_View_Projection_To_Shader(sm.cam, sm.light_Shader, "camMatrix");
+    VAO_Bind(sm.light_VAO);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
     // DEBUG DEPTH (Comment out all code after init)
     // Shader_Bind(sm.shader_depth_debug);
@@ -337,6 +399,8 @@ void ShadowMapLights_Update()
 
 void ShadowMapLights_OnExit()
 {
+    Camera_Print_Values(sm.cam);
+
     Mesh_Free(sm.scene);
 
     Shader_Destroy(&sm.shader_default);
