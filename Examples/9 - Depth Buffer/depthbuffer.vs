@@ -44,7 +44,6 @@ void main()
     // Assigns the colors from the Vertex Data to "color"
     fColor = aColour;
     // Assigns the texture coordinates from the Vertex Data to "texCoord"
-    // fTexCoords = mat2(0.0, -1.0, 1.0, 0.0) * aTex;
     fTexCoords = aTex;
 
     // Outputs the positions/coordinates of all vertices
