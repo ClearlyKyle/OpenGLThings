@@ -196,10 +196,16 @@ void Framebuffer_Draw(struct FBO fbo)
 
     // Draw the framebuffer rectangle
     Shader_Bind(fbo.shader);
+
     glBindVertexArray(fbo.VAO);
     glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
+
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fbo.FBO_tex);
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 void Framebuffer_Destroy(struct FBO *fbo)
@@ -236,10 +242,10 @@ void Debug_FBO_Init()
 {
     const GLfloat quad_verticies[] = {
         // positions        // texture Coords
-        0.5f, 0.9f, 0.0f, 1.0f,  //
+        0.5f, 0.9f, 0.0f, 1.0f, //
         0.5f, 0.5f, 0.0f, 0.0f, //
-        0.9f, 0.9f, 1.0f, 1.0f,   //
-        0.9f, 0.5f, 1.0f, 0.0f,  //
+        0.9f, 0.9f, 1.0f, 1.0f, //
+        0.9f, 0.5f, 1.0f, 0.0f, //
     };
 
     GLuint VAO, VBO;
@@ -263,17 +269,26 @@ void Debug_FBO_Init()
                                               {.index = 0, .name = "position"},
                                               {.index = 1, .name = "texCoords"}});
 
+    Shader_Bind(shader);
+    Shader_Uniform_Int(shader, "fboAttachment", 0);
+
     debug_fbo.shader_id = shader.shader_id;
 }
 
 void Debug_FBO_Draw(const GLuint fbo_tex)
 {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, fbo_tex);
-
-    glBindVertexArray(debug_fbo.VAO_id);
+    if (!(debug_fbo.shader_id || debug_fbo.VAO_id))
+    {
+        puts("You forgot to call Debug_FBO_Init()!");
+        return;
+    }
     glUseProgram(debug_fbo.shader_id);
 
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, fbo_tex);
+
+    glBindVertexArray(debug_fbo.VAO_id);
+
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindVertexArray(0);
+    // glBindVertexArray(0);
 }
