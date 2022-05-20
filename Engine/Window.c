@@ -74,16 +74,14 @@ void Window_Init(int width, int height,
     printf("Depth Buffer Size    : %d (bits)\n", depth_bits);
     printf("\n");
 
-    // ENABLE
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(MessageCallback, 0);
-    // glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0,
-    //                      GL_DEBUG_SEVERITY_MEDIUM, -1, "error message here");
-    //  glEnable(GL_DEPTH_TEST); // Enables the Depth Buffer
-    //  glDepthFunc(GL_LESS);
 
-    // glEnable(GL_STENCIL_TEST); // Enable stencil test
+    // ENABLE
+    glEnable(GL_DEPTH_TEST);   // Enables the Depth Buffer
+    glEnable(GL_STENCIL_TEST); // Enable stencil test
+    glDepthFunc(GL_LESS);
 
     // Use v-sync: (0) - off, (1) - on
     SDL_GL_SetSwapInterval(0);
