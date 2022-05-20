@@ -1,11 +1,17 @@
 #version 330 core
 in vec4 FragPos;
 
-uniform vec3 lightPos;
+uniform vec3  lightPos;
 uniform float farPlane;
 
 void main()
 {
-    // Manually sets depth map in the range [0, 1]
-    gl_FragDepth = length(FragPos.xyz - lightPos) / farPlane;
+    // get distance between fragment and light source
+    float lightDistance = length(FragPos.xyz - lightPos);
+
+    // map to [0;1] range by dividing by far_plane
+    lightDistance = lightDistance / farPlane;
+
+    // write this as modified depth
+    gl_FragDepth = lightDistance;
 }
