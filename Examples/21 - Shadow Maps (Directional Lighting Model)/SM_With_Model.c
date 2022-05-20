@@ -152,7 +152,7 @@ void ShadowMapModel_Init()
 
     // glm_vec3_scale(lightPos, 20.0f, lightPos);
 
-    glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 25.0f, light_orthogonal);
+    glm_ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 75.0f, light_orthogonal);
     glm_lookat(light_position, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, light_view);
     glm_mat4_mul(light_orthogonal, light_view, light_matrix);
 
@@ -176,6 +176,8 @@ void ShadowMapModel_Init()
 
     Shader_Bind(shader_depth_debug);
     Shader_Uniform_Int(shader_depth_debug, "depthMap", 0);
+
+    Debug_FBO_Init();
 }
 
 void ShadowMapModel_Update()
@@ -188,12 +190,14 @@ void ShadowMapModel_Update()
     glViewport(0, 0, sm.shadowmap.width, sm.shadowmap.height);
     glBindFramebuffer(GL_FRAMEBUFFER, sm.shadowmap.FBO_Id);
     glClear(GL_DEPTH_BUFFER_BIT);
+    glCullFace(GL_FRONT);
 
     // BIND Shader for use in shadowmap
     sm.model.shader = sm.shader_shadowmap;
     Mesh_Draw(sm.model); // DRAW model
     sm.model.shader = sm.shader_default;
 
+    glCullFace(GL_BACK);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);         // Switch back to the default framebuffer
     glViewport(0, 0, window.width, window.heigh); // Switch back to the default viewport
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -216,7 +220,9 @@ void ShadowMapModel_Update()
     Framebuffer_Update(sm.msaa_fbo, sm.post_processing_fbo);
     Framebuffer_Draw(sm.post_processing_fbo);
 
-    // DEBUG DEPTH (Comment out all code after END)
+    Debug_FBO_Draw(sm.shadowmap.tex_Id);
+
+    // Old debug method:
     // Shader_Bind(sm.shader_depth_debug);
     // glActiveTexture(GL_TEXTURE0);
     // glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
