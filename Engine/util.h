@@ -54,11 +54,14 @@
         assert(A);                   \
     }
 
-#define check_that(A, M, ...)        \
-    if (!(A))                        \
-    {                                \
-        log_error(M, ##__VA_ARGS__); \
-    }
+//#define check_that(A, M, ...)        \
+//    if (!(A))                        \
+//    {                                \
+//        log_error(M, ##__VA_ARGS__); \
+//    }
+
+#define check_that(EXPRESSION, ERROR_MESSAGE, ...) \
+    ((void)((EXPRESSION) || log_error(ERROR_MESSAGE, ##__VA_ARGS__)))
 
 //#define EXIT_ON_GL_ERROR
 #define CHECK_GL_ERRORS_TOGGLE
