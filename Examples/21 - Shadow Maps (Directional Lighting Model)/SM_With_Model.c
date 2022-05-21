@@ -197,7 +197,6 @@ void ShadowMapModel_Update()
     Mesh_Draw(sm.model); // DRAW model
     sm.model.shader = sm.shader_default;
 
-    glCullFace(GL_BACK);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);         // Switch back to the default framebuffer
     glViewport(0, 0, window.width, window.heigh); // Switch back to the default viewport
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
