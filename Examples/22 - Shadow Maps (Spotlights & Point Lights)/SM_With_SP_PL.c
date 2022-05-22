@@ -1,5 +1,14 @@
 #include "SM_With_SP_PL.h"
 
+struct ShadowCubeMap
+{
+    struct Shader shader;
+    GLuint        FBO;
+    GLuint        TEX_ID;
+    GLsizei       width;
+    GLsizei       height;
+};
+
 static struct ShadowMapLights
 {
     Camera_t    cam;
@@ -10,14 +19,13 @@ static struct ShadowMapLights
     Shadowmap_t shadowmap;
     VAO_t       debug_VAO;
 
-    GLuint pointShadowMapFBO;
-    GLuint depthCubemap;
+    GLuint               pointShadowMapFBO;
+    struct ShadowCubeMap cube_map;
 
     struct Shader shader_default;
     struct Shader shader_framebuffer;
     struct Shader shader_shadowmap;
     struct Shader shader_depth_debug;
-    struct Shader shader_cube_map;
 
     VAO_t         light_VAO;
     struct Shader light_Shader;
@@ -161,7 +169,6 @@ void ShadowMapLights_Init()
     sm.shader_framebuffer = shader_framebuffer;
     sm.shader_shadowmap   = shader_shadowmap;
     sm.shader_depth_debug = shader_depth_debug;
-    sm.shader_cube_map    = shader_cube_map;
 
     glEnable(GL_DEPTH_TEST);  // Enables the Depth Buffer
     glEnable(GL_MULTISAMPLE); // Enables Multisampling
@@ -275,8 +282,11 @@ void ShadowMapLights_Init()
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    sm.pointShadowMapFBO = pointShadowMapFBO;
-    sm.depthCubemap      = depthCubemap;
+    sm.cube_map.FBO    = pointShadowMapFBO;
+    sm.cube_map.TEX_ID = depthCubemap;
+    sm.cube_map.width  = shadowMapWidth;
+    sm.cube_map.height = shadowMapHeight;
+    sm.cube_map.shader = shader_cube_map;
 
     // Matrices needed for the light's perspective on all faces of the cubemap
     const float aspect = (float)shadowMapWidth / (float)shadowMapHeight;
@@ -323,15 +333,33 @@ void ShadowMapLights_Update()
 {
     glEnable(GL_DEPTH_TEST);
 
-    // 1. render scene to depth cubemap
+    // 1. render scene to shadowmap
     // --------------------------------
-    glViewport(0, 0, sm.shadowmap.width, sm.shadowmap.height);
-    glBindFramebuffer(GL_FRAMEBUFFER, sm.shadowmap.FBO_Id);
+    // glViewport(0, 0, sm.shadowmap.width, sm.shadowmap.height);
+    // glBindFramebuffer(GL_FRAMEBUFFER, sm.shadowmap.FBO_Id);
+    // glClear(GL_DEPTH_BUFFER_BIT);
+    //// glCullFace(GL_FRONT);
+
+    //// Render scene with 'shader_cube_map' shader
+    // sm.scene.shader = sm.shader_shadowmap;
+    // Mesh_Draw(sm.scene);
+    // sm.scene.shader = sm.shader_default;
+
+    //// reset
+    //// glCullFace(GL_BACK);
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0);         // Switch back to the default framebuffer
+    // glViewport(0, 0, window.width, window.heigh); // Switch back to the default viewport
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // 1. render scene to cube map
+    // --------------------------------
+    glViewport(0, 0, sm.cube_map.width, sm.cube_map.height);
+    glBindFramebuffer(GL_FRAMEBUFFER, sm.cube_map.FBO);
     glClear(GL_DEPTH_BUFFER_BIT);
-    glCullFace(GL_FRONT);
+    // glCullFace(GL_FRONT);
 
     // Render scene with 'shader_cube_map' shader
-    sm.scene.shader = sm.shader_shadowmap;
+    sm.scene.shader = sm.cube_map.shader;
     Mesh_Draw(sm.scene);
     sm.scene.shader = sm.shader_default;
 
@@ -353,10 +381,10 @@ void ShadowMapLights_Update()
     Camera_View_Projection_To_Shader(sm.cam, sm.scene.shader, "camMatrix");
 
     // Draw the normal model
-    glActiveTexture(GL_TEXTURE0 + 2);
-    glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
-    // glActiveTexture(GL_TEXTURE0 + 3);
-    // glBindTexture(GL_TEXTURE_2D, cubemap.tex_Id);
+    // glActiveTexture(GL_TEXTURE0 + 2);
+    // glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
+    glActiveTexture(GL_TEXTURE0 + 3);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, sm.cube_map.TEX_ID); // NOTE: GL_TEXTURE_CUBE_MAP
 
     Mesh_Draw(sm.scene); // DRAW model normally
 
@@ -383,5 +411,5 @@ void ShadowMapLights_OnExit()
     Shader_Destroy(&sm.shader_framebuffer);
     Shader_Destroy(&sm.shader_shadowmap);
     Shader_Destroy(&sm.shader_depth_debug);
-    Shader_Destroy(&sm.shader_cube_map);
+    Shader_Destroy(&sm.cube_map.shader);
 }
