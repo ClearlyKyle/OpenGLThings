@@ -153,10 +153,9 @@ void ShadowMapLights_Init()
     struct Shader shader_cube_map = Shader_Create2("../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowCubeMap.vs",
                                                    "../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowCubeMap.fs",
                                                    "../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/shadowCubeMap.gs",
-                                                   2,
+                                                   1,
                                                    (struct VertexAttribute[]){
-                                                       {.index = 0, .name = "aPos"},
-                                                       {.index = 1, .name = "aTexCoords"}});
+                                                       {.index = 0, .name = "aPos"}});
 
     struct Shader shader_depth_debug = Shader_Create("../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/depthdebug.vs",
                                                      "../../Examples/22 - Shadow Maps (Spotlights & Point Lights)/depthdebug.fs",
@@ -218,17 +217,17 @@ void ShadowMapLights_Init()
 
     // Matrices needed for the light's perspective
     const float nearPlane = 1.0f;
-    const float farPlane  = 25.0f;
+    const float farPlane  = 100.0f;
     mat4        orthgonalProjection;
     mat4        perspectiveProjection;
-    mat4        lightView;
+    mat4        lightView = GLM_MAT4_IDENTITY_INIT;
     mat4        lightProjection;
 
     // glm_ortho(-35.0f, 35.0f, -35.0f, 35.0f, nearPlane, farPlane, orthgonalProjection);
-    glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 25.0f, orthgonalProjection);
-    glm_perspective(glm_rad(90.0f), 1.0f, nearPlane, farPlane, perspectiveProjection);
-    glm_lookat(light_position, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, lightView);
-    glm_mat4_mul(orthgonalProjection, lightView, lightProjection);
+    glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, farPlane, orthgonalProjection);
+    glm_perspective(glm_rad(90.0f), 1.0f, 0.1f, farPlane, perspectiveProjection);
+    glm_lookat(light_position, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 0.0f, 1.0f}, lightView);
+    glm_mat4_mul(perspectiveProjection, lightView, lightProjection);
 
     // SHADER UNIFORMS
     Shader_Bind(shader_shadowmap);
@@ -238,8 +237,8 @@ void ShadowMapLights_Init()
     Shader_Uniform_Vec4(shader_default, "lightColor", light_colour);
     Shader_Uniform_Vec3(shader_default, "lightPos", light_position);
     Shader_Uniform_Mat4(shader_default, "lightProjection", lightProjection);
-    Shader_Uniform_Int(shader_default, "shadowMap", 2);
-    Shader_Uniform_Int(shader_default, "shadowCubeMap", 3);
+    // Shader_Uniform_Int(shader_default, "shadowMap", 2);
+    Shader_Uniform_Int(shader_default, "shadowCubeMap", 2);
     Shader_Uniform_Float(shader_default, "farPlane", farPlane);
 
     Shader_Bind(shader_framebuffer);
@@ -282,6 +281,7 @@ void ShadowMapLights_Init()
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     sm.cube_map.FBO    = pointShadowMapFBO;
     sm.cube_map.TEX_ID = depthCubemap;
     sm.cube_map.width  = shadowMapWidth;
@@ -291,9 +291,9 @@ void ShadowMapLights_Init()
     // Matrices needed for the light's perspective on all faces of the cubemap
     const float aspect = (float)shadowMapWidth / (float)shadowMapHeight;
     mat4        shadowProj;
-    glm_perspective(glm_rad(90.0f), aspect, nearPlane, farPlane, shadowProj);
+    glm_perspective(glm_rad(90.0f), 1.0f, 0.1f, farPlane, shadowProj);
 
-    mat4 shadowTransforms[6];
+    mat4 shadowTransforms[6] = {0};
 
     glm_lookat(light_position, (vec3){light_position[0] + 1.0f, light_position[1], light_position[2]}, (vec3){0.0f, -1.0f, 0.0f}, shadowTransforms[0]);
     glm_lookat(light_position, (vec3){light_position[0] - 1.0f, light_position[1], light_position[2]}, (vec3){0.0f, -1.0f, 0.0f}, shadowTransforms[1]);
@@ -367,7 +367,7 @@ void ShadowMapLights_Update()
     // glCullFace(GL_BACK);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);         // Switch back to the default framebuffer
     glViewport(0, 0, window.width, window.heigh); // Switch back to the default viewport
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // 2. render scene as normal
     // -------------------------
@@ -377,14 +377,16 @@ void ShadowMapLights_Update()
 
     // Send the shadowmap generated to the default shader
     Shader_Bind(sm.shader_default);
+    Shader_Uniform_Float(sm.scene.shader, "farPlane", 100.0f);
     Shader_Uniform_Vec3(sm.scene.shader, "camPos", sm.cam.position);
     Camera_View_Projection_To_Shader(sm.cam, sm.scene.shader, "camMatrix");
 
     // Draw the normal model
     // glActiveTexture(GL_TEXTURE0 + 2);
     // glBindTexture(GL_TEXTURE_2D, sm.shadowmap.tex_Id);
-    glActiveTexture(GL_TEXTURE0 + 3);
+    glActiveTexture(GL_TEXTURE0 + 2);
     glBindTexture(GL_TEXTURE_CUBE_MAP, sm.cube_map.TEX_ID); // NOTE: GL_TEXTURE_CUBE_MAP
+    Shader_Uniform_Int(sm.scene.shader, "shadowCubeMap", 2);
 
     Mesh_Draw(sm.scene); // DRAW model normally
 
@@ -392,7 +394,7 @@ void ShadowMapLights_Update()
     Framebuffer_Draw(sm.post_processing_fbo);
 
     // FBO Debug testing
-    Debug_FBO_Draw(sm.shadowmap.tex_Id);
+    // Debug_FBO_Draw(sm.shadowmap.tex_Id);
 
     //  Draw a Cube to represent the Light source
     Shader_Bind(sm.light_Shader);

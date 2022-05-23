@@ -1,30 +1,31 @@
 #version 330 core
 
-// Outputs colors in RGBA
-out vec4 FragColor;
+out vec4 FragColor; // Outputs colors in RGBA
 
-// Imports the current position from the Vertex Shader
-in vec3 crntPos;
-// Imports the normal from the Vertex Shader
-in vec3 Normal;
-// Imports the color from the Vertex Shader
-in vec3 color;
-// Imports the texture coordinates from the Vertex Shader
-in vec2 texCoord;
-// Imports the fragment position of the light
-in vec4 fragPosLight;
+in vec3 crntPos;      // Imports the current position from the Vertex Shader
+in vec3 Normal;       // Imports the normal from the Vertex Shader
+in vec3 color;        // Imports the color from the Vertex Shader
+in vec2 texCoord;     // Imports the texture coordinates from the Vertex Shader
+in vec4 fragPosLight; // Imports the fragment position of the light
+
+layout(std140) uniform Matrices // Material data
+{
+    vec4  fAmbient;
+    vec4  fDiffuse;
+    vec4  fSpecular;
+    vec4  fEmission;
+    float fShininess;
+};
 
 // Gets the Texture Units from the main function
 uniform sampler2D   diffuse0;
 uniform sampler2D   specular0;
 uniform sampler2D   shadowMap;
 uniform samplerCube shadowCubeMap;
-// Gets the color of the light from the main function
-uniform vec4 lightColor;
-// Gets the position of the light from the main function
-uniform vec3 lightPos;
-// Gets the position of the camera from the main function
-uniform vec3  camPos;
+
+uniform vec4  lightColor; // Gets the color of the light from the main function
+uniform vec3  lightPos;   // Gets the position of the light from the main function
+uniform vec3  camPos;     // Gets the position of the camera from the main function
 uniform float farPlane;
 
 vec4 pointLight_normal()
@@ -83,7 +84,7 @@ vec4 pointLight()
         float specularLight = 0.50f;
         vec3  viewDirection = normalize(camPos - crntPos);
         vec3  halfwayVec    = normalize(viewDirection + lightDirection);
-        float specAmount    = pow(max(dot(normal, halfwayVec), 0.0f), 16);
+        float specAmount    = pow(max(dot(normal, halfwayVec), 0.0f), fShininess);
         specular            = specAmount * specularLight;
     };
 
@@ -114,8 +115,7 @@ vec4 pointLight()
     // Average shadow
     shadow /= pow((sampleRadius * 2 + 1), 3);
 
-    // return (texture(diffuse0, texCoord) * (diffuse * (1.0f - shadow) * inten + ambient) + texture(specular0, texCoord).r * specular * (1.0f - shadow) * inten) * lightColor;
-    return texture(diffuse0, texCoord);
+    return (texture(diffuse0, texCoord) * (fDiffuse * diffuse * (1.0f - shadow) * inten + ambient * fAmbient) + texture(specular0, texCoord).r * specular * (1.0f - shadow) * inten) * lightColor;
 }
 
 vec4 direcLight()
@@ -233,5 +233,6 @@ vec4 spotLight()
 void main()
 {
     // outputs final color
-    FragColor = pointLight_normal();
+    // FragColor = direcLight(); // shadowmap
+    FragColor = pointLight(); // cubemap
 }
