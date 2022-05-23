@@ -674,7 +674,7 @@ static struct Mesh _Mesh_Load_Data(const struct Shader shader, unsigned int inst
         else
         {
             // TODO : Mesh does not use a texture..
-            fprintf(stderr, "Mesh does not use a texture..\n");
+            fprintf(stderr, "%s does not use a texture..\n", mesh->mName.data);
         }
 
         // AMBIENT
@@ -726,7 +726,7 @@ static struct Mesh _Mesh_Load_Data(const struct Shader shader, unsigned int inst
 
 Mesh_t Mesh_Load_Instancing(const struct Shader shader, GLuint count, mat4 *matrix, const char *file_path)
 {
-    check_that(count > 1, "Why are you using this with only one instance?\n");
+    check_that((count > 1), "Why are you using this with only one instance?\n");
 
     fprintf(stderr, "[MODEL INSTANCING] Loading instancing!\n\n");
 
@@ -777,8 +777,11 @@ static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, co
         // bind material uniform
         UBO_Bind_Buffer_To_Index(m.models[nd->mMeshes[n]].material_vbo.ID, 0, 0, sizeof(struct MaterialInfo));
 
-        // if (m.models[nd->mMeshes[n]].tex.ID < 10)
-        Texture_Bind(m.models[nd->mMeshes[n]].tex);
+        if (m.models[nd->mMeshes[n]].tex.ID < 100)
+        {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(m.models[nd->mMeshes[n]].tex.type, m.models[nd->mMeshes[n]].tex.ID);
+        }
 
         VAO_Bind(m.models[nd->mMeshes[n]].vao);
 
