@@ -243,8 +243,8 @@ void Debug_FBO_Init()
     const GLfloat quad_verticies[] = {
         // positions        // texture Coords
         0.5f, 0.9f, 0.0f, 1.0f, //
-        0.5f, 0.5f, 0.0f, 0.0f, //
         0.9f, 0.9f, 1.0f, 1.0f, //
+        0.5f, 0.5f, 0.0f, 0.0f, //
         0.9f, 0.5f, 1.0f, 0.0f, //
     };
 
@@ -284,8 +284,8 @@ void Debug_FBO_Draw(const GLuint fbo_tex)
     }
     glUseProgram(debug_fbo.shader_id);
 
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, fbo_tex);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fbo_tex);
 
     glBindVertexArray(debug_fbo.VAO_id);
 
