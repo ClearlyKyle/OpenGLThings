@@ -22,8 +22,9 @@
 #include "Gamma.h"               // Example 19 - Gamma Correction
 #include "UBOExample.h"          // Example 20 - Drawing Triangles with use of UBO
 #include "SM_With_Cubes.h"       // Example 21 - Shadow Mapping with Directional Lighting Using Cubes
-#include "SM_With_Model.h"       // Example 22 - Shadow Mapping with Directional Lighting Using a Model
-#include "SM_With_SP_PL.h"       // Example 23 - Shadow Mapping with Spotlights and Point Lights
+#include "SM_With_Model.h"       // Example 21 - Shadow Mapping with Directional Lighting Using a Model
+#include "SM_With_SP_PL.h"       // Example 22 - Shadow Mapping with Spotlights and Point Lights
+#include "Normal_Maps.h"         // Example 23 - Normal Mapping
 #include "Ortho.h"
 #include "challanges.h"
 #include "challanges.h"
@@ -89,14 +90,22 @@ int main(int argc, char *argv[])
     // Example 19 - Gamma Correction
     // Window_Init(800, 800, Gamma_Init, Gamma_Update, Gamma_OnExit);
 
-    // Example 21 - Shadow Mapping with Directional Lighting
-    Window_Init(1024, 1024, ShadowMap_Init, ShadowMap_Update, ShadowMap_OnExit);
-    // Window_Init(1024, 1024, ShadowMapCubes_Init, ShadowMapCubes_Update, ShadowMapCubes_OnExit);
-
-    // Window_Init(800, 800, Ortho_Init, Ortho_Update, Ortho_OnExit);
-
     // Example 20 - Drawing Triangles with use of UBO
     // Window_Init(800, 800, UBOExample_Init, UBOExample_Update, UBOExample_OnExit);
+
+    // Example 21 - Shadow Mapping with Directional Lighting Using Cubes
+    // Window_Init(1024, 1024, ShadowMapCubes_Init, ShadowMapCubes_Update, ShadowMapCubes_OnExit);
+
+    // Example 21 - Shadow Mapping with Directional Lighting Using a Model
+    // Window_Init(1024, 1024, ShadowMapModel_Init, ShadowMapModel_Update, ShadowMapModel_OnExit);
+
+    // Example 22 - Shadow Mapping with Spotlights and Point Lights
+    // Window_Init(1024, 1024, ShadowMapLights_Init, ShadowMapLights_Update, ShadowMapLights_OnExit);
+
+    // Example 23 - Normal Mapping
+    Window_Init(1024, 1024, NormalMaps_Init, NormalMaps_Update, NormalMaps_OnExit);
+
+    // Window_Init(800, 800, Ortho_Init, Ortho_Update, Ortho_OnExit);
 
     // Testing things
     // Window_Init(800, 800, challanges_Init, challanges_Update, challanges_OnExit);
