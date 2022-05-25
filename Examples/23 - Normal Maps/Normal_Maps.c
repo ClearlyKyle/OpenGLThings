@@ -101,7 +101,12 @@ void NormalMaps_Init()
         const struct Shader shader = Shader_Create(
             "../../Examples/23 - Normal Maps/texture_example.vs",
             "../../Examples/23 - Normal Maps/texture_example.fs",
-            2, (struct VertexAttribute[]){{.index = 0, .name = "aPos"}, {.index = 1, .name = "aColor"}});
+            4, (struct VertexAttribute[]){
+                   {.index = 0, .name = "aPos"},
+                   {.index = 1, .name = "aNormal"},
+                   {.index = 2, .name = "aColor"},
+                   {.index = 3, .name = "aTex"},
+               });
 
         const GLfloat plane_vertices[] =
             {
@@ -130,7 +135,7 @@ void NormalMaps_Init()
         const char    *file_path = "../../Examples/res/textures/diffuse.png";
         struct Texture tex       = Texture_Create(file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
 
-        vec3 object_position = {0.0f, 0.0f, 0.0f};
+        vec3 object_position = {0.5f, 0.5f, 0.5f};
         mat4 object_model    = GLM_MAT4_ZERO_INIT;
         glm_translate_make(object_model, object_position);
 

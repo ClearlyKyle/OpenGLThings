@@ -10,4 +10,5 @@ uniform sampler2D tex0; // Gets the Texture Unit from the main function
 void main()
 {
     FragColor = texture(tex0, texCoord);
+    // FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
