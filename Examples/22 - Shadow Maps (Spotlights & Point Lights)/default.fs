@@ -115,7 +115,7 @@ vec4 pointLight()
     // Average shadow
     shadow /= pow((sampleRadius * 2 + 1), 3);
 
-    return (texture(diffuse0, texCoord) * (fDiffuse * diffuse * (1.0f - shadow) * inten + ambient * fAmbient) + texture(specular0, texCoord).r * specular * (1.0f - shadow) * inten) * lightColor;
+    return (((fDiffuse * diffuse * (1.0f - shadow) * inten) + (ambient * fAmbient)) + specular * fSpecular * (1.0f - shadow) * inten + fEmission) * lightColor;
 }
 
 vec4 direcLight()
@@ -235,4 +235,5 @@ void main()
     // outputs final color
     // FragColor = direcLight(); // shadowmap
     FragColor = pointLight(); // cubemap
+    // FragColor = texture(diffuse0, texCoord) * vec4(color, 1.0); // plain colour
 }
