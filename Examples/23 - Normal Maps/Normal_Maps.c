@@ -4,11 +4,14 @@ static struct NormalMaps
 {
     Camera_t cam;
 
-    FBO_t msaa_fbo;
-    FBO_t post_processing_fbo;
+    FBO_t    msaa_fbo;
+    FBO_t    post_processing_fbo;
+    Shader_t shader_program;
 
     VAO_t     plane_VAO;
-    Texture_t plane_TEXTURE;
+    Texture_t plane_tex_DIFFUSE;
+    Texture_t plane_tex_SPECULAR;
+    Texture_t plane_tex_NORMAL;
     Shader_t  plane_SHADER;
 } nm;
 
@@ -42,14 +45,19 @@ void NormalMaps_Init()
                                                   "../../Examples/23 - Normal Maps/default.gs",
                                                   2,
                                                   (struct VertexAttribute[]){
-                                                      {.index = 0, .name = "inPos"},
-                                                      {.index = 1, .name = "inTexCoords"}});
+                                                      {.index = 0, .name = "aPos"},
+                                                      {.index = 1, .name = "aNormal"},
+                                                      {.index = 2, .name = "aColor"},
+                                                      {.index = 3, .name = "aTex"},
+                                                  });
 
     struct Shader shader_framebuffer = Shader_Create("../../Examples/23 - Normal Maps/framebuffer.vs",
                                                      "../../Examples/23 - Normal Maps/framebuffer.fs",
                                                      1,
                                                      (struct VertexAttribute[]){
                                                          {.index = 0, .name = "aPos"}});
+
+    nm.shader_program = shader_program;
 
     vec4 light_colour   = {1.0f, 1.0f, 1.0f, 1.0f};
     vec3 light_position = {0.5f, 0.5f, 0.5f};
@@ -59,6 +67,9 @@ void NormalMaps_Init()
     Shader_Bind(shader_program);
     Shader_Uniform_Vec4(shader_program, "lightColor", light_colour);
     Shader_Uniform_Vec3(shader_program, "lightPos", light_position);
+    Shader_Uniform_Int(shader_program, "diffuse0", 0);
+    Shader_Uniform_Int(shader_program, "specular0", 1);
+    Shader_Uniform_Int(shader_program, "normal0", 2);
 
     Shader_Bind(shader_framebuffer);
     Shader_Uniform_Int(shader_framebuffer, "screenTexture", 0);
@@ -132,20 +143,44 @@ void NormalMaps_Init()
         VAO_Attr(VAO, VBO, 2, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(6 * sizeof(GLfloat)));
         VAO_Attr(VAO, VBO, 3, 2, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(9 * sizeof(GLfloat)));
 
-        const char    *file_path = "../../Examples/res/textures/diffuse.png";
-        struct Texture tex       = Texture_Create(file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+        const char    *diffuse_file_path  = "../../Examples/res/textures/brick_wall/Tileable_Red_brick_texture_DIFFUSE.png";
+        const char    *specular_file_path = "../../Examples/res/textures/brick_wall/Tileable_Red_brick_texture_SPECULAR.png";
+        const char    *normal_file_path   = "../../Examples/res/textures/brick_wall/Tileable_Red_brick_texture_NORMAL.png";
+        struct Texture diff_tex           = Texture_Create(diffuse_file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+        struct Texture spec_tex           = Texture_Create(specular_file_path, GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+        struct Texture nrm_tex            = Texture_Create(normal_file_path, GL_TEXTURE_2D, 2, GL_RGBA, GL_UNSIGNED_BYTE);
 
-        vec3 object_position = {0.5f, 0.5f, 0.5f};
-        mat4 object_model    = GLM_MAT4_ZERO_INIT;
-        glm_translate_make(object_model, object_position);
+        vec3   translation = {0.5f, 0.5f, 0.5f};
+        versor rotation    = {0.707f, 0.0f, 0.0f, 0.707f};
+        vec3   scale       = {1.0f, 1.0f, 1.0f};
+
+        mat4 object_translation = {0};
+        mat4 object_roataion    = {0};
+        mat4 object_scale       = {0};
+        mat4 object_matrix      = GLM_MAT4_IDENTITY_INIT;
+
+        glm_translate_make(object_translation, translation);
+        glm_quat_mat4(rotation, object_roataion);
+        glm_scale_make(object_scale, scale);
 
         Shader_Bind(shader);
-        Shader_Uniform_Mat4(shader, "model", object_model);
+        Shader_Uniform_Mat4(shader, "translation", object_translation);
+        Shader_Uniform_Mat4(shader, "rotation", object_roataion);
+        Shader_Uniform_Mat4(shader, "scale", object_scale);
+        Shader_Uniform_Mat4(shader, "model", object_matrix);
         Shader_Uniform_Int(shader, "tex0", 0);
 
-        nm.plane_VAO     = VAO;
-        nm.plane_TEXTURE = tex;
-        nm.plane_SHADER  = shader;
+        Shader_Bind(shader_program);
+        Shader_Uniform_Mat4(shader_program, "translation", object_translation);
+        Shader_Uniform_Mat4(shader_program, "rotation", object_roataion);
+        Shader_Uniform_Mat4(shader_program, "scale", object_scale);
+        Shader_Uniform_Mat4(shader_program, "model", object_matrix);
+
+        nm.plane_VAO          = VAO;
+        nm.plane_tex_DIFFUSE  = diff_tex;
+        nm.plane_tex_SPECULAR = spec_tex;
+        nm.plane_tex_NORMAL   = nrm_tex;
+        nm.plane_SHADER       = shader;
     } // SETUP PLANE
 
     // Texture_t normal_map = Texture_Create("", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
@@ -155,10 +190,13 @@ void NormalMaps_Update()
 {
     Camera_Inputs(&nm.cam);
 
-    Shader_Bind(nm.plane_SHADER);
-    Camera_View_Projection_To_Shader(nm.cam, nm.plane_SHADER, "camMatrix");
+    Shader_Bind(nm.shader_program);
+    Shader_Uniform_Vec3(nm.shader_program, "camPos", nm.cam.position);
+    Camera_View_Projection_To_Shader(nm.cam, nm.shader_program, "camMatrix");
 
-    Texture_Bind(nm.plane_TEXTURE);
+    Texture_Bind(nm.plane_tex_DIFFUSE);
+    Texture_Bind(nm.plane_tex_SPECULAR);
+    Texture_Bind(nm.plane_tex_NORMAL);
 
     VAO_Bind(nm.plane_VAO);
 
@@ -173,6 +211,8 @@ void NormalMaps_OnExit()
     Framebuffer_Destroy(&nm.post_processing_fbo);
 
     VAO_Destroy(nm.plane_VAO);
-    Texture_Delete(nm.plane_TEXTURE);
+    Texture_Delete(nm.plane_tex_DIFFUSE);
+    Texture_Delete(nm.plane_tex_SPECULAR);
+    Texture_Delete(nm.plane_tex_NORMAL);
     Shader_Destroy(&nm.plane_SHADER);
 }
