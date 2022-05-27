@@ -13,6 +13,9 @@ static struct NormalMaps
     Texture_t plane_tex_SPECULAR;
     Texture_t plane_tex_NORMAL;
     Shader_t  plane_SHADER;
+
+    Shader_t light_Shader;
+    VAO_t    light_VAO;
 } nm;
 
 void NormalMaps_Init()
@@ -150,7 +153,7 @@ void NormalMaps_Init()
         struct Texture spec_tex           = Texture_Create(specular_file_path, GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE);
         struct Texture nrm_tex            = Texture_Create(normal_file_path, GL_TEXTURE_2D, 2, GL_RGBA, GL_UNSIGNED_BYTE);
 
-        vec3   translation = {0.5f, 0.5f, 0.5f};
+        vec3   translation = {0.0f, 0.0f, 0.0f};
         versor rotation    = {0.707f, 0.0f, 0.0f, 0.707f};
         vec3   scale       = {1.0f, 1.0f, 1.0f};
 
@@ -183,7 +186,61 @@ void NormalMaps_Init()
         nm.plane_SHADER       = shader;
     } // SETUP PLANE
 
-    // Texture_t normal_map = Texture_Create("", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    { // LIGHT CUBE
+        // Drawing a Cube to represent the Light source
+
+        const GLfloat light_vertices[] =
+            {//     COORDINATES     //
+             -0.1f, -0.1f, 0.1f,
+             -0.1f, -0.1f, -0.1f,
+             0.1f, -0.1f, -0.1f,
+             0.1f, -0.1f, 0.1f,
+             -0.1f, 0.1f, 0.1f,
+             -0.1f, 0.1f, -0.1f,
+             0.1f, 0.1f, -0.1f,
+             0.1f, 0.1f, 0.1f};
+
+        const GLuint light_indices[] =
+            {
+                // front face
+                0, 1, 2, 2, 3, 0,
+                // top face
+                3, 2, 6, 6, 7, 3,
+                // back face
+                7, 6, 5, 5, 4, 7,
+                // left face
+                4, 0, 3, 3, 7, 4,
+                // bottom face
+                0, 4, 5, 5, 1, 0, // Back to front now.
+                                  // right face
+                1, 5, 6, 6, 2, 1};
+
+        struct Shader light_shader = Shader_Create(
+            "../../Examples/18 - Blinn-Phong/lights.vs",
+            "../../Examples/18 - Blinn-Phong/lights.fs",
+            1,
+            (struct VertexAttribute[]){
+                {.index = 0, .name = "aPos"}});
+
+        struct VAO light_vao = VAO_Create();
+
+        struct EBO light_ebo = EBO_Create();
+        EBO_Buffer(light_ebo, sizeof(light_indices), (void *)light_indices);
+
+        struct VBO light_abo = VBO_Create(GL_ARRAY_BUFFER);
+        VBO_Buffer(light_abo, sizeof(light_vertices), (const GLvoid *)light_vertices);
+        VAO_Attr(light_vao, light_abo, 0, 3, GL_FLOAT, 3 * sizeof(GLfloat), (const GLvoid *)(0));
+
+        mat4 light_model = GLM_MAT4_ZERO_INIT;
+        glm_translate_make(light_model, light_position);
+
+        Shader_Bind(light_shader);
+        Shader_Uniform_Mat4(light_shader, "model", light_model);
+        Shader_Uniform_Vec4(light_shader, "lightColor", light_colour);
+
+        nm.light_Shader = light_shader;
+        nm.light_VAO    = light_vao;
+    } // LIGHT CUBE
 }
 
 void NormalMaps_Update()
@@ -201,6 +258,12 @@ void NormalMaps_Update()
     VAO_Bind(nm.plane_VAO);
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    //  Draw a Cube to represent the Light source
+    Shader_Bind(nm.light_Shader);
+    Camera_View_Projection_To_Shader(nm.cam, nm.light_Shader, "camMatrix");
+    VAO_Bind(nm.light_VAO);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
 
 void NormalMaps_OnExit()
