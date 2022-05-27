@@ -1,6 +1,6 @@
 #include "EBO.h"
 
-struct EBO EBO_Create()
+EBO_t EBO_Create()
 {
     struct EBO ebo = {0};
 

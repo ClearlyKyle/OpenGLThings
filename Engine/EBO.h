@@ -8,10 +8,12 @@ struct EBO
     GLuint ID;
 };
 
-struct EBO EBO_Create();
-void EBO_Destroy(struct EBO ebo);
-void EBO_Bind(struct EBO ebo);
-void EBO_Unbind();
-void EBO_Buffer(struct EBO ebo, GLsizeiptr size, const GLvoid *data);
+typedef struct EBO EBO_t;
+
+EBO_t EBO_Create();
+void  EBO_Destroy(struct EBO ebo);
+void  EBO_Bind(struct EBO ebo);
+void  EBO_Unbind();
+void  EBO_Buffer(struct EBO ebo, GLsizeiptr size, const GLvoid *data);
 
 #endif // __EBO_H__
