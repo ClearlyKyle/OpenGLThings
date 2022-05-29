@@ -439,6 +439,8 @@ struct Shader Shader_Create2(const char *vs_path, const char *fs_path, const cha
     shader.fs_handle = 0;
     shader.gs_handle = 0;
 
+    _Print_Active_Uniforms_Attribs(shader);
+
     return shader;
 }
 
@@ -525,11 +527,12 @@ void Shader_Bind(const struct Shader shader)
 // it will be optimized away. Uniforms are defined post-link
 // 1- Check if uniform is going to be used
 // 2 -Check if uniform is the correct name
-#define LOCATION_CHECK(LOCATION, NAME, FUNCTION)                                                                       \
-    if ((LOCATION) == GL_INVALID_INDEX)                                                                                \
-        fprintf(stderr, _colour_RED "[UNIFORM ERROR] " _colour_COLOUR_X "Error locating uniform name : %s\n", (NAME)); \
-    else                                                                                                               \
+#define LOCATION_CHECK(LOCATION, NAME, FUNCTION) \
+    if ((LOCATION) == GL_INVALID_INDEX)          \
+        return;                                  \
+    else                                         \
         FUNCTION;
+//fprintf(stderr, _colour_RED "[UNIFORM ERROR] " _colour_COLOUR_X "Error locating uniform name : %s\n", (NAME)); \
 
 void Shader_Uniform_Int(struct Shader shader, const char *name, int i)
 {
@@ -543,13 +546,13 @@ void Shader_Uniform_Float(struct Shader shader, const char *name, float f)
     LOCATION_CHECK(location, name, glUniform1f(location, f));
 }
 
-void Shader_Uniform_Vec3(struct Shader shader, char *name, vec3 v)
+void Shader_Uniform_Vec3(struct Shader shader, const char *name, vec3 v)
 {
     const GLint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
     LOCATION_CHECK(location, name, glUniform3f(location, v[0], v[1], v[2]));
 }
 
-void Shader_Uniform_Vec4(struct Shader shader, char *name, vec4 v)
+void Shader_Uniform_Vec4(struct Shader shader, const char *name, const vec4 v)
 {
     // A vec3 is valid to pass to vec4 uniform, easy mistake, check for correct size
     // vec being used, similar for vec3 uniform
