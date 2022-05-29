@@ -31,18 +31,6 @@ void NormalMaps_Init()
             1.0f, -1.0f, 1.0f, 0.0f,
             -1.0f, 1.0f, 0.0f, 1.0f};
 
-    // Vertices for plane with texture
-    // const GLfloat plane_vertices[] =
-    //    {
-    //        -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    //        -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-    //        1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-    //        1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
-
-    // const GLfloat plane_indicies[] = {
-    //     0, 1, 2,
-    //     0, 2, 3};
-
     struct Shader shader_program = Shader_Create2("../../Examples/23 - Normal Maps/default.vs",
                                                   "../../Examples/23 - Normal Maps/default.fs",
                                                   "../../Examples/23 - Normal Maps/default.gs",
