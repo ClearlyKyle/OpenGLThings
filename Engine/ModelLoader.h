@@ -46,9 +46,9 @@ struct TextureInfo
     unsigned int tex_count;
 
     // All unique texture file paths will be added here
-    char *texture_file_paths[32]; // array of pointers
+    char *texture_file_paths[16]; // array of pointers
 
-    enum aiTextureType texture_type[32];
+    enum aiTextureType texture_type[16];
 };
 
 struct InstancingInfo
@@ -105,6 +105,7 @@ Mesh_t Mesh_Load_Instancing(const struct Shader shader, GLuint count, mat4 *matr
 void   Mesh_Instance_Load_Vectors(Mesh_t *mesh, GLuint index, vec3 trans, versor rot, vec3 scale);
 
 void Mesh_Draw(struct Mesh m);
+void Mesh_Draw_Shader(struct Mesh m, struct Shader shader, struct Camera cam);
 void Mesh_Free(struct Mesh mesh);
 
 #endif // __MODELLOADER_H__
