@@ -58,11 +58,13 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
         fprintf(stderr, "Something is wrong with the image format\n");
     }
 
-    if (image_format != format)
-    {
-        fprintf(stderr, "Image format might not be correct : %s\n", path);
-        fprintf(stderr, "stbi_load returns %s (%d bpp), while Texture_Create format is set to %s\n", image_format_text, image_bpp, _PIXEL_FORMAT_NAME(format));
-    }
+    fprintf(stderr, "Image format being used : %s\n", image_format_text);
+
+    // if (image_format != format)
+    //{
+    //     fprintf(stderr, "Image format might not be correct : %s\n", path);
+    //     fprintf(stderr, "stbi_load returns %s (%d bpp), while Texture_Create format is set to %s\n", image_format_text, image_bpp, _PIXEL_FORMAT_NAME(format));
+    // }
 
     // Generates an OpenGL texture object
     glGenTextures(1, &t.ID);
@@ -83,11 +85,14 @@ struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot
     glTexParameteri(texture_type, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // Assigns the image to the OpenGL Texture object
-    glTexImage2D(texture_type, 0, GL_RGBA, image_width, image_height, 0, image_format, pixel_type, image_bytes);
+    // >    internalFormat (2nd argument) defines the format that OpenGL should use to store the data internally.
+    // >    format (7th argument), together with the type(8th) argument, describes the data you pass in as the last argument.
+    //      So the format/type combination defines the memory layout of the data you pass in.
+    glTexImage2D(texture_type, 0, format, image_width, image_height, 0, image_format, pixel_type, image_bytes);
     // glTexImage2D(texture_type, 0, GL_RGBA, image_width, image_height, 0, format, pixel_type, image_bytes);
 
     // Generates MipMaps
-    // glGenerateMipmap(texture_type);
+    glGenerateMipmap(texture_type);
 
     // Deletes the image data as it is already in the OpenGL Texture object
     stbi_image_free(image_bytes);
@@ -105,6 +110,7 @@ void Texture_Bind(const struct Texture t)
     glBindTexture(t.type, t.ID);
 }
 
+// https://stackoverflow.com/questions/27345340/how-do-i-render-multiple-textures-in-modern-opengl
 void Texture_Bind_Slot(const struct Texture t, GLuint slot)
 {
     glActiveTexture(GL_TEXTURE0 + slot);
