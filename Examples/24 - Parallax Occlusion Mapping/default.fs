@@ -35,10 +35,10 @@ vec4 pointLight()
     vec3 viewDirection = normalize(camPos - crntPos);
 
     // Variables that control parallax occlusion mapping quality
-    float       heightScale       = 0.05f;
+    float       heightScale       = 0.1f; // controls the height of the displacement
     const float minLayers         = 8.0f;
-    const float maxLayers         = 64.0f;
-    float       numLayers         = mix(maxLayers, minLayers, abs(dot(vec3(0.0f, 0.0f, 1.0f), viewDirection)));
+    const float maxLayers         = 32.0f;
+    float       numLayers         = mix(maxLayers, minLayers, max(dot(vec3(0.0f, 0.0f, 1.0f), viewDirection), 0.0));
     float       layerDepth        = 1.0f / numLayers;
     float       currentLayerDepth = 0.0f;
 
@@ -47,22 +47,25 @@ vec4 pointLight()
     vec2 deltaUVs = S / numLayers;
 
     vec2  UVs                  = texCoord;
-    float currentDepthMapValue = 1.0f - texture(displacement0, UVs).r;
+    float currentDepthMapValue = texture(displacement0, UVs).r;
+    // float currentDepthMapValue = 1.0f - texture(displacement0, UVs).r;
 
     // Loop till the point on the heightmap is "hit"
     while (currentLayerDepth < currentDepthMapValue)
     {
         UVs -= deltaUVs;
-        currentDepthMapValue = 1.0f - texture(displacement0, UVs).r;
+        currentDepthMapValue = texture(displacement0, UVs).r;
+        // currentDepthMapValue = 1.0f - texture(displacement0, UVs).r;
         currentLayerDepth += layerDepth;
     }
 
     // Apply Occlusion (interpolation with prev value)
     vec2  prevTexCoords = UVs + deltaUVs;
     float afterDepth    = currentDepthMapValue - currentLayerDepth;
-    float beforeDepth   = 1.0f - texture(displacement0, prevTexCoords).r - currentLayerDepth + layerDepth;
-    float weight        = afterDepth / (afterDepth - beforeDepth);
-    UVs                 = prevTexCoords * weight + UVs * (1.0f - weight);
+    float beforeDepth   = texture(displacement0, prevTexCoords).r - currentLayerDepth + layerDepth;
+    // float beforeDepth   = 1.0f - texture(displacement0, prevTexCoords).r - currentLayerDepth + layerDepth;
+    float weight = afterDepth / (afterDepth - beforeDepth);
+    UVs          = prevTexCoords * weight + UVs * (1.0f - weight);
 
     // Get rid of anything outside the normal range
     if (UVs.x > 1.0 || UVs.y > 1.0 || UVs.x < 0.0 || UVs.y < 0.0)
@@ -84,7 +87,8 @@ vec4 pointLight()
         specular            = specAmount * specularLight;
     };
 
-    return (texture(diffuse0, UVs) * (diffuse * inten + ambient) + texture(specular0, UVs).r * specular * inten) * lightColor;
+    return (texture(diffuse0, UVs) * (diffuse * inten + ambient) + specular * inten) * lightColor;
+    // return (texture(diffuse0, UVs) * (diffuse * inten + ambient) + texture(specular0, UVs).r * specular * inten) * lightColor;
 }
 
 vec4 direcLight()

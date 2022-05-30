@@ -127,10 +127,14 @@ void ParallaxMapping_Init()
         VAO_Attr(VAO, VBO, 2, 3, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(6 * sizeof(GLfloat)));
         VAO_Attr(VAO, VBO, 3, 2, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(9 * sizeof(GLfloat)));
 
-        const char    *diffuse_file_path      = "../../Examples/res/textures/brick_wall/Tileable_Red_brick_texture_DIFFUSE.png";
-        const char    *specular_file_path     = "../../Examples/res/textures/brick_wall/Tileable_Red_brick_texture_SPECULAR.png";
-        const char    *normal_file_path       = "../../Examples/res/textures/brick_wall/Tileable_Red_brick_texture_NORMAL.png";
-        const char    *displacement_file_path = "../../Examples/res/textures/brick_wall/Tileable_Red_brick_texture_DISP.png";
+        // const char    *diffuse_file_path      = "../../Examples/res/textures/brick_wall/Tileable_Red_brick_texture_DIFFUSE.png";
+        // const char    *specular_file_path     = "../../Examples/res/textures/brick_wall/Tileable_Red_brick_texture_SPECULAR.png";
+        // const char    *normal_file_path       = "../../Examples/res/textures/brick_wall/Tileable_Red_brick_texture_NORMAL.png";
+        // const char    *displacement_file_path = "../../Examples/res/textures/brick_wall/Tileable_Red_brick_texture_DISP.png";
+        const char    *diffuse_file_path      = "../../Examples/res/textures/toy_box/toy_box_diffuse.png";
+        const char    *specular_file_path     = "../../Examples/res/textures/toy_box/toy_box_diffuse.png";
+        const char    *normal_file_path       = "../../Examples/res/textures/toy_box/toy_box_normal.png";
+        const char    *displacement_file_path = "../../Examples/res/textures/toy_box/toy_box_disp.png";
         struct Texture diff_tex               = Texture_Create(diffuse_file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
         struct Texture spec_tex               = Texture_Create(specular_file_path, GL_TEXTURE_2D, 1, GL_RED, GL_UNSIGNED_BYTE);
         struct Texture nrm_tex                = Texture_Create(normal_file_path, GL_TEXTURE_2D, 2, GL_RGB, GL_UNSIGNED_BYTE);
