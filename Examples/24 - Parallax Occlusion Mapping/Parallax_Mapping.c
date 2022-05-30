@@ -104,10 +104,10 @@ void ParallaxMapping_Init()
         const GLfloat plane_vertices[] =
             {
                 //     COORDINATES  / NORMALS /     COLORS      / TexCoord  //
-                -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-                1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-                1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+                1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+                1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
 
         const GLuint plane_indicies[] =
             {
@@ -137,7 +137,7 @@ void ParallaxMapping_Init()
         struct Texture disp_tex               = Texture_Create(displacement_file_path, GL_TEXTURE_2D, 3, GL_RED, GL_UNSIGNED_BYTE);
 
         vec3   translation = {0.0f, 0.0f, 0.0f};
-        versor rotation    = {0.707f, 0.0f, 0.0f, 0.707f};
+        versor rotation    = {0.0f, 0.0f, 0.0f, 0.0f};
         vec3   scale       = {1.0f, 1.0f, 1.0f};
 
         mat4 object_translation = {0};
@@ -173,7 +173,7 @@ void ParallaxMapping_Init()
         pm.plane_tex_SPECULAR = spec_tex;
         pm.plane_tex_NORMAL   = nrm_tex;
         pm.plane_tex_DISP     = disp_tex;
-        pm.plane_SHADER       = shader;
+        pm.plane_SHADER       = shader_program;
     } // SETUP PLANE
 
     { // LIGHT CUBE
@@ -237,9 +237,9 @@ void ParallaxMapping_Update()
 {
     Camera_Inputs(&pm.cam);
 
-    Shader_Bind(pm.shader_program);
-    Shader_Uniform_Vec3(pm.shader_program, "camPos", pm.cam.position);
-    Camera_View_Projection_To_Shader(pm.cam, pm.shader_program, "camMatrix");
+    Shader_Bind(pm.plane_SHADER);
+    Shader_Uniform_Vec3(pm.plane_SHADER, "camPos", pm.cam.position);
+    Camera_View_Projection_To_Shader(pm.cam, pm.plane_SHADER, "camMatrix");
 
     Texture_Bind(pm.plane_tex_DIFFUSE);
     Texture_Bind(pm.plane_tex_SPECULAR);
