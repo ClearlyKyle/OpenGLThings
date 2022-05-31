@@ -9,6 +9,7 @@
 #include "Textures.h"
 #include "ModelLoader.h"
 #include "Camera.h"
+#include "Mesh.h"
 #include "features/skybox.h"
 #include "features/shadowmap.h"
 
