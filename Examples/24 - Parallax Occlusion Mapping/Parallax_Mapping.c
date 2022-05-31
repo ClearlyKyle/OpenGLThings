@@ -145,17 +145,17 @@ void ParallaxMapping_Init()
         vec3   scale       = {1.0f, 1.0f, 1.0f};
 
         mat4 object_translation = {0};
-        mat4 object_roataion    = {0};
+        mat4 object_rotaion     = {0};
         mat4 object_scale       = {0};
         mat4 object_matrix      = GLM_MAT4_IDENTITY_INIT;
 
         glm_translate_make(object_translation, translation);
-        glm_quat_mat4(rotation, object_roataion);
+        glm_quat_mat4(rotation, object_rotaion);
         glm_scale_make(object_scale, scale);
 
         Shader_Bind(shader);
         Shader_Uniform_Mat4(shader, "translation", object_translation);
-        Shader_Uniform_Mat4(shader, "rotation", object_roataion);
+        Shader_Uniform_Mat4(shader, "rotation", object_rotaion);
         Shader_Uniform_Mat4(shader, "scale", object_scale);
         Shader_Uniform_Mat4(shader, "model", object_matrix);
         Shader_Uniform_Int(shader, "tex0", 0);
@@ -164,7 +164,7 @@ void ParallaxMapping_Init()
         Shader_Uniform_Vec4(shader_program, "lightColor", light_colour);
         Shader_Uniform_Vec3(shader_program, "lightPos", light_position);
         Shader_Uniform_Mat4(shader_program, "translation", object_translation);
-        Shader_Uniform_Mat4(shader_program, "rotation", object_roataion);
+        Shader_Uniform_Mat4(shader_program, "rotation", object_rotaion);
         Shader_Uniform_Mat4(shader_program, "scale", object_scale);
         Shader_Uniform_Mat4(shader_program, "model", object_matrix);
         Shader_Uniform_Int(shader_program, "diffuse0", 0);
