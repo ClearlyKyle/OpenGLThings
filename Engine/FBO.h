@@ -22,7 +22,7 @@ struct FBO
 
 typedef struct FBO FBO_t;
 
-FBO_t FBO_Create(Shader_t shader, GLenum target, const GLsizei width, const GLsizei height, GLsizei samples);
+FBO_t FBO_Create(Shader_t shader, GLenum target, GLenum internalformat, const GLsizei width, const GLsizei height, GLsizei samples);
 void  FBO_Add_RBO(FBO_t *fbo, GLenum internalformat, GLenum attachment);
 
 void Framebuffer_Update(const FBO_t msaa_fbo, const FBO_t post_processing_fbo);

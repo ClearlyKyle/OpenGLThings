@@ -83,13 +83,13 @@ void NormalMaps_Init()
     VAO_Attr(rect_VAO, rect_VBO, 1, 4 * sizeof(GLfloat), GL_FLOAT, 2, (const GLvoid *)(2 * sizeof(GLfloat)));
 
     // MSAA FBO
-    FBO_t msaa_fbo = FBO_Create(shader_framebuffer, GL_TEXTURE_2D_MULTISAMPLE, window.width, window.heigh, 4);
+    FBO_t msaa_fbo = FBO_Create(shader_framebuffer, GL_TEXTURE_2D_MULTISAMPLE, GL_RGB, window.width, window.heigh, 4);
     FBO_Add_RBO(&msaa_fbo, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT);
     msaa_fbo.VAO = rect_VAO.ID;
     nm.msaa_fbo  = msaa_fbo;
 
     // POST PROCESSING FBO
-    FBO_t post_processing_fbo = FBO_Create(shader_framebuffer, GL_TEXTURE_2D, window.width, window.heigh, 0);
+    FBO_t post_processing_fbo = FBO_Create(shader_framebuffer, GL_TEXTURE_2D, GL_RGB, window.width, window.heigh, 0);
     post_processing_fbo.VAO   = rect_VAO.ID;
     nm.post_processing_fbo    = post_processing_fbo;
 

@@ -72,12 +72,12 @@ void Gamma_Init()
     VAO_Attr(rectVAO, rectVBO, 0, 2, GL_FLOAT, 4 * sizeof(GLfloat), (const GLvoid *)(0));
     VAO_Attr(rectVAO, rectVBO, 1, 2, GL_FLOAT, 4 * sizeof(GLfloat), (const GLvoid *)(2 * sizeof(GLfloat)));
 
-    FBO_t msaa_fbo = FBO_Create(shader_framebuffer, GL_TEXTURE_2D_MULTISAMPLE, window.width, window.heigh, 4);
+    FBO_t msaa_fbo = FBO_Create(shader_framebuffer, GL_TEXTURE_2D_MULTISAMPLE, GL_RGB, window.width, window.heigh, 4);
     FBO_Add_RBO(&msaa_fbo, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT);
     msaa_fbo.VAO = rectVAO.ID;
     gam.msaa_fbo = msaa_fbo;
 
-    FBO_t post_processing_fbo = FBO_Create(shader_framebuffer, GL_TEXTURE_2D, window.width, window.heigh, 0);
+    FBO_t post_processing_fbo = FBO_Create(shader_framebuffer, GL_TEXTURE_2D, GL_RGB, window.width, window.heigh, 0);
     FBO_Add_RBO(&post_processing_fbo, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT);
     post_processing_fbo.VAO = rectVAO.ID;
     gam.post_processing_fbo = post_processing_fbo;

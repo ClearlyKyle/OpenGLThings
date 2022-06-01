@@ -51,7 +51,7 @@ static void _Check_Framebuffer_Status()
 
 // target  : GL_TEXTURE_2D, GL_TEXTURE_2D_ARRAY, GL_TEXTURE_2D_MULTISAMPLE ...
 // samples : used for MSAA with GL_TEXTURE_2D_MULTISAMPLE
-FBO_t FBO_Create(Shader_t shader, GLenum target, const GLsizei width, const GLsizei height, GLsizei samples)
+FBO_t FBO_Create(Shader_t shader, GLenum target, GLenum internalformat, const GLsizei width, const GLsizei height, GLsizei samples)
 {
     // Create Frame Buffer Object
     GLuint FBO;
@@ -75,13 +75,13 @@ FBO_t FBO_Create(Shader_t shader, GLenum target, const GLsizei width, const GLsi
             samples--;
 
         // GL_TEXTURE_2D_MULTISAMPLE for AA FB
-        glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, width, height, GL_TRUE);
+        glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, internalformat, width, height, GL_TRUE);
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, framebuffer_texture, 0);
     }
     else
     {
-        glTexImage2D(target, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(target, 0, internalformat, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
         glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
