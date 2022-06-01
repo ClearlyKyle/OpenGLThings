@@ -26,6 +26,7 @@
 #include "SM_With_SP_PL.h"       // Example 22 - Shadow Mapping with Spotlights and Point Lights
 #include "Normal_Maps.h"         // Example 23 - Normal Mapping
 #include "Parallax_Mapping.h"    // Example 24 - Parallax Occluision Mapping
+#include "HDR.h"                 // Example 25 - HDR
 #include "Mesh_Test.h"
 #include "Ortho.h"
 #include "challanges.h"
@@ -110,8 +111,11 @@ int main(int argc, char *argv[])
     // Example 24 - Parallax Occluision Mapping
     // Window_Init(1024, 1024, ParallaxMapping_Init, ParallaxMapping_Update, ParallaxMapping_OnExit);
 
-    Window_Init(1024, 1024, MeshTest_Init, MeshTest_Update, MeshTest_OnExit);
-    // Window_Init(800, 800, Ortho_Init, Ortho_Update, Ortho_OnExit);
+    // Example 25 - HDR
+    Window_Init(1024, 1024, HDR_Init, HDR_Update, HDR_OnExit);
+
+    // Window_Init(1024, 1024, MeshTest_Init, MeshTest_Update, MeshTest_OnExit);
+    //  Window_Init(800, 800, Ortho_Init, Ortho_Update, Ortho_OnExit);
 
     // Testing things
     // Window_Init(800, 800, challanges_Init, challanges_Update, challanges_OnExit);
