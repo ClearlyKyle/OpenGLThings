@@ -46,15 +46,19 @@ void Bloom_Init()
 
     const struct Shader shader_framebuffer = Shader_Create("../../Examples/26 - Bloom/framebuffer.vs",
                                                            "../../Examples/26 - Bloom/framebuffer.fs",
-                                                           1,
+                                                           2,
                                                            (struct VertexAttribute[]){
-                                                               {.index = 0, .name = "aPos"}});
+                                                               {.index = 0, .name = "aPos"},
+                                                               {.index = 1, .name = "inTexCoords"},
+                                                           });
 
     const struct Shader shader_blur = Shader_Create("../../Examples/26 - Bloom/framebuffer.vs",
                                                     "../../Examples/26 - Bloom/blur.fs",
-                                                    1,
+                                                    2,
                                                     (struct VertexAttribute[]){
-                                                        {.index = 0, .name = "aPos"}});
+                                                        {.index = 0, .name = "aPos"},
+                                                        {.index = 1, .name = "inTexCoords"},
+                                                    });
 
     const Camera_t cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f}, 45.0f, 0.1f, 1000.0f);
     b.cam              = cam;
@@ -146,8 +150,8 @@ void Bloom_Init()
     } // CREATE FBO for BLOOM and POST-PROCESSING
 
     // Create Ping Pong Framebuffers for repetitive blurring
-    b.ping_pong_FBO[0] = FBO_Create(shader_framebuffer, GL_TEXTURE_2D, GL_RGB, window.width, window.heigh, 0);
-    b.ping_pong_FBO[1] = FBO_Create(shader_framebuffer, GL_TEXTURE_2D, GL_RGB, window.width, window.heigh, 0);
+    b.ping_pong_FBO[0] = FBO_Create(shader_framebuffer, GL_TEXTURE_2D, GL_RGBA16F, window.width, window.heigh, 0);
+    b.ping_pong_FBO[1] = FBO_Create(shader_framebuffer, GL_TEXTURE_2D, GL_RGBA16F, window.width, window.heigh, 0);
 
     { // SETUP PLANE
         const GLfloat plane_vertices[] =
@@ -177,8 +181,8 @@ void Bloom_Init()
         VAO_Attr(VAO, VBO, 3, 2, GL_FLOAT, 11 * sizeof(GLfloat), (const GLvoid *)(9 * sizeof(GLfloat)));
 
         const char    *diffuse_file_path      = "../../Examples/res/textures/bloom/diffuse.png";
-        const char    *displacement_file_path = "../../Examples/res/textures/bloom/displacement.png";
         const char    *normal_file_path       = "../../Examples/res/textures/bloom/normal.png";
+        const char    *displacement_file_path = "../../Examples/res/textures/bloom/displacement.png";
         struct Texture diff_tex               = Texture_Create(diffuse_file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
         struct Texture nrm_tex                = Texture_Create(normal_file_path, GL_TEXTURE_2D, 1, GL_RGB, GL_UNSIGNED_BYTE);
         struct Texture disp_tex               = Texture_Create(displacement_file_path, GL_TEXTURE_2D, 2, GL_RED, GL_UNSIGNED_BYTE);
@@ -215,6 +219,8 @@ void Bloom_Init()
     } // SETUP PLANE
 }
 
+static bool first_iteration;
+
 void Bloom_Update()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, b.postProcessingFBO);
@@ -238,7 +244,8 @@ void Bloom_Update()
     } // DRAW PLANE
 
     // Bounce the image data around to blur multiple times
-    bool horizontal = true, first_iteration = true;
+    bool horizontal = true;
+    first_iteration = true;
 
     // Amount of time to bounce the blur
     const unsigned int amount = 2;
@@ -252,12 +259,14 @@ void Bloom_Update()
         // In the first bounc we want to get the data from the bloomTexture
         if (first_iteration)
         {
+            glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, b.bloomTexture);
             first_iteration = false;
         }
         // Move the data between the pingPong textures
         else
         {
+            glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, b.ping_pong_FBO[!horizontal].FBO_tex);
         }
 
@@ -281,7 +290,7 @@ void Bloom_Update()
 
     glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, b.postProcessingFBO);
+    glBindTexture(GL_TEXTURE_2D, b.postProcessingTexture);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, b.ping_pong_FBO[!horizontal].FBO_tex);
     glDrawArrays(GL_TRIANGLES, 0, 6);

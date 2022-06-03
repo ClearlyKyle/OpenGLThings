@@ -240,19 +240,20 @@ void HDR_Update()
     Camera_Inputs(&hdr.cam);
 
     // Draw Scene Start
+    {
+        Shader_Bind(hdr.plane_SHADER);
+        Shader_Uniform_Vec3(hdr.plane_SHADER, "camPos", hdr.cam.position);
+        Camera_View_Projection_To_Shader(hdr.cam, hdr.plane_SHADER, "camMatrix");
 
-    Shader_Bind(hdr.plane_SHADER);
-    Shader_Uniform_Vec3(hdr.plane_SHADER, "camPos", hdr.cam.position);
-    Camera_View_Projection_To_Shader(hdr.cam, hdr.plane_SHADER, "camMatrix");
+        Texture_Bind(hdr.plane_tex_DIFFUSE);
+        Texture_Bind(hdr.plane_tex_SPECULAR);
+        Texture_Bind(hdr.plane_tex_NORMAL);
+        Texture_Bind(hdr.plane_tex_DISP);
 
-    Texture_Bind(hdr.plane_tex_DIFFUSE);
-    Texture_Bind(hdr.plane_tex_SPECULAR);
-    Texture_Bind(hdr.plane_tex_NORMAL);
-    Texture_Bind(hdr.plane_tex_DISP);
+        VAO_Bind(hdr.plane_VAO);
 
-    VAO_Bind(hdr.plane_VAO);
-
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
 
     //  Draw a Cube to represent the Light source
     Shader_Bind(hdr.light_Shader);
