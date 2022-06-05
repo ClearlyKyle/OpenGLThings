@@ -29,6 +29,7 @@
 #include "HDR.h"                 // Example 25 - HDR
 #include "Bloom.h"               // Example 26 - Bloom
 #include "Procedural.h"          // Example 27 - Procedural Generation
+#include "Compute.h"             // Example 28 - Compute Shaders
 #include "Mesh_Test.h"
 #include "Ortho.h"
 #include "challanges.h"
@@ -120,7 +121,10 @@ int main(int argc, char *argv[])
     // Window_Init(1024, 1024, Bloom_Init, Bloom_Update, Bloom_OnExit);
 
     // Example 27 - Procedural Generation
-    Window_Init(1024, 1024, Procedural_Init, Procedural_Update, Procedural_OnExit);
+    // Window_Init(1024, 1024, Procedural_Init, Procedural_Update, Procedural_OnExit);
+
+    // Example 28 - Compute Shaders
+    Window_Init(1024, 1024, Compute_Init, Compute_Update, Compute_OnExit);
 
     // Window_Init(1024, 1024, MeshTest_Init, MeshTest_Update, MeshTest_OnExit);
     //  Window_Init(800, 800, Ortho_Init, Ortho_Update, Ortho_OnExit);
