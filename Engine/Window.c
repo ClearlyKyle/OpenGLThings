@@ -28,7 +28,7 @@ void Window_Init(int width, int height,
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1); // Set to 1 to require hardware acceleration, set to 0 to force software rendering
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4); // Request an OpenGL 4.5 context (should be core)
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5); //              MAJOR^ ^MINOR
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24); // Depth buffer size in bits
