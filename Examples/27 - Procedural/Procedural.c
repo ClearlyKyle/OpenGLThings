@@ -54,6 +54,34 @@ GLuint *Circle_Indicies(const GLuint num_of_triangles)
     return indicies;
 }
 
+int getVerticesCount(int width, int height)
+{
+    return width * height * 3;
+}
+
+int getIndicesCount(int width, int height)
+{
+    return (width * height) + (width - 1) * (height - 2);
+}
+
+GLfloat *get_plane_vertices(int width, int height)
+{
+    GLfloat *vertices = (GLfloat *)malloc(sizeof(GLfloat) * (width * height * 3));
+
+    int i = 0;
+    for (int row = 0; row < height; row++)
+    {
+        for (int col = 0; col < width; col++)
+        {
+            vertices[i++] = (GLfloat)col;
+            vertices[i++] = (GLfloat)row;
+            vertices[i++] = 0.0f;
+        }
+    }
+
+    return vertices;
+}
+
 GLfloat *Plane_Verticies(vec3 v0, vec3 v1, vec3 v2, vec3 v3, const GLuint divisions)
 {
     // v3 --- v2
@@ -142,15 +170,68 @@ void Procedural_Init()
     pc.circle_Shader = circle_Shader;
     pc.circle_VAO    = circle_VAO;
     pc.circle_Count  = num_of_triangles;
+    } // CIRCLE
+
+    { // PLANE
+        const Shader_t plane_Shader = Shader_Create("../../Examples/27 - Procedural/plane.vs",
+                                                    "../../Examples/27 - Procedural/plane.fs",
+                                                    1,
+                                                    (struct VertexAttribute[]){
+                                                        {.index = 0, .name = "aPos"},
+                                                    });
+
+        const GLuint num_of_divisons = 6;
+        const float  circle_radius   = 0.5f;
+
+        // v3 --- v2
+        // |      |
+        // |      |
+        // v0 --- v1
+        vec3 v0 = {-0.5f, -0.5f, 0.0f};
+        vec3 v1 = {0.5f, -0.5f, 0.0f};
+        vec3 v2 = {0.5f, 0.5f, 0.0f};
+        vec3 v3 = {-0.5f, 0.5f, 0.0f};
+
+        GLuint num_of_indicies = getIndicesCount(4, 4);
+
+        // GLfloat *verticies = get_plane_vertices(4, 4);
+        GLfloat *verticies = Plane_Verticies(v0, v1, v2, v3, 4);
+        // GLuint  *indicies  = Circle_Indicies(num_of_indicies);
+        GLuint *indicies = get_plane_Indices(4, 4, &num_of_indicies);
+
+        VAO_t plane_VAO = VAO_Create();
+
+        VBO_t plane_VBO = VBO_Create(GL_ARRAY_BUFFER);
+        VBO_Buffer(plane_VBO, sizeof(GLfloat) * num_of_indicies * 3, (const GLvoid *)verticies);
+
+        EBO_t plane_EBO = EBO_Create();
+        EBO_Buffer(plane_EBO, sizeof(GLuint) * num_of_indicies, (const GLvoid *)indicies);
+
+        VAO_Attr(plane_VAO, plane_VBO, 0, 3, GL_FLOAT, 3 * sizeof(GLfloat), (const GLvoid *)0);
+
+        // free(verticies);
+        // free(indicies);
+
+        pc.plane_Shader   = plane_Shader;
+        pc.plane_VAO      = plane_VAO;
+        pc.plane_Indicies = num_of_indicies;
+    } // PLANE
 }
 
 void Procedural_Update()
 {
-    Shader_Bind(pc.circle_Shader);
+    //{ // CIRCLE
+    //    Shader_Bind(pc.circle_Shader);
+    //    VAO_Bind(pc.circle_VAO);
+    //    glDrawArrays(GL_TRIANGLE_FAN, 0, pc.circle_Count);
+    //} // CIRCLE
 
-    VAO_Bind(pc.circle_VAO);
-
-    glDrawArrays(GL_TRIANGLE_FAN, 0, pc.circle_Count);
+    { // PLANE
+        Shader_Bind(pc.plane_Shader);
+        VAO_Bind(pc.plane_VAO);
+        // glDrawArrays(GL_TRIANGLE_STRIP, 0, pc.plane_Indicies);
+        glDrawElements(GL_POINTS, pc.plane_Indicies, GL_UNSIGNED_INT, 0);
+    } // PLANE
 }
 
 void Procedural_OnExit()
@@ -159,4 +240,6 @@ void Procedural_OnExit()
 
     Shader_Destroy(&pc.circle_Shader);
     VAO_Destroy(pc.circle_VAO);
+    Shader_Destroy(&pc.plane_Shader);
+    VAO_Destroy(pc.plane_VAO);
 }
