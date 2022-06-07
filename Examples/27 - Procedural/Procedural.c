@@ -102,7 +102,7 @@ GLuint *get_plane_Indices(GLuint width, GLuint height, GLuint *num_of_indicies_r
 
     // Now build the index data
     const int numStripsRequired = width - 1;
-    const int numDegensRequired = 2 * (numStripsRequired - 1);
+    const int numDegensRequired = (2 * (numStripsRequired + 2));
     const int verticesPerStrip  = 2 * height;
 
     *num_of_indicies_return = (verticesPerStrip * numStripsRequired) + numDegensRequired;
@@ -112,6 +112,14 @@ GLuint *get_plane_Indices(GLuint width, GLuint height, GLuint *num_of_indicies_r
     GLuint *indices = (GLuint *)malloc(sizeof(GLuint) * (*num_of_indicies_return));
 
     unsigned int offset = 0;
+
+    // indices[offset++] = width - 1;
+    // indices[offset++] = width - 1;
+    // indices[offset++] = 0;
+    indices[offset++] = width - 1;
+    indices[offset++] = 0;
+    indices[offset++] = 0;
+
     for (unsigned int y = 0; y < width - 1; y++)
     {
         if (y > 0)
@@ -134,52 +142,17 @@ GLuint *get_plane_Indices(GLuint width, GLuint height, GLuint *num_of_indicies_r
         }
     }
 
-    // unsigned int i = 0;
-    // for (unsigned int row = 0; row < height - 1; row++)
-    //{
-    //     if ((row & 1) == 0)
-    //     { // even rows
-    //         for (unsigned int col = 0; col < width; col++)
-    //         {
-    //             indices[i++] = col + row * width; // Puts in the | lines
-    //             indices[i++] = col + (row + 1) * width;
-    //         }
-    //     }
-    //     else
-    //     { // odd rows
-    //         for (unsigned int col = width - 1; col > 0; col--)
-    //         {
-    //             indices[i++] = col + (row + 1) * width;
-    //             indices[i++] = (col - 1) + row * width;
-    //         }
-    //     }
-    // }
+    indices[offset++] = (height * width) - 1;
+    indices[offset++] = (height * width) - 1;
+    indices[offset++] = (height * width) - width;
+    // indices[offset++] = (height * width) - 1;
+    // indices[offset++] = (height * width) - width;
+    // indices[offset++] = (height * width) - width;
 
     for (size_t i = 0; i < *num_of_indicies_return; i++)
     {
         printf("%d\n", indices[i]);
     }
-
-    // unsigned int index = 0;
-    // for (unsigned int j = 0; j < height - 1; j++)
-    //{
-    //     // Set idx to point at first vertex of row j
-    //     unsigned int idx = j * width;
-
-    //    for (unsigned int i = 0; i < width - 1; i++)
-    //    {
-    //        // Bottom triangle of the quad
-    //        indices[index++] = (idx);
-    //        indices[index++] = (idx + 1);
-    //        indices[index++] = (idx + width);
-    //        // Top triangle of the quad
-    //        indices[index++] = (idx + 1);
-    //        indices[index++] = (idx + width + 1);
-    //        indices[index++] = (idx + width);
-    //        // Move one vertex to the right
-    //        idx++;
-    //    }
-    //}
 
     return indices;
 }
@@ -364,7 +337,7 @@ void Procedural_Init()
                                                         {.index = 0, .name = "aPos"},
                                                     });
 
-        const GLuint num_of_divisons = 10;
+        const GLuint num_of_divisons = 16;
         const float  circle_radius   = 0.5f;
 
         // v3 --- v2
