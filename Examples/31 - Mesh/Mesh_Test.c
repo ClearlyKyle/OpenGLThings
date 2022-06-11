@@ -57,7 +57,7 @@ void MeshTest_Init()
                                   NUM_OF_ELEMETS(textures),
                                   textures);
     mt.mesh      = mesh;
-    mt.shader    = plane_shader; 
+    mt.shader    = plane_shader;
 }
 
 void MeshTest_Update()
