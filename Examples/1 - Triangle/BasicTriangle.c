@@ -25,8 +25,8 @@ void BasicTriangle_Init()
 
     // Generates Shader object using shaders defualt.vert and default.frag
     struct Shader triangle_shader = Shader_Create(
-        "../../Examples/shaders/1/basic_triangle.vs",
-        "../../Examples/shaders/1/basic_triangle.fs",
+        "../../Examples/1 - Triangle/basic_triangle.vs",
+        "../../Examples/1 - Triangle/basic_triangle.fs",
         1,
         (struct VertexAttribute[]){{.name = "aPos", .index = 0}});
 
