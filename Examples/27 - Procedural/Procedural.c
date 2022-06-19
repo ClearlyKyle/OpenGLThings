@@ -401,7 +401,7 @@ void Procedural_Update()
 
         VAO_Bind(pc.plane_VAO);
         // glDrawArrays(GL_LINE_STRIP, 0, pc.plane_Indicies);
-        glDrawElements(GL_LINE_STRIP, pc.plane_Indicies, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLE_STRIP, pc.plane_Indicies, GL_UNSIGNED_INT, 0);
 
     } // PLANE
 }
