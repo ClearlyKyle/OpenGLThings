@@ -172,6 +172,7 @@ void Compute_Update()
 {
     glUseProgram(cs.computeProgram);
     glDispatchCompute(cs.num_groups_x, cs.num_groups_y, cs.num_groups_z);
+    // make sure writing to image has finished before read
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
     glUseProgram(cs.screenShaderProgram);

@@ -785,6 +785,8 @@ static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, co
 
         VAO_Bind(m.models[nd->mMeshes[n]].vao);
 
+        // https://stackoverflow.com/questions/40202354/glsl-shader-to-support-coloring-and-texturing
+
         if (m.instancing.count > 1)
         {
             glDrawElementsInstanced(GL_TRIANGLES, m.models[nd->mMeshes[n]].num_indicies * 3, GL_UNSIGNED_INT, 0, m.instancing.count);
