@@ -546,7 +546,7 @@ void Shader_Uniform_Float(struct Shader shader, const char *name, float f)
     LOCATION_CHECK(location, name, glUniform1f(location, f));
 }
 
-void Shader_Uniform_Vec3(struct Shader shader, const char *name, vec3 v)
+void Shader_Uniform_Vec3(struct Shader shader, const char *name, const vec3 v)
 {
     const GLint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
     LOCATION_CHECK(location, name, glUniform3f(location, v[0], v[1], v[2]));

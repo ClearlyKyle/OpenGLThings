@@ -34,7 +34,7 @@ void Shader_Uniform_Int(struct Shader shader, const char *name, int f);
 void Shader_Uniform_Float(struct Shader shader, const char *name, float f);
 void Shader_Uniform_Mat4_Floats(struct Shader shader, const char *name, const float *matrix);
 void Shader_Uniform_Mat4(struct Shader shader, const char *name, const mat4 m);
-void Shader_Uniform_Vec3(struct Shader shader, const char *name, vec3 v);
+void Shader_Uniform_Vec3(struct Shader shader, const char *name, const vec3 v);
 void Shader_Uniform_Vec4(struct Shader shader, const char *name, const vec4 v);
 void Shader_Uniform_Texture2D(struct Shader shader, const char *name, const struct Texture texture);
 // void Texture_Uniform(struct Shader shader, const struct Texture texture, const char *uniform, GLuint unit);
