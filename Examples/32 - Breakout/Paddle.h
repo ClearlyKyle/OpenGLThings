@@ -6,13 +6,14 @@
 typedef struct Paddle
 {
     float   dx, dy;
+    float   width, height;
     vec3    pos;
     mat4    model;
     VAO_t   vao;
     GLsizei count;
 } Paddle_t;
 
-Paddle_t Paddle_Init(const float y);
+Paddle_t Paddle_Init(const float y, const float width, const float height);
 void     Paddle_Update(Paddle_t *const paddle);
 void     Paddle_Draw(const Shader_t shader, const Paddle_t *const paddle);
 void     Paddle_Destroy(Paddle_t *const paddle);
