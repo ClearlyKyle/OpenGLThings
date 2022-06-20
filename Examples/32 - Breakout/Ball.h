@@ -6,6 +6,7 @@
 typedef struct ball
 {
     float   dx, dy;
+    float   radius;
     vec3    pos;
     mat4    model;
     VAO_t   vao;

@@ -42,12 +42,14 @@ Ball_t Ball_Init(const float x, const float y, const float radius)
     ball.dx = 2.0f;
     ball.dy = 3.0f;
 
+    ball.radius = radius;
+
     return ball;
 }
 
 void Ball_Update(Ball_t *const ball)
 {
-    const double tm = window.frame_time * 10.0;
+    const double tm = window.frame_time * 100.0;
 
     ball->pos[0] += (ball->dx * (float)tm);
     ball->pos[1] += (ball->dy * (float)tm);
