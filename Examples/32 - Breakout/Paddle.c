@@ -23,7 +23,7 @@ Paddle_t Paddle_Init(const float y, const float width, const float height)
 
     glm_vec3_copy((vec3){(float)window.width / 2.0f, y, 0.0f}, paddle.pos);
 
-    paddle.count = 12;
+    paddle.count = 6;
     paddle.vao   = paddle_VAO;
     paddle.dx    = 2.0f;
     paddle.dy    = 0.0f;

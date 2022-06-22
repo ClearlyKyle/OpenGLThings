@@ -2,6 +2,8 @@
 
 #include "Ball.h"
 #include "Paddle.h"
+#include "Collisions.h"
+#include "Bricks.h"
 
 struct Breakout
 {
@@ -9,7 +11,7 @@ struct Breakout
 
     Ball_t   ball;
     Paddle_t paddle;
-
+    Bricks_t bricks;
 } bo;
 
 void Breakout_Init()
@@ -28,10 +30,12 @@ void Breakout_Init()
     Shader_Uniform_Mat4(shader, "orthograph", orthograph);
 
     Ball_t   ball   = Ball_Init(50.0f, 50.0f, 20.0f);
-    Paddle_t paddle = Paddle_Init(20.0f);
+    Paddle_t paddle = Paddle_Init(20.0f, 50.0f, 7.0f);
+    Bricks_t bricks = Bricks_Init();
 
     bo.ball   = ball;
     bo.paddle = paddle;
+    bo.bricks = bricks;
     bo.shader = shader;
 }
 
@@ -47,6 +51,15 @@ void Breakout_Update()
 
     Paddle_Update(&bo.paddle);
     Paddle_Draw(bo.shader, &bo.paddle);
+
+    Bricks_Draw(bo.shader, &bo.bricks);
+
+    if (Ball_Paddle_Collision(bo.ball, bo.paddle))
+    {
+        bo.ball.dy *= -1.05f;
+    }
+
+    Ball_Brick_Collision(bo.ball, &bo.bricks);
 }
 
 void Breakout_OnExit()
@@ -55,4 +68,5 @@ void Breakout_OnExit()
 
     Ball_Destroy(&bo.ball);
     Paddle_Destroy(&bo.paddle);
+    Bricks_Destroy(&bo.bricks);
 }
