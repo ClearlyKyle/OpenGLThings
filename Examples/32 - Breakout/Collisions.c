@@ -5,46 +5,58 @@
 
 static float clamp(float value, float min, float max)
 {
-    return fmax(min, fmin(max, value));
+    return (float)fmax(min, fmin(max, value));
+}
+
+static bool Circle_Rect_Collision(
+    float circle_x, float circle_y, float radius,
+    float rect_x, float rect_y, float width, float height)
+{
+    vec2 circle_position = {circle_x, circle_y};
+
+    // calculate AABB info (center, half-extents)
+    vec2 aabb_half_extents = {width / 2.0f, height / 2.0f};
+    vec2 aabb_center       = {
+        rect_x + aabb_half_extents[0],
+        rect_y + aabb_half_extents[1]};
+
+    // get difference vector between both centers
+    vec2 difference;
+
+    glm_vec2_sub(circle_position, aabb_center, difference);
+
+    vec2 clamped;
+    clamped[0] = clamp(difference[0], -aabb_half_extents[0], aabb_half_extents[0]);
+    clamped[1] = clamp(difference[1], -aabb_half_extents[1], aabb_half_extents[1]);
+
+    // add clamped value to AABB_center and we get the value of box closest to circle
+    vec2 closest;
+    glm_vec2_add(aabb_center, clamped, closest);
+
+    // retrieve vector between center circle and closest point AABB and check if length <= radius
+    glm_vec2_sub(closest, circle_position, difference);
+
+    return glm_vec2_norm(difference) < radius;
 }
 
 bool Ball_Paddle_Collision(const Ball_t ball, const Paddle_t paddle)
 {
-    // vec2 center;
+    return Circle_Rect_Collision(
+        ball.pos[0], ball.pos[1], ball.radius,
+        paddle.pos[0], paddle.pos[1], paddle.width, paddle.height);
+}
 
-    //// get center point circle first
-    // glm_vec2_add(ball.pos, paddle.pos, center);
+bool Ball_Brick_Collision(const Ball_t ball, Bricks_t *bricks)
+{
+    for (int i = 0; i < 36; i++)
+    {
+        if (Circle_Rect_Collision(
+                ball.pos[0], ball.pos[1], ball.radius,
+                bricks->pos[i][0], bricks->pos[i][1], bricks->width, bricks->height))
+        {
+            bricks->isHit[i] = true;
+        }
+    }
 
-    //// calculate AABB info (center, half-extents)
-    // vec2 aabb_half_extents = {paddle.width / 2.0f, paddle.height / 2.0f};
-    // vec2 aabb_center       = {
-    //     ball.pos[0] + aabb_half_extents[0],
-    //     ball.pos[1] + aabb_half_extents[1]};
-
-    // get difference vector between both centers
-    // vec2 difference;
-
-    // glm_vec2_sub(center, aabb_center, difference);
-    // glm_vec2_clamp(difference, )
-    // glm::vec2 difference = center - aabb_center;
-    // glm::vec2 clamped    = glm::clamp(difference, -aabb_half_extents, aabb_half_extents);
-
-    //// add clamped value to AABB_center and we get the value of box closest to circle
-    // glm::vec2 closest = aabb_center + clamped;
-
-    //// retrieve vector between center circle and closest point AABB and check if length <= radius
-    // difference = closest - center;
-    // return glm::length(difference) < one.Radius;
-
-    // Find the closest point to the circle within the rectangle
-    const float closestX = clamp(ball.pos[0], paddle.pos[0], paddle.pos[0] + paddle.width);
-    const float closestY = clamp(ball.pos[1], paddle.pos[1] + paddle.height, paddle.pos[1]);
-
-    // Calculate the distance between the circle's center and this closest point
-    const float distanceX = ball.pos[0] - closestX;
-    const float distanceY = ball.pos[1] - closestY;
-
-    // If the distance is less than the circle's radius, an intersection occurs
-    float distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
-    return distanceSquared < (ball.radius * ball.radius);
+    return true;
 }
