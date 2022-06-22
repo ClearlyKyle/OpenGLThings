@@ -517,6 +517,9 @@ void Shader_Destroy(struct Shader *shader)
 
 void Shader_Bind(const struct Shader shader)
 {
+    if (shader.shader_id == 0)
+        fprintf(stderr, "You are using a shader with id of 0\n");
+        
     glUseProgram(shader.shader_id);
 }
 
