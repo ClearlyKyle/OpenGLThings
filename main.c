@@ -1,40 +1,41 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "BasicTriangle.h"       // Example 1 - Basic Triangle
-#include "ShaderColour.h"        // Example 2 - Basic Shader Colour
-#include "TextureExample.h"      // Example 3 - Texture Drawing
-#include "Basic3D.h"             // Example 4 - Basic 3D
-#include "CameraExample.h"       // Example 5 - 3D Camera (FPS Style)
-#include "LightingExample.h"     // Example 6 - Basic Lighting
-#include "SpecularMaps.h"        // Example 7 - Specular Maps with Various Lighting Types
-#include "ModelLoadingExample.h" // Example 8 - Loading A Model from OBJ File
-#include "DepthBuffer.h"         // Example 9 - Visualise Depth Buffer
-#include "StencilBuffer.h"       // Example 10 - Stencil Buffer
-#include "FaceCulling.h"         // Example 11 - Face Culling
-#include "Transparancy.h"        // Example 12 - Transparancy
-#include "FrameProcess.h"        // Example 13 - Framebuffer and Post Process
-#include "CubeBoxes.h"           // Example 14 - Cubemaps & Skyboxes
-#include "Geometry.h"            // Example 15 - Geometry Shader
-#include "Instancing.h"          // Example 16 - Instancing
-#include "AntiAliasing.h"        // Example 17 - Anti-Aliasing (MSAA)
-#include "BlinnPhong.h"          // Example 18 - Blin-Phong Lighting
-#include "Gamma.h"               // Example 19 - Gamma Correction
-#include "UBOExample.h"          // Example 20 - Drawing Triangles with use of UBO
-#include "SM_With_Cubes.h"       // Example 21 - Shadow Mapping with Directional Lighting Using Cubes
-#include "SM_With_Model.h"       // Example 21 - Shadow Mapping with Directional Lighting Using a Model
-#include "SM_With_SP_PL.h"       // Example 22 - Shadow Mapping with Spotlights and Point Lights
-#include "Normal_Maps.h"         // Example 23 - Normal Mapping
-#include "Parallax_Mapping.h"    // Example 24 - Parallax Occluision Mapping
-#include "HDR.h"                 // Example 25 - HDR
-#include "Bloom.h"               // Example 26 - Bloom
-#include "Procedural.h"          // Example 27 - Procedural Generation
-#include "Compute.h"             // Example 28 - Compute Shaders
-#include "Breakout.h"            // Example 32 - Breakout
-#include "Mesh_Test.h"
-#include "Ortho.h"
-#include "challanges.h"
-#include "challanges.h"
+//#include "BasicTriangle.h"       // Example 1 - Basic Triangle
+//#include "ShaderColour.h"        // Example 2 - Basic Shader Colour
+//#include "TextureExample.h"      // Example 3 - Texture Drawing
+//#include "Basic3D.h"             // Example 4 - Basic 3D
+//#include "CameraExample.h"       // Example 5 - 3D Camera (FPS Style)
+//#include "LightingExample.h"     // Example 6 - Basic Lighting
+//#include "SpecularMaps.h"        // Example 7 - Specular Maps with Various Lighting Types
+//#include "ModelLoadingExample.h" // Example 8 - Loading A Model from OBJ File
+//#include "DepthBuffer.h"         // Example 9 - Visualise Depth Buffer
+//#include "StencilBuffer.h"       // Example 10 - Stencil Buffer
+//#include "FaceCulling.h"         // Example 11 - Face Culling
+//#include "Transparancy.h"        // Example 12 - Transparancy
+//#include "FrameProcess.h"        // Example 13 - Framebuffer and Post Process
+//#include "CubeBoxes.h"           // Example 14 - Cubemaps & Skyboxes
+//#include "Geometry.h"            // Example 15 - Geometry Shader
+//#include "Instancing.h"          // Example 16 - Instancing
+//#include "AntiAliasing.h"        // Example 17 - Anti-Aliasing (MSAA)
+//#include "BlinnPhong.h"          // Example 18 - Blin-Phong Lighting
+//#include "Gamma.h"               // Example 19 - Gamma Correction
+//#include "UBOExample.h"          // Example 20 - Drawing Triangles with use of UBO
+//#include "SM_With_Cubes.h"       // Example 21 - Shadow Mapping with Directional Lighting Using Cubes
+//#include "SM_With_Model.h"       // Example 21 - Shadow Mapping with Directional Lighting Using a Model
+//#include "SM_With_SP_PL.h"       // Example 22 - Shadow Mapping with Spotlights and Point Lights
+//#include "Normal_Maps.h"         // Example 23 - Normal Mapping
+//#include "Parallax_Mapping.h"    // Example 24 - Parallax Occluision Mapping
+//#include "HDR.h"                 // Example 25 - HDR
+//#include "Bloom.h"               // Example 26 - Bloom
+//#include "Procedural.h"          // Example 27 - Procedural Generation
+//#include "Compute.h"             // Example 28 - Compute Shaders
+#include "Deferred.h" // Example 28 - Deferred Shading
+//#include "Breakout.h"            // Example 32 - Breakout
+//#include "Mesh_Test.h"
+//#include "Ortho.h"
+//#include "challanges.h"
+//#include "challanges.h"
 
 int main(int argc, char *argv[])
 {
@@ -127,8 +128,11 @@ int main(int argc, char *argv[])
     // Example 28 - Compute Shaders
     // Window_Init(1024, 1024, Compute_Init, Compute_Update, Compute_OnExit);
 
+    // Example 29 - Compute Shaders
+    Window_Init(800, 800, Deferred_Init, Deferred_Update, Deferred_OnExit);
+
     // Example 32 - Breakout
-    Window_Init(1024, 1024, Breakout_Init, Breakout_Update, Breakout_OnExit);
+    // Window_Init(1024, 1024, Breakout_Init, Breakout_Update, Breakout_OnExit);
 
     // Window_Init(1024, 1024, MeshTest_Init, MeshTest_Update, MeshTest_OnExit);
     //  Window_Init(800, 800, Ortho_Init, Ortho_Update, Ortho_OnExit);
