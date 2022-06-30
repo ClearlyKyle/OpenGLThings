@@ -2,8 +2,8 @@
 ## and to add the directories to the "include"
 
 file (GLOB EXAMPLE_SOURCES 
-        ${CMAKE_CURRENT_LIST_DIR}/**/*.c
-        ${CMAKE_CURRENT_LIST_DIR}/**/*.h
+        ${CMAKE_CURRENT_LIST_DIR}/**/**/*.c
+        ${CMAKE_CURRENT_LIST_DIR}/**/**/*.h
     )
 
 #foreach (exmaple_source ${EXAMPLE_SOURCES})
