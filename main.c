@@ -30,7 +30,8 @@
 //#include "Bloom.h"               // Example 26 - Bloom
 //#include "Procedural.h"          // Example 27 - Procedural Generation
 //#include "Compute.h"             // Example 28 - Compute Shaders
-#include "Deferred.h" // Example 28 - Deferred Shading
+//#include "Ex1/Deferred.h"  // Example 29 - Deferred Shading
+#include "Ex2/Deferred2.h" // Example 29 - Deferred Shading Another example
 //#include "Breakout.h"            // Example 32 - Breakout
 //#include "Mesh_Test.h"
 //#include "Ortho.h"
@@ -128,8 +129,9 @@ int main(int argc, char *argv[])
     // Example 28 - Compute Shaders
     // Window_Init(1024, 1024, Compute_Init, Compute_Update, Compute_OnExit);
 
-    // Example 29 - Compute Shaders
-    Window_Init(800, 800, Deferred_Init, Deferred_Update, Deferred_OnExit);
+    // Example 29 - Deferred Shading
+    // Window_Init(800, 800, Deferred_Init, Deferred_Update, Deferred_OnExit);
+    Window_Init(800, 800, Deferred2_Init, Deferred2_Update, Deferred2_OnExit);
 
     // Example 32 - Breakout
     // Window_Init(1024, 1024, Breakout_Init, Breakout_Update, Breakout_OnExit);
