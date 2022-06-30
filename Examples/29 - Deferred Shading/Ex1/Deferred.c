@@ -115,8 +115,8 @@ void Deferred_Init()
     def.cam            = cam;
 
     // Shaders
-    Shader_t shader_geometry_pass = Shader_Create("../../Examples/29 - Deferred Shading/g_buffer.vs",
-                                                  "../../Examples/29 - Deferred Shading/g_buffer.fs",
+    Shader_t shader_geometry_pass = Shader_Create("../../Examples/29 - Deferred Shading/Ex1/g_buffer.vs",
+                                                  "../../Examples/29 - Deferred Shading/Ex1/g_buffer.fs",
                                                   3,
                                                   (struct VertexAttribute[]){
                                                       {.index = 0, .name = "aPos"},
@@ -124,16 +124,16 @@ void Deferred_Init()
                                                       {.index = 2, .name = "aTexCoords"},
                                                   });
 
-    Shader_t shader_lighting_pass = Shader_Create("../../Examples/29 - Deferred Shading/deferred_shading.vs",
-                                                  "../../Examples/29 - Deferred Shading/deferred_shading.fs",
+    Shader_t shader_lighting_pass = Shader_Create("../../Examples/29 - Deferred Shading/Ex1/deferred_shading.vs",
+                                                  "../../Examples/29 - Deferred Shading/Ex1/deferred_shading.fs",
                                                   2,
                                                   (struct VertexAttribute[]){
                                                       {.index = 0, .name = "aPos"},
                                                       {.index = 1, .name = "aTexCoords"},
                                                   });
 
-    Shader_t shader_light_box = Shader_Create("../../Examples/29 - Deferred Shading/deferred_light_box.vs",
-                                              "../../Examples/29 - Deferred Shading/deferred_light_box.fs",
+    Shader_t shader_light_box = Shader_Create("../../Examples/29 - Deferred Shading/Ex1/deferred_light_box.vs",
+                                              "../../Examples/29 - Deferred Shading/Ex1/deferred_light_box.fs",
                                               3,
                                               (struct VertexAttribute[]){
                                                   {.index = 0, .name = "aPos"},
