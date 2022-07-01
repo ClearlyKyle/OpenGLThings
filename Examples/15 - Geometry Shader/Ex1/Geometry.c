@@ -13,9 +13,9 @@ void Geometry_Init()
 {
     // Generates Shader object using shaders default.vert and default.frag
     // Shader        shaderProgram("default.vert", "default.frag", "default.geom");
-    struct Shader shader_default = Shader_Create2("../../Examples/15 - Geometry Shader/default.vs",
-                                                  "../../Examples/15 - Geometry Shader/default.fs",
-                                                  "../../Examples/15 - Geometry Shader/default.gs",
+    struct Shader shader_default = Shader_Create2("../../Examples/15 - Geometry Shader/Ex1/default.vs",
+                                                  "../../Examples/15 - Geometry Shader/Ex1/default.fs",
+                                                  "../../Examples/15 - Geometry Shader/Ex1/default.gs",
                                                   4,
                                                   (struct VertexAttribute[]){
                                                       {.index = 0, .name = "aPos"},
@@ -24,9 +24,9 @@ void Geometry_Init()
                                                       {.index = 3, .name = "aTex"}});
 
     // Shader        normalsShader("default.vert", "normals.frag", "normals.geom");
-    struct Shader normals_shader = Shader_Create2("../../Examples/15 - Geometry Shader/default.vs",
-                                                  "../../Examples/15 - Geometry Shader/normals.fs",
-                                                  "../../Examples/15 - Geometry Shader/normals.gs",
+    struct Shader normals_shader = Shader_Create2("../../Examples/15 - Geometry Shader/Ex1/default.vs",
+                                                  "../../Examples/15 - Geometry Shader/Ex1/normals.fs",
+                                                  "../../Examples/15 - Geometry Shader/Ex1/normals.gs",
                                                   4,
                                                   (struct VertexAttribute[]){
                                                       {.index = 0, .name = "aPos"},
