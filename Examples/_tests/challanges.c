@@ -1,7 +1,13 @@
 
 #include "challanges.h"
 
-static struct challanges challange;
+struct challanges
+{
+    struct VAO    vao;
+    struct Shader shader;
+
+    GLsizei size;
+} challange;
 
 void challanges_Init()
 {

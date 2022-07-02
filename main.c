@@ -15,7 +15,8 @@
 //#include "Transparancy.h"        // Example 12 - Transparancy
 //#include "FrameProcess.h"        // Example 13 - Framebuffer and Post Process
 //#include "CubeBoxes.h"           // Example 14 - Cubemaps & Skyboxes
-//#include "Geometry.h"            // Example 15 - Geometry Shader
+//#include "Ex1/Geometry.h"            // Example 15 - Geometry Shader
+//#include "EX2/Geometry2.h" // Example 15 - Geometry Shader 2D Example
 //#include "Instancing.h"          // Example 16 - Instancing
 //#include "AntiAliasing.h"        // Example 17 - Anti-Aliasing (MSAA)
 //#include "BlinnPhong.h"          // Example 18 - Blin-Phong Lighting
@@ -31,12 +32,13 @@
 //#include "Procedural.h"          // Example 27 - Procedural Generation
 //#include "Compute.h"             // Example 28 - Compute Shaders
 //#include "Ex1/Deferred.h"  // Example 29 - Deferred Shading
-#include "Ex2/Deferred2.h" // Example 29 - Deferred Shading Another example
+//#include "Ex2/Deferred2.h" // Example 29 - Deferred Shading Another example
+//#include "Ex3/Deferred3.h" // Example 29 - Deferred Shading Another example
 //#include "Breakout.h"            // Example 32 - Breakout
 //#include "Mesh_Test.h"
 //#include "Ortho.h"
 //#include "challanges.h"
-//#include "challanges.h"
+#include "Sphere_Rendering.h" // Generating a Sphere
 
 int main(int argc, char *argv[])
 {
@@ -87,6 +89,9 @@ int main(int argc, char *argv[])
     // Example 15 - Geometry Shader
     // Window_Init(800, 800, Geometry_Init, Geometry_Update, Geometry_OnExit);
 
+    // Example 15 - Geometry Shader 2D Example
+    // Window_Init(800, 800, Geometry2_Init, Geometry2_Update, Geometry2_OnExit);
+
     // Example 16 - Instancing
     // Window_Init(800, 800, Instancing_Init, Instancing_Update, Instancing_OnExit);
 
@@ -131,7 +136,8 @@ int main(int argc, char *argv[])
 
     // Example 29 - Deferred Shading
     // Window_Init(800, 800, Deferred_Init, Deferred_Update, Deferred_OnExit);
-    Window_Init(800, 800, Deferred2_Init, Deferred2_Update, Deferred2_OnExit);
+    // Window_Init(800, 800, Deferred2_Init, Deferred2_Update, Deferred2_OnExit);
+    // Window_Init(800, 800, Deferred3_Init, Deferred3_Update, Deferred3_OnExit);
 
     // Example 32 - Breakout
     // Window_Init(1024, 1024, Breakout_Init, Breakout_Update, Breakout_OnExit);
@@ -141,6 +147,7 @@ int main(int argc, char *argv[])
 
     // Testing things
     // Window_Init(800, 800, challanges_Init, challanges_Update, challanges_OnExit);
+    Window_Init(800, 800, Sphere_Init, Sphere_Update, Sphere_OnExit);
 
     Window_Loop();
 

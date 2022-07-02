@@ -3,14 +3,6 @@
 
 #include "Engine.h"
 
-struct challanges
-{
-    struct VAO vao;
-    struct Shader shader;
-
-    GLsizei size;
-};
-
 void challanges_Init();
 void challanges_Update();
 void challanges_OnExit();
