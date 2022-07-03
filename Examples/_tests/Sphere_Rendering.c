@@ -4,10 +4,11 @@
 
 struct Sphere
 {
-    Camera_t   cam;
-    Shader_t   shader;
-    struct VAO sphere;
+    Camera_t cam;
+    Shader_t shader;
 
+    struct VAO   sphere;
+    unsigned int index_count;
 } sph;
 
 // return face normal of a triangle v1-v2-v3
@@ -51,7 +52,10 @@ static void computeFaceNormal(vec3 normal, float x1, float y1, float z1, // v1
     // normal[2] = 0.0f;
 }
 
-static VAO_t Sphere_Generate(const float radius, const int sectors, const int stacks)
+static VAO_t Sphere_Generate_Method_1(const float        radius,
+                                      const unsigned int sectors,
+                                      const unsigned int stacks,
+                                      unsigned int      *index_count)
 {
     // tmp vertex definition (x,y,z,s,t)
     struct Vertex
@@ -71,7 +75,7 @@ static VAO_t Sphere_Generate(const float radius, const int sectors, const int st
 
     // compute all vertices first, each vertex contains (x,y,z,s,t) except normal
     unsigned int index = 0;
-    for (int i = 0; i <= stacks; i++)
+    for (unsigned int i = 0; i <= stacks; i++)
     {
         stackAngle     = (float)(M_PI / 2.0) - i * stackStep; // starting from pi/2 to -pi/2
         const float xy = radius * cosf(stackAngle);           // r * cos(u)
@@ -79,7 +83,7 @@ static VAO_t Sphere_Generate(const float radius, const int sectors, const int st
 
         // add (sectorCount+1) vertices per stack
         // the first and last vertices have same position and normal, but different tex coords
-        for (int j = 0; j <= sectors; j++)
+        for (unsigned int j = 0; j <= sectors; j++)
         {
             sectorAngle = j * sectorStep; // starting from 0 to 2pi
 
@@ -96,11 +100,11 @@ static VAO_t Sphere_Generate(const float radius, const int sectors, const int st
     }
 
     // Vertex data
-    const unsigned int size      = stacks * (sectors - 1) * 2 * 3 * 2;
+    const unsigned int size      = (stacks + 3) * (sectors + 4) * 3 * 3;
     GLfloat           *verticies = (GLfloat *)malloc(sizeof(GLfloat) * size);                               // POS
     GLfloat           *normals   = (GLfloat *)malloc(sizeof(GLfloat) * size);                               // NOR
     GLfloat           *texCoords = (GLfloat *)malloc(sizeof(GLfloat) * stacks * (sectors - 1) * 2 * 2 * 2); // TEX
-    // GLuint  *indicies  = (GLuint *)malloc(sizeof(GLuint) * 3 * stacks * sectors);   // INDICIES
+    unsigned int      *indicies  = (unsigned int *)malloc(sizeof(unsigned int) * size);                     // IND
 
     struct Vertex v1, v2, v3, v4; // 4 vertex positions and tex coords
     vec3          n;              // 1 face normal
@@ -110,6 +114,8 @@ static VAO_t Sphere_Generate(const float radius, const int sectors, const int st
     unsigned int vert_index = 0;
     unsigned int norm_index = 0;
     unsigned int tex_index  = 0;
+    unsigned int indi_index = 0;
+    index                   = 0;
 
     for (unsigned int i = 0; i < stacks; ++i)
     {
@@ -162,6 +168,13 @@ static VAO_t Sphere_Generate(const float radius, const int sectors, const int st
                     normals[norm_index++] = n[1];
                     normals[norm_index++] = n[2];
                 }
+
+                // put indices of 1 triangle
+                indicies[indi_index++] = index + 0;
+                indicies[indi_index++] = index + 1;
+                indicies[indi_index++] = index + 2;
+
+                index += 3; // for next
             }
             else if (i == (stacks - 1)) // a triangle for last stack =========
             {
@@ -196,6 +209,13 @@ static VAO_t Sphere_Generate(const float radius, const int sectors, const int st
                     normals[norm_index++] = n[1];
                     normals[norm_index++] = n[2];
                 }
+
+                // put indices of 1 triangle
+                indicies[indi_index++] = index + 0;
+                indicies[indi_index++] = index + 1;
+                indicies[indi_index++] = index + 2;
+
+                index += 3; // for next
             }
             else // 2 triangles for others ====================================
             {
@@ -237,11 +257,27 @@ static VAO_t Sphere_Generate(const float radius, const int sectors, const int st
                     normals[norm_index++] = n[1];
                     normals[norm_index++] = n[2];
                 }
+
+                // put indices of quad (2 triangles)
+                indicies[indi_index++] = index + 0;
+                indicies[indi_index++] = index + 1;
+                indicies[indi_index++] = index + 2;
+
+                indicies[indi_index++] = index + 2;
+                indicies[indi_index++] = index + 1;
+                indicies[indi_index++] = index + 3;
+
+                index += 4; // for next
             }
         }
     }
 
+    *index_count = indi_index;
+
     VAO_t sphere = VAO_Create();
+
+    EBO_t indi = EBO_Create();
+    EBO_Buffer(indi, sizeof(GLfloat) * size, (const GLvoid *)indicies);
 
     VBO_t verts = VBO_Create(GL_ARRAY_BUFFER);
     VBO_Buffer(verts, sizeof(GLfloat) * size, (const GLvoid *)verticies);
@@ -257,24 +293,10 @@ static VAO_t Sphere_Generate(const float radius, const int sectors, const int st
     free(verticies);
     free(normals);
     free(texCoords);
-    // free(indicies);
+    free(indicies);
     free(tmpVertices);
 
     return sphere;
-}
-
-static void Sphere_Draw(const VAO_t sphere_vao)
-{
-    VAO_Bind(sphere_vao);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 7571);
-
-    // glDrawArrays(GL_LINE_STRIP, 0, 1056);
-    // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4225);
-    // glDrawElements(GL_TRIANGLE_STRIP, 8320, GL_UNSIGNED_INT, 0);
-
-    // Method 3
-    // glDrawElements(GL_LINE_STRIP, 8320, GL_UNSIGNED_INT, 0);
 }
 
 static VAO_t createSphereArraysAndVBOs()
@@ -445,6 +467,23 @@ static VAO_t renderSphere()
     return sphere;
 }
 
+static void Sphere_Draw(const VAO_t sphere_vao, const unsigned int index_count)
+{
+    VAO_Bind(sphere_vao);
+
+    // Method 1
+    // glDrawArrays(GL_TRIANGLES, 0, 2520);
+    // glDrawElements(GL_TRIANGLES, index_count, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINE_STRIP, index_count, GL_UNSIGNED_INT, 0);
+
+    // glDrawArrays(GL_LINE_STRIP, 0, 1056);
+    // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4225);
+    // glDrawElements(GL_TRIANGLE_STRIP, 8320, GL_UNSIGNED_INT, 0);
+
+    // Method 3
+    // glDrawElements(GL_LINE_STRIP, 8320, GL_UNSIGNED_INT, 0);
+}
+
 void Sphere_Init()
 {
     // Camera, dont forget this!!
@@ -468,10 +507,13 @@ void Sphere_Init()
 
     glEnable(GL_CULL_FACE);
 
-    VAO_t sphere = Sphere_Generate(1.0f, 36, 18);
+    unsigned int index_count = 0;
+    VAO_t        sphere      = Sphere_Generate_Method_1(1.0f, 36, 18, &index_count);
     // VAO_t sphere = createSphereArraysAndVBOs();
     // VAO_t sphere = renderSphere();
     sph.sphere = sphere;
+
+    sph.index_count = index_count;
 }
 
 void Sphere_Update()
@@ -483,9 +525,9 @@ void Sphere_Update()
 
     mat4 model = GLM_MAT4_IDENTITY_INIT;
     Uniform_Mat4("model", model);
-    Uniform_Vec3("camPos", sph.cam.position);
+    // Uniform_Vec3("camPos", sph.cam.position);
 
-    Sphere_Draw(sph.sphere);
+    Sphere_Draw(sph.sphere, sph.index_count);
 }
 
 void Sphere_OnExit()
