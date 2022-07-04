@@ -18,10 +18,10 @@ set(EXE_NAME "MAIN")
 include(Examples/CMakeLists.txt)
 
 include_directories(
-        ${PROJECT_SOURCE_DIR}/Engine
-        ${PROJECT_SOURCE_DIR}/Engine/libs
-        ${PROJECT_SOURCE_DIR}/Examples
-        ${EXAMPLE_DIRECTORIES}
+    ${PROJECT_SOURCE_DIR}/Engine
+    ${PROJECT_SOURCE_DIR}/Engine/libs
+    ${PROJECT_SOURCE_DIR}/Examples
+    ${EXAMPLE_DIRECTORIES}
 )
 
 file(GLOB_RECURSE ENGINE_SRC
@@ -29,8 +29,7 @@ file(GLOB_RECURSE ENGINE_SRC
     "${PROJECT_SOURCE_DIR}/Engine/*.h"
 )
 
-#file(GLOB_RECURSE EXAMPLES_SRC ${PROJECT_SOURCE_DIR}/Examples/*.c)
-
+# file(GLOB_RECURSE EXAMPLES_SRC ${PROJECT_SOURCE_DIR}/Examples/*.c)
 add_executable(${EXE_NAME} main.c ${EXAMPLE_SOURCES} ${ENGINE_SRC})
 
 # SDL2::SDL2main needs to come first to compile with GCC 10.3.0
