@@ -434,6 +434,12 @@ void _Load_Textures(const struct aiScene *scene, struct Mesh *mesh, const char *
         }
     }
 
+    if (texInfo.tex_count == 0)
+    {
+        mesh->texInfo = texInfo;
+        return;
+    }
+
     fprintf(stderr, "Textures found...\n");
     for (size_t i = 0; i < texInfo.tex_count; i++)
     {
@@ -795,13 +801,13 @@ static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, co
         {
             // NORMAL NON INSTANCED DRAWING
             // Update trans, rot and scale
-            mat4 mat_trans = GLM_MAT4_ZERO_INIT;
-            mat4 mat_rot   = GLM_MAT4_ZERO_INIT;
-            mat4 mat_scale = GLM_MAT4_ZERO_INIT;
+            // mat4 mat_trans = GLM_MAT4_ZERO_INIT;
+            // mat4 mat_rot   = GLM_MAT4_ZERO_INIT;
+            // mat4 mat_scale = GLM_MAT4_ZERO_INIT;
 
-            glm_translate_make(mat_trans, m.translation);
-            glm_quat_mat4(m.rotation, mat_rot);
-            glm_scale_make(mat_scale, m.scale);
+            // glm_translate_make(mat_trans, m.translation);
+            // glm_quat_mat4(m.rotation, mat_rot);
+            // glm_scale_make(mat_scale, m.scale);
 
             // uniform mat4 model;
             // uniform mat4 translation;
@@ -810,10 +816,10 @@ static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, co
 
             // Send to shader uniforms
             // Shader_Uniform_Mat4_Floats(m.shader, "translation", aux);
-            Shader_Uniform_Mat4(m.shader, "translation", mat_trans);
-            Shader_Uniform_Mat4(m.shader, "rotation", mat_rot);
-            Shader_Uniform_Mat4(m.shader, "scale", mat_scale);
-            Shader_Uniform_Mat4(m.shader, "model", m.matrix);
+            // Shader_Uniform_Mat4(m.shader, "translation", mat_trans);
+            // Shader_Uniform_Mat4(m.shader, "rotation", mat_rot);
+            // Shader_Uniform_Mat4(m.shader, "scale", mat_scale);
+            // Shader_Uniform_Mat4(m.shader, "model", m.matrix);
 
             glDrawElements(GL_TRIANGLES, m.models[nd->mMeshes[n]].num_indicies * 3, GL_UNSIGNED_INT, 0);
         }
@@ -852,6 +858,12 @@ void Mesh_Draw(struct Mesh m)
 
     _Recursive_Mesh_Renderer(m, m.scene, m.scene->mRootNode);
 }
+
+// void Mesh_Draw_with_Shader(struct Mesh m, struct Shader shader)
+//{
+//     Shader_Bind(shader);
+//     _Recursive_Mesh_Renderer(m, m.scene, m.scene->mRootNode);
+// }
 
 void Mesh_Draw_Shader(struct Mesh m, struct Shader shader, struct Camera cam)
 {
