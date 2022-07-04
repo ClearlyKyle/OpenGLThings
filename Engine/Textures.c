@@ -18,6 +18,10 @@ static const char *_PIXEL_FORMAT_NAME(const int value)
 #undef NAME
 }
 
+// texture_type : GL_TEXTURE_2D...
+// slot : GL_TEXTURE0 + slot
+// format : GL_RGBA
+// pixel_type: GL_UNSIGNED_BYTE
 struct Texture Texture_Create(const char *path, GLenum texture_type, GLuint slot, GLenum format, GLenum pixel_type)
 {
     assert((GL_TEXTURE0 + slot) < GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
