@@ -2,10 +2,12 @@
 
 struct SpecularMaps
 {
-    struct Shader shader[2];
-    struct VAO vao[2];
+    struct Shader  shader[2];
+    struct VAO     vao[2];
     struct Texture tex[2];
-    struct Camera cam;
+    struct Camera  cam;
+
+    VAO_t cube_vao;
 
     GLsizei numer_of_indicies[2];
 };
@@ -101,13 +103,16 @@ void SpecularMaps_Init()
             "../../Examples/7 - Specular Maps/lights.fs",
             1,
             (struct VertexAttribute[]){
-                {.index = 0, .name = "aPos"}});
+                {.index = 0, .name = "aPos"},
+            });
 
         spec_maps.shader[1] = shader;
 
+        VAO_t cube         = Cube_Generate();
+        spec_maps.cube_vao = cube;
+
         // Generates Vertex Array Object and binds it
-        struct VAO vao = VAO_Create();
-        VAO_Bind(vao);
+        struct VAO vao   = VAO_Create();
         spec_maps.vao[1] = vao;
 
         // Generates Vertex Buffer Object and links it to vertices
@@ -145,20 +150,24 @@ void SpecularMaps_Init()
     Shader_Uniform_Vec4(spec_maps.shader[1], "lightColor", light_colour);
 
     //  Texture
-    const char *file_path1 = "../../Examples/res/textures/planks.png";
-    struct Texture tex1    = Texture_Create(file_path1, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
-    spec_maps.tex[0]       = tex1;
+    const char    *file_path1 = "../../Examples/res/textures/planks.png";
+    struct Texture tex1       = Texture_Create(file_path1, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    spec_maps.tex[0]          = tex1;
 
-    const char *file_path2 = "../../Examples/res/textures/planksSpec.png";
-    struct Texture tex2    = Texture_Create(file_path2, GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE);
-    spec_maps.tex[1]       = tex2;
+    const char    *file_path2 = "../../Examples/res/textures/planksSpec.png";
+    struct Texture tex2       = Texture_Create(file_path2, GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+    spec_maps.tex[1]          = tex2;
 
+    Shader_Bind(spec_maps.shader[0]);
     Shader_Uniform_Texture2D(spec_maps.shader[0], "tex0", tex1);
     Shader_Uniform_Texture2D(spec_maps.shader[0], "tex1", tex2);
 
     // Camera
     struct Camera cam = Camera_Create(window.width, window.heigh, (vec3){-1.880f, 0.509f, -1.031f}, 45.0f, 0.1f, 100.0f);
-    Camera_Set_Orientation(&cam, (vec3){0.85f, -0.17f, 0.48f});
+    glm_vec3_copy((vec3){-1.427915f, 0.640115f, -0.956351f}, cam.position);
+    glm_vec3_copy((vec3){0.820859f, -0.247010f, 0.514954f}, cam.orientation);
+    cam.pitch = -14.300634f;
+    cam.yaw   = 32.101498f;
 
     // glm_vec3_copy((vec3){-39.353584f, 8.195490f, 30.373175f}, cam.position);
     // glm_vec3_copy((vec3){0.810961f, -0.213032f, -0.544940f}, cam.orientation);
@@ -202,6 +211,8 @@ void SpecularMaps_Update()
     // Export the camMatrix to the Vertex Shader of the light cube
     Camera_View_Projection_To_Shader(spec_maps.cam, spec_maps.shader[1], "camMatrix");
 
+    // Cube_Draw(spec_maps.cube_vao);
+
     // Bind the VAO so OpenGL knows to use it
     VAO_Bind(spec_maps.vao[1]);
 
@@ -216,6 +227,7 @@ void SpecularMaps_OnExit()
 {
     Camera_Print_Values(spec_maps.cam);
 
+    VAO_Destroy(spec_maps.cube_vao);
     VAO_Destroy(spec_maps.vao[0]);
     VAO_Destroy(spec_maps.vao[1]);
     Shader_Destroy(&spec_maps.shader[0]);
