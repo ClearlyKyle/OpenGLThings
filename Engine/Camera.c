@@ -182,4 +182,9 @@ void Camera_Print_Values(struct Camera camera)
 
     fprintf(stderr, "Pitch \t: %ff\n", camera.pitch);
     fprintf(stderr, "Yaw   \t: %ff\n", camera.yaw);
+
+    fprintf(stderr, "glm_vec3_copy((vec3){%ff, %ff, %ff}, cam.position);\n", camera.position[0], camera.position[1], camera.position[2]);
+    fprintf(stderr, "glm_vec3_copy((vec3){%ff, %ff, %ff}, cam.orientation);\n", camera.orientation[0], camera.orientation[1], camera.orientation[2]);
+    fprintf(stderr, "cam.pitch = %ff;\n", camera.pitch);
+    fprintf(stderr, "cam.pitch = %ff;\n", camera.yaw);
 }
