@@ -569,6 +569,12 @@ void Shader_Uniform_Mat4(struct Shader shader, const char *name, const mat4 matr
     LOCATION_CHECK(location, name, glUniformMatrix4fv(location, 1, GL_FALSE, matrix[0]));
 }
 
+void Shader_Uniform_Vec2(struct Shader shader, const char *name, const vec2 v)
+{
+    const GLint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
+    LOCATION_CHECK(location, name, glUniform2f(location, v[0], v[1]));
+}
+
 void Shader_Uniform_Mat4_Floats(struct Shader shader, const char *name, const float *matrix)
 {
     const GLint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
