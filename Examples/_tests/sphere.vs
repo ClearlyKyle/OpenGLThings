@@ -6,14 +6,16 @@ layout(location = 2) in vec2 aTex;
 
 out vec3 Normal;
 out vec3 FragPos;
+out vec2 TexCoords;
 
 uniform mat4 camMatrix;
 uniform mat4 model;
 
 void main()
 {
-    FragPos = vec3(model * vec4(aPos, 1.0));
-    Normal  = aNormal;
+    FragPos   = vec3(model * vec4(aPos, 1.0));
+    Normal    = aNormal;
+    TexCoords = aTex;
 
     gl_Position = camMatrix * vec4(FragPos, 1.0);
 }

@@ -7,6 +7,10 @@ struct Sphere
     Camera_t cam;
     Shader_t shader;
 
+    Mesh_t sphere_mesh;
+
+    Texture_t tex;
+
     struct VAO   sphere;
     unsigned int index_count;
 } sph;
@@ -299,50 +303,51 @@ static VAO_t Sphere_Generate_Method_1(const float        radius,
     return sphere;
 }
 
-static VAO_t createSphereArraysAndVBOs()
+static VAO_t Sphere_Generate_Method_2(unsigned int *triangle_count)
 {
-    double radius = 0.4;
-    int    stacks = 16;
-    int    slices = 32;
-    int    size   = stacks * (slices + 1) * 2 * 3;
-    printf("SIZE = %d, %d\n", size, size / 3);
+    const double radius = 0.4;
+    const int    stacks = 16;
+    const int    slices = 32;
+    const size_t size   = stacks * (slices + 1) * 2 * 3;
 
-    float *sphereVertexArray = malloc(size * sizeof(float));
-    float *sphereNormalArray = malloc(size * sizeof(float));
+    *triangle_count = (unsigned int)(size / 3);
+
+    GLfloat *sphereVertexArray = malloc(sizeof(GLfloat) * size);
+    GLfloat *sphereNormalArray = malloc(sizeof(GLfloat) * size);
 
     int k = 0;
     for (int j = 0; j < stacks; j++)
     {
-        double latitude1 = (M_PI / stacks) * j - M_PI / 2.0;
-        double latitude2 = (M_PI / stacks) * (j + 1) - M_PI / 2;
-        double sinLat1   = sin(latitude1);
-        double cosLat1   = cos(latitude1);
-        double sinLat2   = sin(latitude2);
-        double cosLat2   = cos(latitude2);
+        const double latitude1 = (M_PI / stacks) * j - M_PI / 2.0;
+        const double latitude2 = (M_PI / stacks) * (j + 1) - M_PI / 2;
+        const double sinLat1   = sin(latitude1);
+        const double cosLat1   = cos(latitude1);
+        const double sinLat2   = sin(latitude2);
+        const double cosLat2   = cos(latitude2);
         for (int i = 0; i <= slices; i++)
         {
-            double longitude         = (2 * M_PI / slices) * i;
-            double sinLong           = sin(longitude);
-            double cosLong           = cos(longitude);
-            double x1                = cosLong * cosLat1;
-            double y1                = sinLong * cosLat1;
-            double z1                = sinLat1;
-            double x2                = cosLong * cosLat2;
-            double y2                = sinLong * cosLat2;
-            double z2                = sinLat2;
-            sphereNormalArray[k]     = (float)x2;
-            sphereNormalArray[k + 1] = (float)y2;
-            sphereNormalArray[k + 2] = (float)z2;
-            sphereVertexArray[k]     = (float)(radius * x2);
-            sphereVertexArray[k + 1] = (float)(radius * y2);
-            sphereVertexArray[k + 2] = (float)(radius * z2);
+            const double longitude   = (2 * M_PI / slices) * i;
+            const double sinLong     = sin(longitude);
+            const double cosLong     = cos(longitude);
+            const double x1          = cosLong * cosLat1;
+            const double y1          = sinLong * cosLat1;
+            const double z1          = sinLat1;
+            const double x2          = cosLong * cosLat2;
+            const double y2          = sinLong * cosLat2;
+            const double z2          = sinLat2;
+            sphereNormalArray[k]     = (GLfloat)x2;
+            sphereNormalArray[k + 1] = (GLfloat)y2;
+            sphereNormalArray[k + 2] = (GLfloat)z2;
+            sphereVertexArray[k]     = (GLfloat)(radius * x2);
+            sphereVertexArray[k + 1] = (GLfloat)(radius * y2);
+            sphereVertexArray[k + 2] = (GLfloat)(radius * z2);
             k += 3;
-            sphereNormalArray[k]     = (float)x1;
-            sphereNormalArray[k + 1] = (float)y1;
-            sphereNormalArray[k + 2] = (float)z1;
-            sphereVertexArray[k]     = (float)(radius * x1);
-            sphereVertexArray[k + 1] = (float)(radius * y1);
-            sphereVertexArray[k + 2] = (float)(radius * z1);
+            sphereNormalArray[k]     = (GLfloat)x1;
+            sphereNormalArray[k + 1] = (GLfloat)y1;
+            sphereNormalArray[k + 2] = (GLfloat)z1;
+            sphereVertexArray[k]     = (GLfloat)(radius * x1);
+            sphereVertexArray[k + 1] = (GLfloat)(radius * y1);
+            sphereVertexArray[k + 2] = (GLfloat)(radius * z1);
             k += 3;
         }
     }
@@ -360,29 +365,29 @@ static VAO_t createSphereArraysAndVBOs()
     return sphere;
 }
 
-static VAO_t renderSphere()
+static VAO_t Sphere_Generate_Method_3(unsigned int *index_count)
 {
-    // unsigned int indexCount;
-
     const unsigned int X_SEGMENTS = 64;
     const unsigned int Y_SEGMENTS = 64;
-    const float        PI         = 3.14159265359f;
 
-    GLfloat *positions = (GLfloat *)malloc(sizeof(GLfloat) * (X_SEGMENTS + 1) * (Y_SEGMENTS + 1) * 3);
-    // vec2          uv;
-    GLfloat      *normals = (GLfloat *)malloc(sizeof(GLfloat) * (X_SEGMENTS + 1) * (Y_SEGMENTS + 1) * 3);
-    unsigned int *indices = (unsigned int *)malloc(sizeof(unsigned int) * Y_SEGMENTS * (X_SEGMENTS + 1) * 2);
+    const size_t size = (X_SEGMENTS + 1) * (Y_SEGMENTS + 1) * 3;
 
-    unsigned int k = 0;
+    GLfloat      *positions  = (GLfloat *)malloc(sizeof(GLfloat) * size);
+    GLfloat      *normals    = (GLfloat *)malloc(sizeof(GLfloat) * size);
+    GLfloat      *tex_coords = (GLfloat *)malloc(sizeof(GLfloat) * (Y_SEGMENTS + 1) * (X_SEGMENTS + 1) * 2);
+    unsigned int *indices    = (unsigned int *)malloc(sizeof(unsigned int) * Y_SEGMENTS * (X_SEGMENTS + 1) * 2);
+
+    unsigned int k         = 0;
+    unsigned int tex_index = 0;
     for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
     {
         for (unsigned int y = 0; y <= Y_SEGMENTS; ++y)
         {
             const float xSegment = (float)x / (float)X_SEGMENTS;
             const float ySegment = (float)y / (float)Y_SEGMENTS;
-            const float xPos     = cosf(xSegment * 2.0f * PI) * sinf(ySegment * PI);
-            const float yPos     = cosf(ySegment * PI);
-            const float zPos     = sinf(xSegment * 2.0f * PI) * sinf(ySegment * PI);
+            const float xPos     = cosf(xSegment * 2.0f * (float)M_PI) * sinf(ySegment * (float)M_PI);
+            const float yPos     = cosf(ySegment * (float)M_PI);
+            const float zPos     = sinf(xSegment * 2.0f * (float)M_PI) * sinf(ySegment * (float)M_PI);
 
             positions[k + 0] = xPos;
             positions[k + 1] = yPos;
@@ -393,8 +398,8 @@ static VAO_t renderSphere()
             normals[k + 2] = zPos;
             k += 3;
 
-            // positions.push_back(glm::vec3(xPos, yPos, zPos));
-            // normals.push_back(glm::vec3(xPos, yPos, zPos));
+            tex_coords[tex_index++] = xSegment;
+            tex_coords[tex_index++] = ySegment;
             // uv.push_back(glm::vec2(xSegment, ySegment));
         }
     }
@@ -409,9 +414,6 @@ static VAO_t renderSphere()
             {
                 indices[index++] = y * (X_SEGMENTS + 1) + x;
                 indices[index++] = (y + 1) * (X_SEGMENTS + 1) + x;
-
-                // indices.push_back(y * (X_SEGMENTS + 1) + x);
-                // indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
             }
         }
         else
@@ -420,36 +422,11 @@ static VAO_t renderSphere()
             {
                 indices[index++] = (y + 1) * (X_SEGMENTS + 1) + x;
                 indices[index++] = y * (X_SEGMENTS + 1) + x;
-
-                // indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
-                // indices.push_back(y * (X_SEGMENTS + 1) + x);
             }
         }
         oddRow = !oddRow;
     }
-    printf("Index cound: %d\n", index);
-    printf("k cound: %d\n", k);
-
-    // indexCount = static_cast<unsigned int>(indices.size());
-
-    // std::vector<float> data;
-    // for (unsigned int i = 0; i < positions.size(); ++i)
-    //{
-    //     data.push_back(positions[i].x);
-    //     data.push_back(positions[i].y);
-    //     data.push_back(positions[i].z);
-    //     if (normals.size() > 0)
-    //     {
-    //         data.push_back(normals[i].x);
-    //         data.push_back(normals[i].y);
-    //         data.push_back(normals[i].z);
-    //     }
-    //     if (uv.size() > 0)
-    //     {
-    //         data.push_back(uv[i].x);
-    //         data.push_back(uv[i].y);
-    //     }
-    // }
+    *index_count = index;
 
     VAO_t sphere = VAO_Create();
 
@@ -457,12 +434,20 @@ static VAO_t renderSphere()
     EBO_Buffer(indi, sizeof(GLfloat) * X_SEGMENTS * (Y_SEGMENTS + 1) * 2, (const GLvoid *)indices);
 
     VBO_t verts = VBO_Create(GL_ARRAY_BUFFER);
-    VBO_Buffer(verts, sizeof(GLfloat) * (X_SEGMENTS + 1) * (Y_SEGMENTS + 1) * 3, (const GLvoid *)positions);
+    VBO_Buffer(verts, sizeof(GLfloat) * size, (const GLvoid *)positions);
     VBO_t norm = VBO_Create(GL_ARRAY_BUFFER);
-    VBO_Buffer(norm, sizeof(GLfloat) * (X_SEGMENTS + 1) * (Y_SEGMENTS + 1) * 3, (const GLvoid *)normals);
+    VBO_Buffer(norm, sizeof(GLfloat) * size, (const GLvoid *)normals);
+    VBO_t tex = VBO_Create(GL_ARRAY_BUFFER);
+    VBO_Buffer(tex, sizeof(GLfloat) * Y_SEGMENTS * (X_SEGMENTS + 1) * 2, (const GLvoid *)tex_coords);
 
     VAO_Attr(sphere, verts, 0, 3, GL_FLOAT, 3 * sizeof(GLfloat), (const GLvoid *)(0));
     VAO_Attr(sphere, norm, 1, 3, GL_FLOAT, 3 * sizeof(GLfloat), (const GLvoid *)(0));
+    VAO_Attr(sphere, tex, 2, 2, GL_FLOAT, 2 * sizeof(GLfloat), (const GLvoid *)(0));
+
+    free(positions);
+    free(normals);
+    free(indices);
+    free(tex_coords);
 
     return sphere;
 }
@@ -474,18 +459,19 @@ static void Sphere_Draw(const VAO_t sphere_vao, const unsigned int index_count)
     // Method 1
     // glDrawArrays(GL_TRIANGLES, 0, 2520);
     // glDrawElements(GL_TRIANGLES, index_count, GL_UNSIGNED_INT, 0);
-    glDrawElements(GL_LINE_STRIP, index_count, GL_UNSIGNED_INT, 0);
 
-    // glDrawArrays(GL_LINE_STRIP, 0, 1056);
-    // glDrawArrays(GL_TRIANGLE_STRIP, 0, 4225);
-    // glDrawElements(GL_TRIANGLE_STRIP, 8320, GL_UNSIGNED_INT, 0);
+    // Method 2
+    // glDrawArrays(GL_TRIANGLE_STRIP, 0, index_count);
 
     // Method 3
-    // glDrawElements(GL_LINE_STRIP, 8320, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLE_STRIP, index_count, GL_UNSIGNED_INT, 0);
+    // glDrawArrays(GL_TRIANGLE_STRIP, 0, index_count);
 }
 
 void Sphere_Init()
 {
+    // glEnable(GL_CULL_FACE);
+
     // Camera, dont forget this!!
     Camera_t cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f}, 45.0f, 0.1f, 1000.0f);
     // glm_vec3_copy(cam.position, (vec3){0.388311f, 0.006581f, 5.520222f});
@@ -502,16 +488,23 @@ void Sphere_Init()
                                         {.index = 1, .name = "aNormal"},
                                         {.index = 2, .name = "aTex"},
                                     });
+    sph.shader      = shader;
 
-    sph.shader = shader;
+    Texture_t grid_texture = Texture_Create("../../Examples/_tests/grid512.bmp", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    sph.tex                = grid_texture;
 
-    glEnable(GL_CULL_FACE);
+    // Mesh_t sphere_mesh = Mesh_Load(shader, "../../Examples/_tests/icosphere.obj");
+    Mesh_t sphere_mesh = Mesh_Load(shader, "../../Examples/res/shapes/sphere.obj");
+    sph.sphere_mesh    = sphere_mesh;
+
+    Shader_Bind(shader);
+    Shader_Uniform_Int(shader, "diffuse0", 0);
 
     unsigned int index_count = 0;
-    VAO_t        sphere      = Sphere_Generate_Method_1(1.0f, 36, 18, &index_count);
-    // VAO_t sphere = createSphereArraysAndVBOs();
-    // VAO_t sphere = renderSphere();
-    sph.sphere = sphere;
+    // VAO_t        sphere      = Sphere_Generate_Method_1(1.0f, 36, 18, &index_count);
+    //  VAO_t        sphere      = Sphere_Generate_Method_2(&index_count);
+    // VAO_t sphere = Sphere_Generate_Method_3(&index_count);
+    // sph.sphere   = sphere;
 
     sph.index_count = index_count;
 }
@@ -525,9 +518,12 @@ void Sphere_Update()
 
     mat4 model = GLM_MAT4_IDENTITY_INIT;
     Uniform_Mat4("model", model);
-    // Uniform_Vec3("camPos", sph.cam.position);
 
-    Sphere_Draw(sph.sphere, sph.index_count);
+    Texture_Bind(sph.tex);
+    //  Uniform_Vec3("camPos", sph.cam.position);
+
+    // Sphere_Draw(sph.sphere, sph.index_count);
+    Mesh_Draw(sph.sphere_mesh);
 }
 
 void Sphere_OnExit()
