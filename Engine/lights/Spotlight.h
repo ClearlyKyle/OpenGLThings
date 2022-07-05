@@ -55,7 +55,7 @@ typedef struct Spotlight Spotlight_t;
         .cutoff               = 0.0f,               \
     }
 
-void Spotlight_To_Shader(const Spotlight_t light, const Shader_t shader)
+inline void Spotlight_To_Shader(const Spotlight_t light, const Shader_t shader)
 {
     Shader_Bind(shader);
 

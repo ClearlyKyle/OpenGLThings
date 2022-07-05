@@ -1,7 +1,6 @@
 #include "Deferred3.h"
 
 #include "GBuffer.h"
-#include "Lights.h"
 
 // Example from...
 // https://ogldev.org/www/tutorial36/tutorial36.html

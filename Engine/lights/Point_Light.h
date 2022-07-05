@@ -48,7 +48,7 @@ typedef struct PointLight PointLight_t;
         .attenuation.exp      = 0.0f,               \
     }
 
-void PointLight_To_Shader(const PointLight_t light, const Shader_t shader)
+inline void PointLight_To_Shader(const PointLight_t light, const Shader_t shader)
 {
     Shader_Bind(shader);
 

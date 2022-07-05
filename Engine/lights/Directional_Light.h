@@ -36,7 +36,7 @@ typedef struct DirectionalLight DirectionalLight_t;
         .direction         = {0.0f, 0.0f, 0.0f}, \
     }
 
-void DirectionalLight_To_Shader(const DirectionalLight_t light, const Shader_t shader)
+inline void DirectionalLight_To_Shader(const DirectionalLight_t light, const Shader_t shader)
 {
     Shader_Bind(shader);
 
