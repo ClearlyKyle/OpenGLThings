@@ -28,7 +28,7 @@ static struct Deferred
     struct Mesh model;
 } def;
 
-VAO_t Cube_Generate()
+static VAO_t Cube_Generate()
 {
     const GLfloat vertices[] = {
         // back face
@@ -80,14 +80,14 @@ VAO_t Cube_Generate()
 
     VBO_Buffer(VBO, sizeof(vertices), (const GLvoid *)vertices);
 
-    VAO_Attr(VAO, VBO, 0, 3, GL_FLOAT, 8 * sizeof(GLfloat), (const GLvoid *)(0));
-    VAO_Attr(VAO, VBO, 1, 3, GL_FLOAT, 8 * sizeof(GLfloat), (const GLvoid *)(3 * sizeof(GLfloat)));
-    VAO_Attr(VAO, VBO, 2, 2, GL_FLOAT, 8 * sizeof(GLfloat), (const GLvoid *)(6 * sizeof(GLfloat)));
+    VAO_Attr(VAO, VBO, 0, 3, GL_FLOAT, 8 * sizeof(GLfloat), (const GLvoid *)(0));                   // POSITION
+    VAO_Attr(VAO, VBO, 1, 3, GL_FLOAT, 8 * sizeof(GLfloat), (const GLvoid *)(3 * sizeof(GLfloat))); // NORMALS
+    VAO_Attr(VAO, VBO, 2, 2, GL_FLOAT, 8 * sizeof(GLfloat), (const GLvoid *)(6 * sizeof(GLfloat))); // TEXTURE
 
     return VAO;
 }
 
-VAO_t Quad_Generate()
+static VAO_t Quad_Generate()
 {
     const GLfloat vertices[] = {
         // positions      // texture Coords

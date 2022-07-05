@@ -39,7 +39,8 @@ static void DSLightPass()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    GBuffer_BindForReading(&ds.gBuf);
+    // Bind GBuffer for reading
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, ds.gBuf.fbo);
 
     const GLint WINDOW_WIDTH  = window.width;
     const GLint WINDOW_HEIGHT = window.heigh;
@@ -59,19 +60,19 @@ static void DSLightPass()
     glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
                       HalfWidth, HalfHeight, WINDOW_WIDTH, WINDOW_HEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-    GBuffer_SetReadBuffer(GBUFFER_TEXTURE_TYPE_TEXCOORD);
-    glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
-                      HalfWidth, 0, WINDOW_WIDTH, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    // GBuffer_SetReadBuffer(GBUFFER_TEXTURE_TYPE_TEXCOORD);
+    // glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
+    //                   HalfWidth, 0, WINDOW_WIDTH, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 }
 
 void Deferred2_Init()
 {
     // Camera, dont forget this!!
     Camera_t cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f}, 45.0f, 0.1f, 1000.0f);
-    glm_vec3_copy(cam.position, (vec3){0.388311f, 0.006581f, 5.520222f});
-    glm_vec3_copy(cam.orientation, (vec3){-0.522374f, 0.019198f, -0.852500f});
-    cam.pitch = 1.100027f;
-    cam.yaw   = -121.498100f;
+    glm_vec3_copy((vec3){-0.331897f, -0.000501f, 5.371250f}, cam.position);
+    glm_vec3_copy((vec3){0.614246f, -0.015703f, -0.788958f}, cam.orientation);
+    cam.pitch = -0.899758f;
+    cam.yaw   = -52.097359f;
     ds.cam    = cam;
 
     // Shaders
