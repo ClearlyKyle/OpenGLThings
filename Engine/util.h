@@ -147,8 +147,8 @@ static void GLAPIENTRY MessageCallback(const GLenum  source,
         fprintf(stderr, "[GL CALLBACK] Severity: Low ");
         break;
     case GL_DEBUG_SEVERITY_NOTIFICATION:
-        fprintf(stderr, "[GL CALLBACK] Severity: Notification \n");
-        // break;
+        // fprintf(stderr, "[GL CALLBACK] Severity: Notification \n");
+        //  break;
         return;
     }
 
