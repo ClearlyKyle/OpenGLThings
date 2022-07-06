@@ -148,7 +148,7 @@ static void DSPointLightsPass()
 }
 
 // DIRECITONAL LIGHT Pass
-void DSDirectionalLightPass()
+static void DSDirectionalLightPass()
 {
     mat4 model = GLM_MAT4_IDENTITY_INIT;
 

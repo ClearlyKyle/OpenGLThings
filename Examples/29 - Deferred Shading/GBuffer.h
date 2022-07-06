@@ -17,14 +17,22 @@ struct GBuffer
     GLuint fbo;
     GLuint textures[GBUFFER_NUM_TEXTURES];
     GLuint depthTexture;
+    GLuint finalTexture;
 };
 
 typedef struct GBuffer GBuffer_t;
 
 GBuffer_t GBuffer_Init(unsigned int WindowWidth, unsigned int WindowHeight);
-void      GBuffer_BindForWriting(const GBuffer_t *const buf);
-void      GBuffer_BindForReading(const GBuffer_t *const buf);
-void      GBuffer_SetReadBuffer(const enum GBUFFER_TEXTURE_TYPE TextureType);
-void      GBuffer_Destroy(GBuffer_t *buf);
+
+void GBuffer_StartFrame(const GBuffer_t *const buf);
+void GBuffer_BindForGeomPass(const GBuffer_t *const buf);
+void GBuffer_BindForWriting(const GBuffer_t *const buf);
+void GBuffer_BindForReading(const GBuffer_t *const buf);
+void GBuffer_SetReadBuffer(const enum GBUFFER_TEXTURE_TYPE TextureType);
+void GBuffer_BindForStencilPass();
+void GBuffer_BindForLightPass(const GBuffer_t *const buf);
+void GBuffer_BindForFinalPass(const GBuffer_t *const buf);
+
+void GBuffer_Destroy(GBuffer_t *buf);
 
 #endif // __GBUFFER_H__
