@@ -92,6 +92,12 @@ void Window_Init(int width, int height,
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f); // r g b a
 }
 
+void Window_Clear_Colour(const float r, const float g, const float b, const float a)
+{
+    // clammped to the range range 0 to 1
+    glClearColor(r, g, b, a); // r g b a
+}
+
 static void Window_Destroy()
 {
     InputManager_Destroy(window.input);
@@ -139,8 +145,8 @@ void Window_Loop()
 
         glUseProgram(0); // Fixes a "Vertex shader is being recompiled based on GL state" error?
 
-        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         Input_Update(&window.input);
         _Update();

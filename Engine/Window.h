@@ -10,13 +10,13 @@ typedef void (*Windowfunction_ptr)();
 
 struct Window
 {
-    SDL_Window *sdl_window;
+    SDL_Window   *sdl_window;
     SDL_GLContext sdl_gl_context;
-    SDL_Event event;
+    SDL_Event     event;
 
     unsigned int width;
     unsigned int heigh;
-    float aspect_ratio;
+    float        aspect_ratio;
 
     Windowfunction_ptr Init;
     Windowfunction_ptr Update;
@@ -33,6 +33,7 @@ struct Window
 extern struct Window window;
 
 void Window_Init(int width, int height, Windowfunction_ptr init, Windowfunction_ptr update, Windowfunction_ptr on_exit);
+void Window_Clear_Colour(const float r, const float g, const float b, const float a);
 void Window_Loop();
 
 #endif // __WINDOW_H__

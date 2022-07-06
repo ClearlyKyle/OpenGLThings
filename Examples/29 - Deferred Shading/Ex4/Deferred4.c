@@ -176,6 +176,9 @@ static void DSFinalPass()
 
 void Deferred4_Init()
 {
+    // Makes the screen less "Hazy"
+    Window_Clear_Colour(0.0f, 0.0f, 0.0f, 1.0f);
+
     // Camera, dont forget this!!
     Camera_t cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f}, 45.0f, 0.1f, 1000.0f);
     glm_vec3_copy((vec3){-9.408190f, 4.230574f, -12.485654f}, cam.position);
