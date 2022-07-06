@@ -34,6 +34,7 @@
 //#include "Ex1/Deferred.h"  // Example 29 - Deferred Shading
 #include "Ex2/Deferred2.h" // Example 29 - Deferred Shading Another example
 #include "Ex3/Deferred3.h" // Example 29 - Deferred Shading Another example
+#include "Ex4/Deferred4.h" // Example 29 - Deferred Shading Another example
 //#include "Breakout.h"            // Example 32 - Breakout
 //#include "Mesh_Test.h"
 //#include "Ortho.h"
@@ -137,7 +138,8 @@ int main(int argc, char *argv[])
     // Example 29 - Deferred Shading
     // Window_Init(800, 800, Deferred_Init, Deferred_Update, Deferred_OnExit);
     // Window_Init(800, 800, Deferred2_Init, Deferred2_Update, Deferred2_OnExit);
-    Window_Init(800, 800, Deferred3_Init, Deferred3_Update, Deferred3_OnExit);
+    // Window_Init(800, 800, Deferred3_Init, Deferred3_Update, Deferred3_OnExit);
+    Window_Init(800, 800, Deferred4_Init, Deferred4_Update, Deferred4_OnExit);
 
     // Example 32 - Breakout
     // Window_Init(1024, 1024, Breakout_Init, Breakout_Update, Breakout_OnExit);

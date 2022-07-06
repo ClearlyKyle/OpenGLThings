@@ -5,3 +5,4 @@ bin/*
 Engine/libs/cglm/*
 Engine/libs/tinyobj/*
 Examples/res/*
+Engine/_TO_ADD.txt
