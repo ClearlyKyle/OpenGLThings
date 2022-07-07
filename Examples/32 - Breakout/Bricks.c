@@ -4,7 +4,14 @@ Bricks_t Bricks_Init()
 {
     Bricks_t bricks;
 
-    bricks.width  = 51.0f;
+    const float column_spacing = 10.0f;
+
+    // width from left to right side
+    const float brick_width = ((float)window.width - column_spacing) / ((float)NUM_COLUMNS) - column_spacing;
+    // since we are drawing rectangles with the center in the middle of rectangle
+    // the width is actually half the over all widthd
+
+    bricks.width  = brick_width / 2.0f; // half width as the vertcies coordinates are centered on the origin
     bricks.height = 13.0f;
 
     // To initialize all the elements to false
@@ -18,7 +25,7 @@ Bricks_t Bricks_Init()
         bricks.width, -bricks.height,
         -bricks.width, -bricks.height};
 
-    bricks.count = 6;
+    bricks.vertex_count = 6;
 
     VAO_t bricks_VAO = VAO_Create();
 
@@ -29,13 +36,24 @@ Bricks_t Bricks_Init()
 
     bricks.vao = bricks_VAO;
 
-    for (int row = 0; row < 6; row++)
+    for (int row = 0; row < NUM_ROW; row++)
     {
-        for (int col = 0; col < 6; col++)
+        for (int col = 0; col < NUM_COLUMNS; col++)
         {
-            const int   index = row * 6 + col;
-            const float x     = (4.0f + bricks.width) * (1 + col) + bricks.width * col;
-            const float y     = (float)window.heigh - ((4.0f + bricks.height) * (1 + row) + bricks.height * row);
+            const int index = row * NUM_COLUMNS + col;
+
+            // first we need to jump along a distance of: (4.0f + bricks.width) * (1 + col)
+            // then add on the remaining part of the brick: bricks.width * col
+            /*   __________
+                |   _____
+                |  |_____|
+                ^-----^
+                  D1  ^--^
+                       D2
+             */
+
+            const float x = (column_spacing + bricks.width) * (1 + col) + bricks.width * col;
+            const float y = (float)window.heigh - ((4.0f + bricks.height) * (1 + row) + bricks.height * row);
 
             bricks.pos[index][0] = (float)x;
             bricks.pos[index][1] = (float)y;
@@ -53,13 +71,13 @@ void Bricks_Draw(const Shader_t shader, const Bricks_t *const bricks)
     Shader_Bind(shader);
     VAO_Bind(bricks->vao);
 
-    for (int i = 0; i < 36; i++)
+    for (int i = 0; i < NUM_COLUMNS * NUM_ROW; i++)
     {
         if (bricks->isHit[i])
             continue;
 
         Shader_Uniform_Mat4(shader, "model", bricks->model[i]);
-        glDrawArrays(GL_TRIANGLES, 0, bricks->count);
+        glDrawArrays(GL_TRIANGLES, 0, bricks->vertex_count);
     }
 }
 

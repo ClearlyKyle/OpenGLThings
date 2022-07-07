@@ -41,11 +41,6 @@ void Breakout_Init()
 
 void Breakout_Update()
 {
-    // if (Input_Key_Down(window.input, SDL_SCANCODE_D))
-    //{
-    //     glm_vec3_muladd(speed, camera->orientation, camera->position);
-    // }
-
     Ball_Update(&bo.ball);
     Ball_Draw(bo.shader, &bo.ball);
 

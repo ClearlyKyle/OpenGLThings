@@ -3,15 +3,18 @@
 
 #include "Engine.h"
 
+#define NUM_COLUMNS 8
+#define NUM_ROW 6
+
 typedef struct Bricks
 {
     float   dx, dy;
     float   width, height;
-    mat4    model[36];
-    vec3    pos[36];
-    bool    isHit[36];
+    mat4    model[NUM_COLUMNS * NUM_ROW];
+    vec3    pos[NUM_COLUMNS * NUM_ROW];
+    bool    isHit[NUM_COLUMNS * NUM_ROW];
     VAO_t   vao;
-    GLsizei count;
+    GLsizei vertex_count;
 
 } Bricks_t;
 
