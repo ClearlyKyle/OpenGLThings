@@ -6,13 +6,69 @@ static struct TextRendering
 {
     Camera_t cam;
 
-    VAO_t    text_vao;
-    Shader_t text_shader;
-    GLuint   texture;
+    VAO_t     text_vao;
+    Shader_t  text_shader;
+    GLuint    texture;
+    TTF_Font *font;
 
     Shader_t cube_shader;
     VAO_t    cube;
 } tr;
+
+static void Render_text(const ivec2 position, const char *message)
+{
+    Shader_Bind(tr.text_shader);
+
+    SDL_Surface *surface_message = TTF_RenderText_Blended(tr.font, message, (SDL_Color){255, 255, 255});
+    if (!surface_message)
+    {
+        fprintf(stderr, "Error using TTF_RenderText_Blended: %s\n", TTF_GetError());
+        window.quit = true;
+        return;
+    }
+
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // set texture options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface_message->w, surface_message->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surface_message->pixels);
+
+    const GLuint verts[] = {
+        0, 0, position[0], position[1],                                           //  1,0 --- 1,1
+        1, 0, position[0] + surface_message->w, position[1],                      //   |       |
+        1, 1, position[0] + surface_message->w, position[1] + surface_message->h, //   |       |
+        0, 1, position[0], position[1] + surface_message->h,                      //  0,0 --- 0,1
+    };
+
+    const GLuint indicies[] = {
+        0, 3, 2, //
+        0, 2, 1, //
+    };
+
+    VAO_t vao = VAO_Create();
+    VBO_t vbo = VBO_Create(GL_ARRAY_BUFFER);
+
+    EBO_t ebo = EBO_Create();
+    EBO_Buffer(ebo, sizeof(indicies), (const GLvoid *)indicies);
+
+    VBO_Buffer(vbo, sizeof(verts), (const GLvoid *)verts);
+    VAO_Attr(vao, vbo, 0, 4, GL_UNSIGNED_INT, 4 * sizeof(GLuint), (const GLvoid *)(0)); // TEX + POSITION (tex.x, tex.y, pos.x, pos.y)
+
+    SDL_FreeSurface(surface_message);
+
+    VAO_Bind(vao);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
 
 void TextRendering_Init()
 {
@@ -74,6 +130,7 @@ void TextRendering_Init()
         window.quit = true;
         return;
     }
+    tr.font = font;
 
     // TTF_SetFontStyle(font, TTF_STYLE_BOLD);
 
@@ -86,23 +143,6 @@ void TextRendering_Init()
         fprintf(stderr, "Error using TTF_RenderText_Blended: %s\n", TTF_GetError());
         window.quit = true;
         return;
-    }
-
-    Uint8  colors = surface_message->format->BytesPerPixel;
-    GLenum texture_format;
-    if (colors == 4)
-    { // alpha
-        if (surface_message->format->Rmask == 0x000000ff)
-            texture_format = GL_RGBA;
-        else
-            texture_format = GL_BGRA;
-    }
-    else
-    { // no alpha
-        if (surface_message->format->Rmask == 0x000000ff)
-            texture_format = GL_RGB;
-        else
-            texture_format = GL_BGR;
     }
 
     GLuint texture;
@@ -152,14 +192,13 @@ void TextRendering_Update()
 {
     Camera_Inputs(&tr.cam);
 
-    Shader_Bind(tr.text_shader);
-    VAO_Bind(tr.text_vao);
+    // Showing frame time
+    char buff[32];
+    sprintf(buff, "FRAME TIME: %f", window.frame_time);
+    Render_text((ivec2){100, 100}, buff);
 
-    // Bind texure
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tr.texture);
-
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // Render plain text
+    Render_text((ivec2){200, 200}, "Hello world!");
 
     Shader_Bind(tr.cube_shader);
     Camera_View_Projection_To_Shader(tr.cam, tr.cube_shader, "projection");
