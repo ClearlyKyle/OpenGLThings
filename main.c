@@ -32,10 +32,11 @@
 //#include "Procedural.h"          // Example 27 - Procedural Generation
 //#include "Compute.h"             // Example 28 - Compute Shaders
 //#include "Ex1/Deferred.h"  // Example 29 - Deferred Shading
-#include "Ex2/Deferred2.h" // Example 29 - Deferred Shading Another example
-#include "Ex3/Deferred3.h" // Example 29 - Deferred Shading Another example
-#include "Ex4/Deferred4.h" // Example 29 - Deferred Shading Another example
-//#include "Breakout.h"            // Example 32 - Breakout
+//#include "Ex2/Deferred2.h" // Example 29 - Deferred Shading Another example
+//#include "Ex3/Deferred3.h" // Example 29 - Deferred Shading Another example
+//#include "Ex4/Deferred4.h" // Example 29 - Deferred Shading Another example
+//#include "Breakout.h" // Example 32 - Breakout
+#include "TextRendering.h" // Example 33 - Text Rendering
 //#include "Mesh_Test.h"
 //#include "Ortho.h"
 //#include "challanges.h"
@@ -139,10 +140,13 @@ int main(int argc, char *argv[])
     // Window_Init(800, 800, Deferred_Init, Deferred_Update, Deferred_OnExit);
     // Window_Init(800, 800, Deferred2_Init, Deferred2_Update, Deferred2_OnExit);
     // Window_Init(800, 800, Deferred3_Init, Deferred3_Update, Deferred3_OnExit);
-    Window_Init(800, 800, Deferred4_Init, Deferred4_Update, Deferred4_OnExit);
+    // Window_Init(800, 800, Deferred4_Init, Deferred4_Update, Deferred4_OnExit);
 
     // Example 32 - Breakout
-    // Window_Init(1024, 1024, Breakout_Init, Breakout_Update, Breakout_OnExit);
+    // Window_Init(800, 1000, Breakout_Init, Breakout_Update, Breakout_OnExit);
+
+    // Example 33 - Text Rendering
+    Window_Init(800, 800, TextRendering_Init, TextRendering_Update, TextRendering_OnExit);
 
     // Window_Init(1024, 1024, MeshTest_Init, MeshTest_Update, MeshTest_OnExit);
     //  Window_Init(800, 800, Ortho_Init, Ortho_Update, Ortho_OnExit);
