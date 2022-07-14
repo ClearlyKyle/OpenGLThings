@@ -11,6 +11,7 @@
 #include "Camera.h"
 #include "Mesh.h"
 #include "Shapes.h"
+#include "lights/Lights.h"
 #include "features/skybox.h"
 #include "features/shadowmap.h"
 
