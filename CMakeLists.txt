@@ -12,6 +12,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
+find_package(sdl2-ttf CONFIG REQUIRED)
 
 set(EXE_NAME "MAIN")
 
@@ -34,5 +35,5 @@ add_executable(${EXE_NAME} main.c ${EXAMPLE_SOURCES} ${ENGINE_SRC})
 
 # SDL2::SDL2main needs to come first to compile with GCC 10.3.0
 target_link_libraries(${EXE_NAME} PRIVATE glad::glad)
-target_link_libraries(${EXE_NAME} PRIVATE SDL2::SDL2main SDL2::SDL2)
+target_link_libraries(${EXE_NAME} PRIVATE SDL2::SDL2main SDL2::SDL2 SDL2::SDL2_ttf)
 target_link_libraries(${EXE_NAME} PRIVATE assimp::assimp)
