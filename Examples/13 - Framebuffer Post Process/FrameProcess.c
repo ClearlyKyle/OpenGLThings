@@ -32,8 +32,8 @@ void FrameProcess_Init()
                                                  (struct VertexAttribute[]){
                                                      {.index = 0, .name = "aPos"},
                                                      {.index = 1, .name = "aNormal"},
-                                                     {.index = 2, .name = "aColor"},
-                                                     {.index = 3, .name = "aTex"}});
+                                                     {.index = 2, .name = "aTex"},
+                                                     {.index = 3, .name = "aColor"}});
 
     struct Shader shader_frame_buffer = Shader_Create("../../Examples/13 - Framebuffer Post Process/framebuffer.vs",
                                                       "../../Examples/13 - Framebuffer Post Process/framebuffer.fs",
@@ -117,17 +117,20 @@ void FrameProcess_Init()
     const GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     check_that((fbo_status == GL_FRAMEBUFFER_COMPLETE), "Framebuffer error: %d\n", fbo_status);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind framebuffer
+
     fp.rect_VAO             = rect_VAO;
     fp.FBO                  = FBO;
     fp.frame_buffer_texture = frame_buffer_texture;
-
-    glEnable(GL_DEPTH_TEST);
 }
 
 void FrameProcess_Update()
 {
     // Bind the custom framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, fp.FBO);
+
+    const GLenum DrawBuffers[] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, DrawBuffers);
 
     // Need to use these after "glBindFramebuffer"
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);            // Specify the color of the background
@@ -136,12 +139,14 @@ void FrameProcess_Update()
 
     Camera_Inputs(&fp.cam);
 
+    Shader_Bind(fp.model.shader);
     Shader_Uniform_Vec3(fp.model.shader, "camPos", fp.cam.position);
     Camera_View_Projection_To_Shader(fp.cam, fp.model.shader, "camMatrix");
 
     // Draw the normal model
     Mesh_Draw(fp.model);
 
+    // POST PROCESSING WITH FRAMEBUFFEr
     // Bind the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -151,6 +156,7 @@ void FrameProcess_Update()
 
     glDisable(GL_DEPTH_TEST); // prevents framebuffer rectangle from being discarded
 
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fp.frame_buffer_texture);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
