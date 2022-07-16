@@ -452,7 +452,7 @@ static VAO_t Sphere_Generate_Method_3(unsigned int *index_count)
     return sphere;
 }
 
-static void Sphere_Draw(const VAO_t sphere_vao, const unsigned int index_count)
+static void SphereDraw(const VAO_t sphere_vao, const unsigned int index_count)
 {
     VAO_Bind(sphere_vao);
 
@@ -522,7 +522,7 @@ void Sphere_Update()
     Texture_Bind(sph.tex);
     //  Uniform_Vec3("camPos", sph.cam.position);
 
-    // Sphere_Draw(sph.sphere, sph.index_count);
+    // SphereDraw(sph.sphere, sph.index_count);
     Mesh_Draw(sph.sphere_mesh);
 }
 
