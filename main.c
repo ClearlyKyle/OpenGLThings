@@ -13,7 +13,7 @@
 //#include "StencilBuffer.h"       // Example 10 - Stencil Buffer
 //#include "FaceCulling.h"         // Example 11 - Face Culling
 //#include "Transparancy.h"        // Example 12 - Transparancy
-//#include "FrameProcess.h"        // Example 13 - Framebuffer and Post Process
+#include "FrameProcess.h" // Example 13 - Framebuffer and Post Process
 //#include "CubeBoxes.h"           // Example 14 - Cubemaps & Skyboxes
 //#include "Ex1/Geometry.h"        // Example 15 - Geometry Shader
 //#include "EX2/Geometry2.h"       // Example 15 - Geometry Shader 2D Example
@@ -34,9 +34,12 @@
 //#include "Ex1/Deferred.h"  // Example 29 - Deferred Shading
 //#include "Ex2/Deferred2.h" // Example 29 - Deferred Shading Another example
 //#include "Ex3/Deferred3.h" // Example 29 - Deferred Shading Another example
-//#include "Ex4/Deferred4.h" // Example 29 - Deferred Shading Another example
+#include "Ex4/Deferred4.h" // Example 29 - Deferred Shading Another example
 //#include "Breakout.h" // Example 32 - Breakout
-#include "TextRendering.h" // Example 33 - Text Rendering
+//#include "TextRendering.h" // Example 33 - Text Rendering
+#include "Lighting/PBRLighting.h"                  // Example 34 - PBR - Lighting
+#include "Lighting Textured/PBRLightingTextured.h" // Example 34 - PBR - Lighting Textured
+#include "IBL Irradiance/IBL_Irradiance.h"         // Example 34 - PBR - IBL (Image Based Lighting) Irradiance
 //#include "Mesh_Test.h"
 //#include "Ortho.h"
 //#include "challanges.h"
@@ -146,7 +149,16 @@ int main(int argc, char *argv[])
     // Window_Init(800, 1000, Breakout_Init, Breakout_Update, Breakout_OnExit);
 
     // Example 33 - Text Rendering
-    Window_Init(800, 800, TextRendering_Init, TextRendering_Update, TextRendering_OnExit);
+    // Window_Init(800, 800, TextRendering_Init, TextRendering_Update, TextRendering_OnExit);
+
+    // Example 34 - PBR - Lighting
+    // Window_Init(800, 800, PBRLighting_Init, PBRLighting_Update, PBRLighting_OnExit);
+
+    // Example 34 - PBR - Lighting Textured
+    // Window_Init(800, 800, PBRLightingTextured_Init, PBRLightingTextured_Update, PBRLightingTextured_OnExit);
+
+    // Example 34 - PBR - IBL (Image Based Lighting) Irradiance
+    Window_Init(800, 800, IBL_Irradiance_Init, IBL_Irradiance_Update, IBL_Irradiance_OnExit);
 
     // Window_Init(1024, 1024, MeshTest_Init, MeshTest_Update, MeshTest_OnExit);
     //  Window_Init(800, 800, Ortho_Init, Ortho_Update, Ortho_OnExit);
