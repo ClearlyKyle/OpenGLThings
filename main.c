@@ -26,7 +26,7 @@
 //#include "SM_With_Model.h"       // Example 21 - Shadow Mapping with Directional Lighting Using a Model
 //#include "SM_With_SP_PL.h"       // Example 22 - Shadow Mapping with Spotlights and Point Lights
 //#include "Normal_Maps.h"         // Example 23 - Normal Mapping
-//#include "Parallax_Mapping.h"    // Example 24 - Parallax Occluision Mapping
+#include "Parallax_Mapping.h" // Example 24 - Parallax Occluision Mapping
 //#include "HDR.h"                 // Example 25 - HDR
 //#include "Bloom.h"               // Example 26 - Bloom
 //#include "Procedural.h"          // Example 27 - Procedural Generation
@@ -37,9 +37,10 @@
 #include "Ex4/Deferred4.h" // Example 29 - Deferred Shading Another example
 //#include "Breakout.h" // Example 32 - Breakout
 //#include "TextRendering.h" // Example 33 - Text Rendering
-#include "Lighting/PBRLighting.h"                  // Example 34 - PBR - Lighting
-#include "Lighting Textured/PBRLightingTextured.h" // Example 34 - PBR - Lighting Textured
-#include "IBL Irradiance/IBL_Irradiance.h"         // Example 34 - PBR - IBL (Image Based Lighting) Irradiance
+#include "Lighting/PBRLighting.h"                                // Example 34 - PBR - Lighting
+#include "Lighting Textured/PBRLightingTextured.h"               // Example 34 - PBR - Lighting Textured
+#include "IBL Irradiance/IBL_Irradiance.h"                       // Example 34 - PBR - IBL (Image Based Lighting) Irradiance
+#include "IBL Irradiance Conversion/IBL_Irradiance_Conversion.h" // Example 34 - PBR - IBL (Image Based Lighting) Irradiance Conversion
 //#include "Mesh_Test.h"
 //#include "Ortho.h"
 //#include "challanges.h"
@@ -158,7 +159,10 @@ int main(int argc, char *argv[])
     // Window_Init(800, 800, PBRLightingTextured_Init, PBRLightingTextured_Update, PBRLightingTextured_OnExit);
 
     // Example 34 - PBR - IBL (Image Based Lighting) Irradiance
-    Window_Init(800, 800, IBL_Irradiance_Init, IBL_Irradiance_Update, IBL_Irradiance_OnExit);
+    // Window_Init(800, 800, IBL_Irradiance_Init, IBL_Irradiance_Update, IBL_Irradiance_OnExit);
+
+    // Example 34 - PBR - IBL (Image Based Lighting) Irradiance Conversion
+    Window_Init(800, 800, IBL_Irradiance_Conversion_Init, IBL_Irradiance_Conversion_Update, IBL_Irradiance_Conversion_OnExit);
 
     // Window_Init(1024, 1024, MeshTest_Init, MeshTest_Update, MeshTest_OnExit);
     //  Window_Init(800, 800, Ortho_Init, Ortho_Update, Ortho_OnExit);
