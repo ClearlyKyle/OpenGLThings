@@ -145,8 +145,8 @@ void Window_Loop()
 
         glUseProgram(0); // Fixes a "Vertex shader is being recompiled based on GL state" error?
 
-        glClear(GL_COLOR_BUFFER_BIT);
-        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        // glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         Input_Update(&window.input);
         _Update();

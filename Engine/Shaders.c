@@ -285,6 +285,7 @@ static GLint _Compile_Shader(const char *path, GLenum type)
     }
 
     // Get length of file
+    
     fseek(f, 0, SEEK_END);
     const long len = ftell(f);
     check_that(len > 0, "File length needs to be greater than 0!\n");
@@ -515,12 +516,16 @@ void Shader_Destroy(struct Shader *shader)
     }
 }
 
+static Shader_t _currently_bound_shader = {0};
+
 void Shader_Bind(const struct Shader shader)
 {
     if (shader.shader_id == 0)
         fprintf(stderr, "You are using a shader with id of 0\n");
-        
+
     glUseProgram(shader.shader_id);
+
+    _currently_bound_shader = shader;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -530,10 +535,10 @@ void Shader_Bind(const struct Shader shader)
 // it will be optimized away. Uniforms are defined post-link
 // 1- Check if uniform is going to be used
 // 2 -Check if uniform is the correct name
-#define LOCATION_CHECK(LOCATION, NAME, FUNCTION) \
-    if ((LOCATION) == GL_INVALID_INDEX)          \
-        return;                                  \
-    else                                         \
+#define LOCATION_CHECK(LOCATION, NAME, FUNCTION)                                                                       \
+    if ((LOCATION) == GL_INVALID_INDEX)                                                                                \
+        fprintf(stderr, _colour_RED "[UNIFORM ERROR] " _colour_COLOUR_X "Error locating uniform name : %s\n", (NAME)); \
+    else                                                                                                               \
         FUNCTION;
 //fprintf(stderr, _colour_RED "[UNIFORM ERROR] " _colour_COLOUR_X "Error locating uniform name : %s\n", (NAME)); \
 
@@ -590,4 +595,18 @@ void Shader_Uniform_Texture2D(struct Shader shader, const char *name, const stru
 
     const GLint location = glGetUniformLocation(shader.shader_id, (const GLchar *)name);
     LOCATION_CHECK(location, name, glUniform1i(location, (GLint)texture.slot));
+}
+
+// Testing using the static active shader. When a shader is bound, then no need to keep passing
+// to every uniform, we set a static shader once and reference it with every subsiquent shader_uniform call
+void Uniform_Mat4(const char *name, const mat4 matrix)
+{
+    const GLint location = glGetUniformLocation(_currently_bound_shader.shader_id, (const GLchar *)name);
+    LOCATION_CHECK(location, name, glUniformMatrix4fv(location, 1, GL_FALSE, matrix[0]));
+}
+
+void Uniform_Vec3(const char *name, const vec3 v)
+{
+    const GLint location = glGetUniformLocation(_currently_bound_shader.shader_id, (const GLchar *)name);
+    LOCATION_CHECK(location, name, glUniform3f(location, v[0], v[1], v[2]));
 }
