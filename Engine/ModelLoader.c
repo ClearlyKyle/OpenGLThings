@@ -773,9 +773,9 @@ static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, co
 {
     // Get node transformation matrix
     // OpenGL matrices are column major
-    // struct aiMatrix4x4 mTrans = nd->mTransformation;
-    // float              aux[16];
-    // memcpy(aux, &mTrans, sizeof(float) * 16);
+    struct aiMatrix4x4 mTrans = nd->mTransformation;
+    float              aux[16];
+    memcpy(aux, &mTrans, sizeof(float) * 16);
 
     // draw all meshes assigned to this node
     for (unsigned int n = 0; n < nd->mNumMeshes; n++)
@@ -815,7 +815,7 @@ static void _Recursive_Mesh_Renderer(struct Mesh m, const struct aiScene *sc, co
             // uniform mat4 scale;
 
             // Send to shader uniforms
-            // Shader_Uniform_Mat4_Floats(m.shader, "translation", aux);
+            Shader_Uniform_Mat4_Floats(m.shader, "translation", aux);
             // Shader_Uniform_Mat4(m.shader, "translation", mat_trans);
             // Shader_Uniform_Mat4(m.shader, "rotation", mat_rot);
             // Shader_Uniform_Mat4(m.shader, "scale", mat_scale);
