@@ -41,6 +41,7 @@
 #include "Lighting Textured/PBRLightingTextured.h"               // Example 34 - PBR - Lighting Textured
 #include "IBL Irradiance/IBL_Irradiance.h"                       // Example 34 - PBR - IBL (Image Based Lighting) Irradiance
 #include "IBL Irradiance Conversion/IBL_Irradiance_Conversion.h" // Example 34 - PBR - IBL (Image Based Lighting) Irradiance Conversion
+#include "IBL Specular/IBL_Specular.h"                           // Example 34 - PBR - IBL (Image Based Lighting) Specular
 //#include "Mesh_Test.h"
 //#include "Ortho.h"
 //#include "challanges.h"
@@ -162,7 +163,10 @@ int main(int argc, char *argv[])
     // Window_Init(800, 800, IBL_Irradiance_Init, IBL_Irradiance_Update, IBL_Irradiance_OnExit);
 
     // Example 34 - PBR - IBL (Image Based Lighting) Irradiance Conversion
-    Window_Init(800, 800, IBL_Irradiance_Conversion_Init, IBL_Irradiance_Conversion_Update, IBL_Irradiance_Conversion_OnExit);
+    // Window_Init(800, 800, IBL_Irradiance_Conversion_Init, IBL_Irradiance_Conversion_Update, IBL_Irradiance_Conversion_OnExit);
+
+    // Example 34 - PBR - IBL (Image Based Lighting) Specular
+    Window_Init(800, 800, IBL_Specular_Init, IBL_Specular_Update, IBL_Specular_OnExit);
 
     // Window_Init(1024, 1024, MeshTest_Init, MeshTest_Update, MeshTest_OnExit);
     //  Window_Init(800, 800, Ortho_Init, Ortho_Update, Ortho_OnExit);
