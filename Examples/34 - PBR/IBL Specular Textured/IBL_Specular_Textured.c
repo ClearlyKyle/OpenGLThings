@@ -1,10 +1,19 @@
-#include "IBL_Specular.h"
+#include "IBL_Specular_Textured.h"
 
 #include "stb/stb_image.h"
 
 #define NUM_OF_LIGHTS 4
 
-static struct IBL_Specular
+struct mat
+{
+    Texture_t albedo;
+    Texture_t normal;
+    Texture_t metallic;
+    Texture_t roughness;
+    Texture_t ao;
+};
+
+static struct IBL_Specular_Textured
 {
     Camera_t cam;
 
@@ -30,9 +39,16 @@ static struct IBL_Specular
     int   nrRows;
     int   nrColumns;
     float spacing;
+
+    struct mat iron;
+    struct mat gold;
+    struct mat grass;
+    struct mat plastic;
+    struct mat wall;
+
 } ibl;
 
-void IBL_Specular_Init()
+void IBL_Specular_Textured_Init()
 {
     glEnable(GL_DEPTH_TEST); // set depth function to less than AND equal for skybox depth trick.
     glDepthFunc(GL_LEQUAL);
@@ -40,6 +56,10 @@ void IBL_Specular_Init()
 
     // Camera
     ibl.cam = Camera_Create(window.width, window.heigh, (vec3){0.0f, 0.0f, 2.0f}, 45.0f, 0.1f, 1000.0f);
+    glm_vec3_copy((vec3){-7.093204f, 1.223018f, 15.097446f}, ibl.cam.position);
+    glm_vec3_copy((vec3){0.396110f, -0.114946f, -0.910980f}, ibl.cam.orientation);
+    ibl.cam.pitch = -6.600482f;
+    ibl.cam.yaw   = -66.499748f;
 
     // Cube
     ibl.cube_vao = Cube_Generate();
@@ -51,19 +71,22 @@ void IBL_Specular_Init()
     ibl.quad_vao = Quad_Generate();
 
     // Shaders
-    ibl.pbrShader                      = Shader_Create("../../Examples/34 - PBR/IBL Specular/pbr.vs", "../../Examples/34 - PBR/IBL Specular/pbr.fs", 0, NULL);
-    ibl.equirectangularToCubemapShader = Shader_Create("../../Examples/34 - PBR/IBL Specular/cubemap.vs", "../../Examples/34 - PBR/IBL Specular/equirectangular_to_cubemap.fs", 0, NULL);
-    ibl.irradianceShader               = Shader_Create("../../Examples/34 - PBR/IBL Specular/cubemap.vs", "../../Examples/34 - PBR/IBL Specular/irradiance_convolution.fs", 0, NULL);
-    ibl.prefilterShader                = Shader_Create("../../Examples/34 - PBR/IBL Specular/cubemap.vs", "../../Examples/34 - PBR/IBL Specular/prefilter.fs", 0, NULL);
-    ibl.brdfShader                     = Shader_Create("../../Examples/34 - PBR/IBL Specular/brdf.vs", "../../Examples/34 - PBR/IBL Specular/brdf.fs", 0, NULL);
-    ibl.backgroundShader               = Shader_Create("../../Examples/34 - PBR/IBL Specular/background.vs", "../../Examples/34 - PBR/IBL Specular/background.fs", 0, NULL);
+    ibl.pbrShader                      = Shader_Create("../../Examples/34 - PBR/IBL Specular Textured/pbr.vs", "../../Examples/34 - PBR/IBL Specular Textured/pbr.fs", 0, NULL);
+    ibl.equirectangularToCubemapShader = Shader_Create("../../Examples/34 - PBR/IBL Specular Textured/cubemap.vs", "../../Examples/34 - PBR/IBL Specular Textured/equirectangular_to_cubemap.fs", 0, NULL);
+    ibl.irradianceShader               = Shader_Create("../../Examples/34 - PBR/IBL Specular Textured/cubemap.vs", "../../Examples/34 - PBR/IBL Specular Textured/irradiance_convolution.fs", 0, NULL);
+    ibl.prefilterShader                = Shader_Create("../../Examples/34 - PBR/IBL Specular Textured/cubemap.vs", "../../Examples/34 - PBR/IBL Specular Textured/prefilter.fs", 0, NULL);
+    ibl.brdfShader                     = Shader_Create("../../Examples/34 - PBR/IBL Specular Textured/brdf.vs", "../../Examples/34 - PBR/IBL Specular Textured/brdf.fs", 0, NULL);
+    ibl.backgroundShader               = Shader_Create("../../Examples/34 - PBR/IBL Specular Textured/background.vs", "../../Examples/34 - PBR/IBL Specular Textured/background.fs", 0, NULL);
 
     Shader_Bind(ibl.pbrShader);
     Shader_Uniform_Int(ibl.pbrShader, "irradianceMap", 0);
     Shader_Uniform_Int(ibl.pbrShader, "prefilterMap", 1);
     Shader_Uniform_Int(ibl.pbrShader, "brdfLUT", 2);
-    Shader_Uniform_Vec3(ibl.pbrShader, "albedo", (vec3){0.5f, 0.0f, 0.0f});
-    Shader_Uniform_Float(ibl.pbrShader, "ao", 1.0f);
+    Shader_Uniform_Int(ibl.pbrShader, "albedoMap", 3);
+    Shader_Uniform_Int(ibl.pbrShader, "normalMap", 4);
+    Shader_Uniform_Int(ibl.pbrShader, "metallicMap", 5);
+    Shader_Uniform_Int(ibl.pbrShader, "roughnessMap", 6);
+    Shader_Uniform_Int(ibl.pbrShader, "aoMap", 7);
 
     Shader_Bind(ibl.backgroundShader);
     Shader_Uniform_Int(ibl.backgroundShader, "environmentMap", 0);
@@ -82,6 +105,42 @@ void IBL_Specular_Init()
     ibl.nrRows    = 7;
     ibl.nrColumns = 7;
     ibl.spacing   = 2.5;
+
+    // Load PBR material textures
+    // Rusted iron
+    ibl.iron.albedo    = Texture_Create("../../Examples/res/textures/pbr/rusted_iron/albedo.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    ibl.iron.normal    = Texture_Create("../../Examples/res/textures/pbr/rusted_iron/normal.png", GL_TEXTURE_2D, 1, GL_RGB, GL_UNSIGNED_BYTE);
+    ibl.iron.metallic  = Texture_Create("../../Examples/res/textures/pbr/rusted_iron/metallic.png", GL_TEXTURE_2D, 2, GL_RED, GL_UNSIGNED_BYTE);
+    ibl.iron.roughness = Texture_Create("../../Examples/res/textures/pbr/rusted_iron/roughness.png", GL_TEXTURE_2D, 3, GL_RED, GL_UNSIGNED_BYTE);
+    ibl.iron.ao        = Texture_Create("../../Examples/res/textures/pbr/rusted_iron/ao.png", GL_TEXTURE_2D, 4, GL_RGB, GL_UNSIGNED_BYTE);
+
+    // Gold
+    ibl.gold.albedo    = Texture_Create("../../Examples/res/textures/pbr/gold/albedo.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    ibl.gold.normal    = Texture_Create("../../Examples/res/textures/pbr/gold/normal.png", GL_TEXTURE_2D, 1, GL_RGB, GL_UNSIGNED_BYTE);
+    ibl.gold.metallic  = Texture_Create("../../Examples/res/textures/pbr/gold/metallic.png", GL_TEXTURE_2D, 2, GL_RED, GL_UNSIGNED_BYTE);
+    ibl.gold.roughness = Texture_Create("../../Examples/res/textures/pbr/gold/roughness.png", GL_TEXTURE_2D, 3, GL_RED, GL_UNSIGNED_BYTE);
+    ibl.gold.ao        = Texture_Create("../../Examples/res/textures/pbr/gold/ao.png", GL_TEXTURE_2D, 4, GL_RGB, GL_UNSIGNED_BYTE);
+
+    // Grass
+    ibl.grass.albedo    = Texture_Create("../../Examples/res/textures/pbr/grass/albedo.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    ibl.grass.normal    = Texture_Create("../../Examples/res/textures/pbr/grass/normal.png", GL_TEXTURE_2D, 1, GL_RGB, GL_UNSIGNED_BYTE);
+    ibl.grass.metallic  = Texture_Create("../../Examples/res/textures/pbr/grass/metallic.png", GL_TEXTURE_2D, 2, GL_RED, GL_UNSIGNED_BYTE);
+    ibl.grass.roughness = Texture_Create("../../Examples/res/textures/pbr/grass/roughness.png", GL_TEXTURE_2D, 3, GL_RED, GL_UNSIGNED_BYTE);
+    ibl.grass.ao        = Texture_Create("../../Examples/res/textures/pbr/grass/ao.png", GL_TEXTURE_2D, 4, GL_RGB, GL_UNSIGNED_BYTE);
+
+    // Plastic
+    ibl.plastic.albedo    = Texture_Create("../../Examples/res/textures/pbr/plastic/albedo.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    ibl.plastic.normal    = Texture_Create("../../Examples/res/textures/pbr/plastic/normal.png", GL_TEXTURE_2D, 1, GL_RGB, GL_UNSIGNED_BYTE);
+    ibl.plastic.metallic  = Texture_Create("../../Examples/res/textures/pbr/plastic/metallic.png", GL_TEXTURE_2D, 2, GL_RED, GL_UNSIGNED_BYTE);
+    ibl.plastic.roughness = Texture_Create("../../Examples/res/textures/pbr/plastic/roughness.png", GL_TEXTURE_2D, 3, GL_RED, GL_UNSIGNED_BYTE);
+    ibl.plastic.ao        = Texture_Create("../../Examples/res/textures/pbr/plastic/ao.png", GL_TEXTURE_2D, 4, GL_RGB, GL_UNSIGNED_BYTE);
+
+    // Wall
+    ibl.wall.albedo    = Texture_Create("../../Examples/res/textures/pbr/wall/albedo.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    ibl.wall.normal    = Texture_Create("../../Examples/res/textures/pbr/wall/normal.png", GL_TEXTURE_2D, 1, GL_RGB, GL_UNSIGNED_BYTE);
+    ibl.wall.metallic  = Texture_Create("../../Examples/res/textures/pbr/wall/metallic.png", GL_TEXTURE_2D, 2, GL_RED, GL_UNSIGNED_BYTE);
+    ibl.wall.roughness = Texture_Create("../../Examples/res/textures/pbr/wall/roughness.png", GL_TEXTURE_2D, 3, GL_RED, GL_UNSIGNED_BYTE);
+    ibl.wall.ao        = Texture_Create("../../Examples/res/textures/pbr/wall/ao.png", GL_TEXTURE_2D, 4, GL_RGB, GL_UNSIGNED_BYTE);
 
     // PBR: Setup framebuffer
     const int capture_width  = 512;
@@ -323,14 +382,14 @@ void IBL_Specular_Init()
     ibl.envCubemap     = envCubemap;
 }
 
-void IBL_Specular_Update()
+void IBL_Specular_Textured_Update()
 {
     Camera_Inputs(&ibl.cam);
 
     // Render scene, supplying the convoluted irradiance map to the final shader.
     Shader_Bind(ibl.pbrShader);
 
-    mat4 view;
+    mat4 view, model;
     Camera_Get_View_Matrix(ibl.cam, view);
 
     Shader_Uniform_Mat4(ibl.pbrShader, "view", view);
@@ -344,27 +403,85 @@ void IBL_Specular_Update()
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, ibl.brdfLUTTexture);
 
-    // render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns respectively
-    mat4 model;
-    for (int row = 0; row < ibl.nrRows; row++)
-    {
-        Shader_Uniform_Float(ibl.pbrShader, "metallic", (float)row / (float)ibl.nrRows);
-        for (int col = 0; col < ibl.nrColumns; ++col)
-        {
-            // we clamp the roughness to 0.025 - 1.0 as perfectly smooth surfaces (roughness of 0.0) tend to look a bit off
-            // on direct lighting.
-            Shader_Uniform_Float(ibl.pbrShader, "roughness", glm_clamp((float)col / (float)ibl.nrColumns, 0.05f, 1.0f));
+    // rusted iron
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, ibl.iron.albedo.ID);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, ibl.iron.normal.ID);
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, ibl.iron.metallic.ID);
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_2D, ibl.iron.roughness.ID);
+    glActiveTexture(GL_TEXTURE7);
+    glBindTexture(GL_TEXTURE_2D, ibl.iron.ao.ID);
 
-            glm_translate_make(model, (vec3){
-                                          (float)(col - (ibl.nrColumns / 2)) * ibl.spacing,
-                                          (float)(row - (ibl.nrRows / 2)) * ibl.spacing,
-                                          -2.0f});
+    glm_translate_make(model, (vec3){-5.0f, 0.0f, 2.0f});
+    Shader_Uniform_Mat4(ibl.pbrShader, "model", model);
+    Sphere_Draw(ibl.sphere_vao);
 
-            Shader_Uniform_Mat4(ibl.pbrShader, "model", model);
+    // gold
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, ibl.gold.albedo.ID);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, ibl.gold.normal.ID);
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, ibl.gold.metallic.ID);
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_2D, ibl.gold.roughness.ID);
+    glActiveTexture(GL_TEXTURE7);
+    glBindTexture(GL_TEXTURE_2D, ibl.gold.ao.ID);
 
-            Sphere_Draw(ibl.sphere_vao);
-        }
-    }
+    glm_translate_make(model, (vec3){-3.0f, 0.0f, 2.0f});
+    Shader_Uniform_Mat4(ibl.pbrShader, "model", model);
+    Sphere_Draw(ibl.sphere_vao);
+
+    // grass
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, ibl.grass.albedo.ID);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, ibl.grass.normal.ID);
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, ibl.grass.metallic.ID);
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_2D, ibl.grass.roughness.ID);
+    glActiveTexture(GL_TEXTURE7);
+    glBindTexture(GL_TEXTURE_2D, ibl.grass.ao.ID);
+
+    glm_translate_make(model, (vec3){-1.0f, 0.0f, 2.0f});
+    Shader_Uniform_Mat4(ibl.pbrShader, "model", model);
+    Sphere_Draw(ibl.sphere_vao);
+
+    // plastic
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, ibl.plastic.albedo.ID);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, ibl.plastic.normal.ID);
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, ibl.plastic.metallic.ID);
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_2D, ibl.plastic.roughness.ID);
+    glActiveTexture(GL_TEXTURE7);
+    glBindTexture(GL_TEXTURE_2D, ibl.plastic.ao.ID);
+
+    glm_translate_make(model, (vec3){1.0f, 0.0f, 2.0f});
+    Shader_Uniform_Mat4(ibl.pbrShader, "model", model);
+    Sphere_Draw(ibl.sphere_vao);
+
+    // wall
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, ibl.wall.albedo.ID);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, ibl.wall.normal.ID);
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, ibl.wall.metallic.ID);
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_2D, ibl.wall.roughness.ID);
+    glActiveTexture(GL_TEXTURE7);
+    glBindTexture(GL_TEXTURE_2D, ibl.wall.ao.ID);
+
+    glm_translate_make(model, (vec3){3.0f, 0.0f, 2.0f});
+    Shader_Uniform_Mat4(ibl.pbrShader, "model", model);
+    Sphere_Draw(ibl.sphere_vao);
 
     // render light source (simply re-render sphere at light positions)
     // this looks a bit off as we use the same shader, but it'll make their positions obvious and
@@ -406,7 +523,7 @@ void IBL_Specular_Update()
     // Quad_Draw(ibl.quad_vao);
 }
 
-void IBL_Specular_OnExit()
+void IBL_Specular_Textured_OnExit()
 {
     Camera_Print_Values(ibl.cam);
 
