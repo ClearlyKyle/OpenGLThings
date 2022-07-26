@@ -2,9 +2,9 @@
 
 out vec4 FragColor;
 
-in vec2  TexCoords;
-in vec3  WorldPos;
-in vec3  Normal;
+in vec2 TexCoords;
+in vec3 WorldPos;
+in vec3 Normal;
 
 // material parameters
 uniform vec3  albedo;
