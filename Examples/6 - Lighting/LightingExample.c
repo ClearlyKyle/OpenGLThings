@@ -1,7 +1,18 @@
 
 #include "LightingExample.h"
 
-static struct LightingExample lights;
+static struct LightingExample
+{
+    struct Shader  shader[2];
+    struct VAO     vao[2];
+    struct Texture tex;
+    struct Camera  cam;
+
+    GLsizei numer_of_indicies;
+
+    /* angle to make pyramid auto rotate */
+    double pyramid_angle;
+} lights;
 
 void LightingExample_Init()
 {
@@ -70,8 +81,8 @@ void LightingExample_Init()
     /* PYRAMID SAHDER ---------------------------------------------------------------------*/
     // Generates Shader object using shaders default.vert and default.frag
     struct Shader shader1 = Shader_Create(
-        "../../Examples/shaders/6/default.vs",
-        "../../Examples/shaders/6/default.fs",
+        "../../Examples/6 - Lighting/default.vs",
+        "../../Examples/6 - Lighting/default.fs",
         4,
         (struct VertexAttribute[]){
             {.index = 0, .name = "aPos"},
@@ -108,8 +119,8 @@ void LightingExample_Init()
     /* LIGHT SAHDER ---------------------------------------------------------------------*/
     // Shader for light cube
     struct Shader shader2 = Shader_Create(
-        "../../Examples/shaders/6/lights.vs",
-        "../../Examples/shaders/6/lights.fs",
+        "../../Examples/6 - Lighting/lights.vs",
+        "../../Examples/6 - Lighting/lights.fs",
         1,
         (struct VertexAttribute[]){
             {.index = 0, .name = "aPos"}});
@@ -157,9 +168,9 @@ void LightingExample_Init()
     Shader_Uniform_Vec3(lights.shader[0], "lightPos", light_position);
 
     // Texture
-    const char *file_path = "../../Examples/res/textures/brick.png";
-    struct Texture tex    = Texture_Create(file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
-    lights.tex            = tex;
+    const char    *file_path = "../../Examples/res/textures/brick.png";
+    struct Texture tex       = Texture_Create(file_path, GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    lights.tex               = tex;
 
     Shader_Uniform_Texture2D(lights.shader[0], "tex0", tex);
 
@@ -172,6 +183,19 @@ void LightingExample_Update()
 {
     // Handles camera inputs
     Camera_Inputs(&lights.cam);
+
+    {
+        lights.pyramid_angle += window.last_frame_time * 30.0f;
+        /* Rotate the Pyramid */
+        vec3 pyramid_position = {0.0f, 0.0f, 0.0f};
+        mat4 pyramid_model;
+        glm_translate_make(pyramid_model, pyramid_position);
+        glm_rotate(pyramid_model, glm_rad(180.0f), (vec3){0.0f, 0.0f, 1.0f});
+        glm_rotate(pyramid_model, glm_rad((float)lights.pyramid_angle), (vec3){0.0f, 1.0f, 0.0f});
+
+        Shader_Bind(lights.shader[0]);
+        Shader_Uniform_Mat4(lights.shader[0], "model", pyramid_model);
+    }
 
     // Tells OpenGL which Shader Program we want to use
     Shader_Bind(lights.shader[0]);
